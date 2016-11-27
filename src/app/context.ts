@@ -7,7 +7,9 @@ export class Context
 	public shaderProgram: WebGLProgram;
 	public gl: WebGLRenderingContext;
 	public canvas: HTMLCanvasElement;
+	public texture: WebGLTexture;
 	private observer: Observer<null>;
+	
 
 	constructor(){
 	}
@@ -48,8 +50,28 @@ export class Context
 			}
 			this.gl.useProgram(this.shaderProgram);
 
-			this.observer.next(null);
+			this.initTextures(this.gl);
 		});
+	}
+
+	private initTextures(gl: WebGLRenderingContext) {
+		this.texture = gl.createTexture();
+  		var textureImage = new Image();
+  		textureImage.onload = () => {
+  			this.handleTextureLoaded(textureImage, this.texture, gl);
+  		};
+  		textureImage.src = "/src/texture/grayWallTexture.jpg";
+	}
+
+	private handleTextureLoaded(image: HTMLImageElement, texture: WebGLTexture, gl: WebGLRenderingContext) {
+  		gl.bindTexture(gl.TEXTURE_2D, texture);
+  		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+  		gl.generateMipmap(gl.TEXTURE_2D);
+  		gl.bindTexture(gl.TEXTURE_2D, null);
+
+  		this.observer.next(null);
 	}
 
 	private compileShader(source: string, shaderType: ShaderType) {

@@ -23,7 +23,9 @@ export class Game
 	}
 
 	private start() {
-		setInterval(this.run(), (1000/this.fps));
+		this.tileMap.render(this.context);
+		
+		//setInterval(this.run(), (1000/this.fps));
 	}
 
 	private run() {

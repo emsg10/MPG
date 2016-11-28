@@ -1,10 +1,13 @@
-import { Context, TileMap } from './'
+import { Context, TileMap, Render } from './'
+import { RenderCall } from './render/renderCall';
 
 export class Game
 {
 	private fps = 8;
 	private context: Context;
 	private tileMap: TileMap;
+	private render: Render;
+	private renderCalls: RenderCall[] = [];
 
 	constructor() {
 
@@ -13,6 +16,7 @@ export class Game
 		var doneLoading = this.context.doneListener();
 
 		doneLoading.subscribe(() => {
+			this.render = new Render(this.context);
 			this.start();
 		});
 
@@ -23,7 +27,10 @@ export class Game
 	}
 
 	private start() {
-		this.tileMap.render(this.context);
+		this.tileMap.renderCall.texture = this.context.texture;
+		this.renderCalls.push(this.tileMap.renderCall);
+		this.render.render(this.renderCalls);
+		
 		
 		//setInterval(this.run(), (1000/this.fps));
 	}
@@ -44,7 +51,7 @@ export class Game
 	    	}
 	    
 	    	if(loops) {
-	    		this.tileMap.render(this.context);	
+	    		//this.tileMap.render(this.context);	
 	    	} 
   		};
 	}

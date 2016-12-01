@@ -1,29 +1,41 @@
 import { Context, TileMap, Render } from './'
 import { RenderCall } from './render/renderCall';
+import { Editor } from './editor/editor';
 
 export class Game
 {
 	private fps = 8;
-	private context: Context;
-	private tileMap: TileMap;
+	private context: Context = new Context();
+	private tileMap: TileMap = new TileMap();
 	private render: Render;
 	private renderCalls: RenderCall[] = [];
+	private editor: Editor = new Editor();
 
 	constructor() {
-
-		this.context = new Context();
-		
 		var doneLoading = this.context.doneListener();
+		var tileEdited = this.editor.tileEdited();
 
 		doneLoading.subscribe(() => {
 			this.render = new Render(this.context);
 			this.start();
 		});
 
-		this.context.init();
+		tileEdited.subscribe(() => {
+			this.reRender();
+		});
 
-		this.tileMap = new TileMap(this.context.canvas.width, this.context.canvas.height);
-		this.tileMap.create();
+		this.context.init();
+		this.editor.init(20, 20, this.context.canvas);
+		this.tileMap.create(this.context.canvas.width, this.context.canvas.height, this.editor.tiles);
+
+
+	}
+
+	private reRender() {
+		var call = this.tileMap.createRenderCall(this.editor.tiles);
+		call.texture = this.context.texture;
+		this.renderCalls.push(call);
+		this.render.render(this.renderCalls);
 	}
 
 	private start() {

@@ -7,30 +7,21 @@ export class TileMap {
 	private tiles: Tile[][] = [];
 	public renderCall: RenderCall = new RenderCall();
 
-	constructor(width: number, height: number) {
+	constructor() {
+		
+	}
+
+	public create(width: number, height: number, tiles: Tile[][]) {
 		this.width = width;
 		this.height = height;
+		this.tiles = tiles;
+
+		this.createRenderCall(this.tiles);
 	}
 
-	public create() {
-		var tileWidth = 20;
-		var tileHeight = 20;
 
-		var columnNumber = this.width / tileWidth;
-		var rowNumber = this.height / tileHeight;
 
-		for(var i = 0; i < columnNumber; i++) {
-			this.tiles[i] = [];
-			for(var j = 0; j < rowNumber; j++)
-			{
-				this.tiles[i][j] = new Tile(tileWidth * i, tileHeight * j, tileWidth, tileHeight);
-			}
-		}
-
-		this.createRenderCall();
-	}
-
-	private createRenderCall() {
+	public createRenderCall(tiles: Tile[][]) {
 		var vertecies: number[] = [];
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
@@ -38,7 +29,7 @@ export class TileMap {
 		for(var i = 0; i < this.tiles.length; i++) {
 			for(var j = 0; j < this.tiles[i].length; j++) {
 				vertecies = this.getVertecies(this.tiles[i][j].x, this.tiles[i][j].y, this.tiles[i][j].width, this.tiles[i][j].height, vertecies);
-				textureCoords = this.getTextureCoordinates(textureCoords);
+				textureCoords = this.getTextureCoordinates(textureCoords, this.tiles[i][j].tileTextureType);
 				indecies = this.getIndecies(indecies);
 			}
 		}
@@ -48,6 +39,8 @@ export class TileMap {
 		this.renderCall.indecies = indecies;
 		this.renderCall.width = this.width;
 		this.renderCall.height = this.height;
+
+		return this.renderCall;
 	}
 
 	
@@ -61,10 +54,11 @@ export class TileMap {
   		var newVertecies = [
      		x1, y1,
      		x2, y2,
-     		x1, y2,
+     		x2, y1,
      		x1, y1,
      		x2, y2,
-     		x2, y1]
+     		x1, y2
+     		]
 
      	currentVertecies.push.apply(currentVertecies, newVertecies);
 
@@ -82,14 +76,25 @@ export class TileMap {
      	return currentIndecies;
 	}
 
-	private getTextureCoordinates(currentTextureCoordinates: number[]) {
+	private getTextureCoordinates(currentTextureCoordinates: number[], textureType: number) {
+		let x: number;
+		let y: number;		
+
+		if(textureType == 0) {
+			x = 3;
+			y = 1;
+		} else {
+			x = 2;
+			y = 1;
+		}
+
 		var textureCoordinates = [
-			0.0,  0.0,
-		    1.0,  1.0,
-		    0.0,  1.0,
-		    0.0,  0.0,
-		    1.0,  1.0,
-		    1.0,  0.0
+			(0.2 * x),  (0.2 * y),
+		    (0.2 * (x + 1)),  (0.2 * (y + 1)),
+		    (0.2 * (x + 1)),  (0.2 * y),
+		    (0.2 * x),  (0.2 * y),
+		    (0.2 * (x + 1)),  (0.2 * (y + 1)),
+		    (0.2 * x),  (0.2 * (y + 1)),
 		];
 
 		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoordinates);

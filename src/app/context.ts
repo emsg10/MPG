@@ -20,16 +20,23 @@ export class Context
 		});
 	}
 
-	public init() {
-		this.initContext();
+	public init(width: number, height: number) {
+		this.initContext(width, height);
 		this.initShaders();
 	}
 
-	private initContext() {
+	private initContext(width: number, height: number) {
+		
+		var div = document.createElement("div");
+
 		this.canvas = document.createElement("canvas");
-		this.canvas.width = 1200;
-		this.canvas.height = 800;
-		document.body.appendChild(this.canvas);
+		this.canvas.width = width;
+		this.canvas.height = height;
+		div.style.border = "1px solid #aaa";
+		div.style.display = "inline-block";
+		
+		div.appendChild(this.canvas);
+		document.body.appendChild(div);
 
 		this.gl = this.canvas.getContext("experimental-webgl");
 
@@ -70,6 +77,9 @@ export class Context
   		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
   		gl.generateMipmap(gl.TEXTURE_2D);
   		gl.bindTexture(gl.TEXTURE_2D, null);
+
+  		//gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		//gl.enable(gl.BLEND);
 
   		this.observer.next(null);
 	}

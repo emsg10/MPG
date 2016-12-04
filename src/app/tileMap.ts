@@ -1,25 +1,23 @@
 import { Tile } from '../model';
 import { RenderCall } from './render/renderCall';
+import { TextureMapper } from './render/textureMapper';
+import { Context } from './';
 
 export class TileMap {
-	private width: number;
-	private height: number;
-	private tiles: Tile[][] = [];
 	public renderCall: RenderCall = new RenderCall();
+	private tiles: Tile[][] = [];
+	private textureMapper = new TextureMapper();
+	private context: Context;
 
 	constructor() {
-		
 	}
 
-	public create(width: number, height: number, tiles: Tile[][]) {
-		this.width = width;
-		this.height = height;
+	public create(context: Context, tiles: Tile[][]) {
 		this.tiles = tiles;
+		this.context = context;
 
 		this.createRenderCall(this.tiles);
 	}
-
-
 
 	public createRenderCall(tiles: Tile[][]) {
 		var vertecies: number[] = [];
@@ -28,17 +26,19 @@ export class TileMap {
 
 		for(var i = 0; i < this.tiles.length; i++) {
 			for(var j = 0; j < this.tiles[i].length; j++) {
-				vertecies = this.getVertecies(this.tiles[i][j].x, this.tiles[i][j].y, this.tiles[i][j].width, this.tiles[i][j].height, vertecies);
-				textureCoords = this.getTextureCoordinates(textureCoords, this.tiles[i][j].tileTextureType);
-				indecies = this.getIndecies(indecies);
+				if(this.tiles[i][j].tileTextureType != 0) {
+					vertecies = this.getVertecies(this.tiles[i][j].x, this.tiles[i][j].y, this.tiles[i][j].width, this.tiles[i][j].height, vertecies);
+					textureCoords = this.getTextureCoordinates(textureCoords, this.tiles[i][j].tileTextureType);
+					indecies = this.getIndecies(indecies);
+				}
+				
 			}
 		}
 
 		this.renderCall.vertecies = vertecies;
 		this.renderCall.textureCoords = textureCoords;
 		this.renderCall.indecies = indecies;
-		this.renderCall.width = this.width;
-		this.renderCall.height = this.height;
+		this.renderCall.context = this.context;
 
 		return this.renderCall;
 	}
@@ -77,24 +77,19 @@ export class TileMap {
 	}
 
 	private getTextureCoordinates(currentTextureCoordinates: number[], textureType: number) {
-		let x: number;
-		let y: number;		
+		
+		var point = this.textureMapper.mapTexture(textureType);
 
-		if(textureType == 0) {
-			x = 3;
-			y = 1;
-		} else {
-			x = 2;
-			y = 1;
-		}
+		let x: number = point.x;
+		let y: number = point.y;
 
 		var textureCoordinates = [
-			(0.2 * x),  (0.2 * y),
-		    (0.2 * (x + 1)),  (0.2 * (y + 1)),
-		    (0.2 * (x + 1)),  (0.2 * y),
-		    (0.2 * x),  (0.2 * y),
-		    (0.2 * (x + 1)),  (0.2 * (y + 1)),
-		    (0.2 * x),  (0.2 * (y + 1)),
+			(0.1 * x),  (0.1 * y),
+		    (0.1 * (x + 1)),  (0.1 * (y + 1)),
+		    (0.1 * (x + 1)),  (0.1 * y),
+		    (0.1 * x),  (0.1 * y),
+		    (0.1 * (x + 1)),  (0.1 * (y + 1)),
+		    (0.1 * x),  (0.1 * (y + 1)),
 		];
 
 		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoordinates);

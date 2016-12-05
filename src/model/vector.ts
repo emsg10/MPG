@@ -14,4 +14,8 @@ export class Vector {
 
 		return this;
 	}
+
+	public copy(vector: Vector) {
+		return new Vector(vector.x, vector.y);
+	}
 }

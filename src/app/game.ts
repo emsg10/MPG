@@ -3,6 +3,8 @@ import { RenderCall } from './render/renderCall';
 import { Editor } from './editor/editor';
 import { Player } from './player/player';
 import { Vector } from '../model';
+import { CollisionDetection } from './collision/collisionDetection';
+import { Gravity } from './forces/gravity';
 
 export class Game
 {
@@ -12,9 +14,14 @@ export class Game
 	private render: Render;
 	private renderCalls: RenderCall[] = [];
 	private editor: Editor = new Editor();
+	private collision: CollisionDetection = new CollisionDetection();
 	private player: Player;
 	private leftKeyPress: boolean;
 	private rightKeyPress: boolean;
+	private jumpKeyPress: boolean;
+	private tileSizeX: number = 25;
+	private tileSizeY: number = 25;
+	private started: boolean = false;
 
 	constructor() {
 		var doneLoading = this.context.doneListener();
@@ -26,9 +33,9 @@ export class Game
 		});
 
 		this.context.init(1200, 800);
-		this.editor.init(25, 25, this.context.canvas);
+		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas);
 		this.tileMap.create(this.context, this.editor.tiles);
-		this.player = new Player(new Vector(200, 600), this.context);
+		this.player = new Player(new Vector(200, 600), this.context, 42, 50);
 	}
 
 	private start() {
@@ -46,24 +53,24 @@ export class Game
 	    
 	    	while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
 	      		//Todo gamelogic update
-	      		
-	      		if(this.leftKeyPress) {
-	      			this.player.moveLeft();
-	      		}
-
-	      		if(this.rightKeyPress) {
-	      			this.player.moveRight();
-	      		}
-
-	      		this.player.update();
-
 	      		this.renderCalls = [];
-	      		if(this.editor.doneLoading) {
-	      			this.renderCalls.push(this.editor.createRenderCall());
-	      		}
 
-				this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
-				this.renderCalls.push(this.player.createRenderCall());
+	      		if(!this.started) {
+	      			if(this.editor.doneLoading) {
+		      			this.renderCalls.push(this.editor.createRenderCall());
+		      		}
+	      			this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
+	      		} else {
+
+		      		this.checkKeys();
+
+		      		this.player.update();
+		      		this.checkSolid();
+		      		
+					this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
+					this.renderCalls.push(this.player.createRenderCall());
+
+	      		}
 
 	      		nextGameTick += skipTicks;
 	      		loops++;
@@ -76,8 +83,36 @@ export class Game
   		};
 	}
 
-	private initKeyBindings() {
+	private checkKeys() {
+		if(this.leftKeyPress) {
+			this.player.moveLeft();
+		}
 
+		if(this.rightKeyPress) {
+			this.player.moveRight();
+		}
+
+		if(this.jumpKeyPress) {
+			this.player.jump();
+		}
+	}
+
+	private checkSolid() {
+		var tilesToCheck = this.collision.detectPossibleCollisions(this.player.position, this.tileMap.tiles, this.tileSizeX);
+		let collision = this.collision.checkCollisions(tilesToCheck, this.player.getCollisionBox());
+
+		if(!collision.groundCollision) {
+			this.player.fall();
+		} else {
+			this.player.onGround();
+		}
+
+		if(collision.wallCollision) {
+			this.player.revertPosition();
+		}
+	}
+
+	private initKeyBindings() {
 
 		document.body.addEventListener("keypress", (event: KeyboardEvent) => {
 
@@ -90,6 +125,8 @@ export class Game
 		    	case 100:
 		    		this.rightKeyPress = true;
 		    		break;
+		    	case 119: 
+		    		this.jumpKeyPress = true;
 		    }
 
 		});
@@ -105,8 +142,16 @@ export class Game
 		    	case 68:
 		    		this.rightKeyPress = false;
 		    		break;
+		    	case 87:
+		    		this.jumpKeyPress = false;
+		    		break;
 		    }
 
 		});
+
+		document.getElementById("start").addEventListener("click", (event: MouseEvent) => {
+			this.started = true;
+		});
+
 	}
 }

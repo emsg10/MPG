@@ -1,11 +1,11 @@
-import { Tile } from '../model';
+import { Tile, Vector } from '../model';
 import { RenderCall } from './render/renderCall';
 import { TextureMapper } from './render/textureMapper';
 import { Context } from './';
 
 export class TileMap {
 	public renderCall: RenderCall = new RenderCall();
-	private tiles: Tile[][] = [];
+	public tiles: Tile[][] = [];
 	private textureMapper = new TextureMapper();
 	private context: Context;
 
@@ -31,7 +31,6 @@ export class TileMap {
 					textureCoords = this.getTextureCoordinates(textureCoords, this.tiles[i][j].tileTextureType);
 					indecies = this.getIndecies(indecies);
 				}
-				
 			}
 		}
 
@@ -42,8 +41,6 @@ export class TileMap {
 
 		return this.renderCall;
 	}
-
-	
 
 	private getVertecies(x: number, y: number, width: number, height:number, currentVertecies: number[]) {
 		var x1 = x;

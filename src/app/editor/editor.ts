@@ -115,7 +115,6 @@ export class Editor {
 			this.tiles[column][row].tileTextureType = this.currentTileType;
 			this.observer.next(null);
 		}
-		
 	}
 
 	private initMouseEventListener(canvas: HTMLCanvasElement) {

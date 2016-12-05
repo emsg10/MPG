@@ -1,7 +1,8 @@
-import { Vector } from '../../model';
+import { Vector, Rectangle } from '../../model';
 import { RenderCall } from '../render/renderCall';
 import { Animate } from '../render/animate';
 import { Context } from '../';
+import { Gravity } from '../forces/gravity';
 
 export class Player {
 
@@ -10,17 +11,26 @@ export class Player {
 	private runningAnimation: Animate = new Animate();
 	private inverse: boolean = false;
 	private velocity: Vector = new Vector(0, 0);
-	private drag: number = 0.2;
+	private drag: number = 0.4;
 	private moving: boolean = false;
+	private spriteSizeX: number;
+	private spriteSizeY: number;
+	private lastStablePosition: Vector;
+	private gravity: Gravity = new Gravity();
+	private jumping: boolean = false;
 
-	constructor(position: Vector, context: Context) {
+	constructor(position: Vector, context: Context, spriteSizeX: number, spriteSizeY: number) {
 		this.position = position;
+		this.lastStablePosition = new Vector(this.position.x, this.position.y);
 		this.context = context;
 
+		this.spriteSizeX = spriteSizeX;
+		this.spriteSizeY = spriteSizeY;
+
 		//this.animate.frames.push(new Point(1, 282));
-		this.runningAnimation.frames.push(new Vector(28, 282));
-		this.runningAnimation.frames.push(new Vector(55, 282));
-		this.runningAnimation.frames.push(new Vector(85, 282));
+		this.runningAnimation.frames.push(new Vector(28, 280));
+		this.runningAnimation.frames.push(new Vector(55, 280));
+		this.runningAnimation.frames.push(new Vector(85, 280));
 
 	}
 
@@ -32,15 +42,15 @@ export class Player {
 		var x2: number;
 		
 		if(this.inverse) {
-			x2 = x - 21;
-			x1 = x + 21;
+			x2 = x - (this.spriteSizeX / 2);
+			x1 = x + (this.spriteSizeX / 2);
 		} else {
-			x2 = x + 21;
-			x1 = x - 21;
+			x2 = x + (this.spriteSizeX / 2);
+			x1 = x - (this.spriteSizeX / 2);
 		}
   		
-  		var y1 = this.position.y;
-  		var y2 = this.position.y + 50;
+  		var y1 = this.position.y - (this.spriteSizeY / 2);
+  		var y2 = this.position.y + (this.spriteSizeY / 2);
 
 		call.context = this.context;
 
@@ -71,6 +81,7 @@ export class Player {
 	}
 
 	public update() {
+		this.lastStablePosition = this.lastStablePosition.copy(this.position);
 		this.position.add(this.velocity);
 		if(this.velocity.x != 0) {
 			this.runningAnimation.next();	
@@ -107,6 +118,39 @@ export class Player {
 		}
 		this.inverse = true;
 		this.moving = true;
+	}
+
+	public getCollisionBox() {
+		var collisionBox = new Rectangle(); 
+
+		collisionBox.width = this.spriteSizeX;
+		collisionBox.height = this.spriteSizeY;
+		collisionBox.x = this.position.x - (this.spriteSizeX / 2);
+		collisionBox.y = this.position.y + (this.spriteSizeY / 2);
+
+		return collisionBox;
+	}
+
+	public revertPosition() {
+		this.position = this.lastStablePosition;
+	}
+
+	public fall() {
+		this.gravity.apply(this.velocity);
+	}
+
+	public onGround() {
+		this.position = this.lastStablePosition;
+		this.velocity.y = 0;
+		this.jumping = false;
+	}
+
+	public jump() {
+		if(!this.jumping) {
+			this.velocity.y = -10;
+			this.jumping = true;
+		}
+		
 	}
 
 }

@@ -24,20 +24,37 @@ export class CollisionDetection {
 		return tilesToCheck;
 	}
 
-	public checkCollisions(tiles: Tile[], collisionbox: Rectangle) {
-		var collision: Collision = new Collision();
-		for(let tile of tiles) {
-			if(tile.tileTextureType != 0) {
-				if (tile.x < collisionbox.x + collisionbox.width &&
-   				tile.x + tile.width > collisionbox.x) {
-   					collision.wallCollision = true;
+	public checkGroundCollision(tiles: Tile[], rect: Rectangle) {
+		var collision = false;
+			for(let tile of tiles) {
+				if(tile.tileTextureType != 0) {
+					if (tile.x - tile.width/2 < rect.x + rect.width/2 &&
+	   				tile.x + tile.width/2 > rect.x - rect.width/2 &&
+	   				tile.y - tile.height/2 < rect.y + rect.height/2 &&
+	   				tile.y + tile.height/2 > rect.y - tile.height/2) {
+	   					
+						collision = true;
+						break;
+					}
 				}
-				if(tile.y < collisionbox.y + collisionbox.height &&
-   				tile.height + tile.y > collisionbox.y) {
-					collision.groundCollision = true;
-   				}	
 			}
-		}
+
+		return collision;
+	}
+
+	public checkWallCollision(tiles: Tile[], rect: Rectangle) {
+		var collision = false;
+			for(let tile of tiles) {
+				if(tile.tileTextureType != 0) {
+					if (tile.x - tile.width/2 < rect.x + rect.width/2 &&
+	   				tile.x + tile.width/2 > rect.x - rect.width/2 &&
+	   				tile.y - tile.height/2 < rect.y + rect.height/2 &&
+	   				tile.y + tile.height/2 > rect.y - tile.height/2) {
+	   					collision = true;
+	   					break;
+					}
+				}
+			}
 
 		return collision;
 	}

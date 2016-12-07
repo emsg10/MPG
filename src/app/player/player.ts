@@ -120,34 +120,50 @@ export class Player {
 		this.moving = true;
 	}
 
-	public getCollisionBox() {
-		var collisionBox = new Rectangle(); 
+	public getWallCollision() {
+		var collisionX = new Rectangle();
 
-		collisionBox.width = this.spriteSizeX;
-		collisionBox.height = this.spriteSizeY;
-		collisionBox.x = this.position.x - (this.spriteSizeX / 2);
-		collisionBox.y = this.position.y + (this.spriteSizeY / 2);
+		collisionX.width = (this.spriteSizeX);
+		collisionX.height = this.spriteSizeY;
+		collisionX.x = this.position.x;
+		collisionX.y = this.position.y;
 
-		return collisionBox;
+		return collisionX;
 	}
 
-	public revertPosition() {
-		this.position = this.lastStablePosition;
+	public getGroundCollision() {
+		var collisionX = new Rectangle();
+
+		collisionX.width = this.spriteSizeX;
+		collisionX.height = (this.spriteSizeY);
+		collisionX.x = this.position.x;
+		collisionX.y = this.position.y;
+
+		return collisionX;
+	}
+
+	public wallCollision() {
+		this.velocity.x = -this.velocity.x;
+		this.position.add(this.velocity);
+		this.velocity.x = 0;
 	}
 
 	public fall() {
 		this.gravity.apply(this.velocity);
 	}
 
-	public onGround() {
-		this.position = this.lastStablePosition;
+	public groundCollision() {
+
+		this.position.y -= this.velocity.y;
+		//this.position.add(this.velocity);
 		this.velocity.y = 0;
+		
 		this.jumping = false;
 	}
 
 	public jump() {
 		if(!this.jumping) {
-			this.velocity.y = -10;
+			this.velocity.y = -8;
 			this.jumping = true;
 		}
 		

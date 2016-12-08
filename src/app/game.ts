@@ -61,13 +61,11 @@ export class Game
 		      		}
 	      			this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
 	      		} else {
-
+	      			this.collision.checkPowerUps(this.player, this.tileMap, this.tileSizeX);
 	      			this.checkKeys();
-
+	      			this.collision.checkIfWallCollision(this.player, this.tileMap, this.tileSizeX);
 	      			this.player.update();
-
 		      		this.checkSolid();
-		      		
 	      		}
 
 	      		nextGameTick += skipTicks;
@@ -98,21 +96,23 @@ export class Game
 
 	private checkSolid() {
 		var tilesToCheck = this.collision.detectPossibleCollisions(this.player.position, this.tileMap.tiles, this.tileSizeX);
-		let groundCollision = this.collision.checkGroundCollision(tilesToCheck, this.player.getGroundCollision());
+		let groundCollision = this.collision.checkCollision(tilesToCheck, this.player.getCollisionArea());
 
 		if(!groundCollision) {
 			this.player.fall();
 		} else {
-			this.player.groundCollision();
+			groundCollision = this.player.groundCollision();
 		}
 
-		let wallCollision = this.collision.checkWallCollision(tilesToCheck, this.player.getWallCollision());
+		let wallCollision = this.collision.checkCollision(tilesToCheck, this.player.getCollisionArea());
 
 		if(wallCollision) {
 			this.player.wallCollision();
 		}
 
-		
+		if(groundCollision && !wallCollision) {
+			this.player.resetJump();
+		}	
 	}
 
 	private initKeyBindings() {

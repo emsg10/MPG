@@ -7,6 +7,8 @@ import { Gravity } from '../forces/gravity';
 export class Player {
 
 	public position: Vector;
+	public defaultJumpSpeed: number = -8;
+	public jumpSpeed: number = this.defaultJumpSpeed;
 	private context: Context;
 	private runningAnimation: Animate = new Animate();
 	private inverse: boolean = false;
@@ -81,7 +83,6 @@ export class Player {
 	}
 
 	public update() {
-		this.lastStablePosition = this.lastStablePosition.copy(this.position);
 		this.position.add(this.velocity);
 		if(this.velocity.x != 0) {
 			this.runningAnimation.next();	
@@ -104,7 +105,7 @@ export class Player {
 	}
 
 	public moveRight() {
-		if(this.velocity.x < 6) {
+		if(this.velocity.x < 3) {
 			this.velocity.x += 0.5;
 		}
 		this.inverse = false;
@@ -113,60 +114,64 @@ export class Player {
 
 	public moveLeft() {
 		
-		if(this.velocity.x > -6) {
+		if(this.velocity.x > -3) {
 			this.velocity.x -= 0.5;
 		}
 		this.inverse = true;
 		this.moving = true;
 	}
 
-	public getWallCollision() {
-		var collisionX = new Rectangle();
+	public getCollisionArea() {
+		var collision = new Rectangle();
 
-		collisionX.width = (this.spriteSizeX);
-		collisionX.height = this.spriteSizeY;
-		collisionX.x = this.position.x;
-		collisionX.y = this.position.y;
+		collision.width = this.spriteSizeX;
+		collision.height = this.spriteSizeY;
+		collision.x = this.position.x;
+		collision.y = this.position.y;
 
-		return collisionX;
-	}
-
-	public getGroundCollision() {
-		var collisionX = new Rectangle();
-
-		collisionX.width = this.spriteSizeX;
-		collisionX.height = (this.spriteSizeY);
-		collisionX.x = this.position.x;
-		collisionX.y = this.position.y;
-
-		return collisionX;
+		return collision;
 	}
 
 	public wallCollision() {
-		this.velocity.x = -this.velocity.x;
-		this.position.add(this.velocity);
+		this.position.x -= this.velocity.x;
 		this.velocity.x = 0;
 	}
+
+
 
 	public fall() {
 		this.gravity.apply(this.velocity);
 	}
 
 	public groundCollision() {
+		let groundCollision = this.velocity.y > 0;
 
 		this.position.y -= this.velocity.y;
-		//this.position.add(this.velocity);
 		this.velocity.y = 0;
+
+		return groundCollision;
+	}
+
+	public getNextCollisionArea(row: boolean) {
+		if(row) {
+			this.position.x += this.velocity.x;
+		} else {
+			this.position.y += this.velocity.y;
+		}
 		
-		this.jumping = false;
+		return this.getCollisionArea();
 	}
 
 	public jump() {
 		if(!this.jumping) {
-			this.velocity.y = -8;
+			this.velocity.y = this.jumpSpeed;
 			this.jumping = true;
 		}
 		
+	}
+
+	public resetJump() {
+		this.jumping = false;
 	}
 
 }

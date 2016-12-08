@@ -78,8 +78,8 @@ export class Context
   		gl.generateMipmap(gl.TEXTURE_2D);
   		gl.bindTexture(gl.TEXTURE_2D, null);
 
-  		//gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		//gl.enable(gl.BLEND);
+  		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		gl.enable(gl.BLEND);
 
   		this.observer.next(null);
 	}

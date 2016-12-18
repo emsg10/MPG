@@ -1,18 +1,20 @@
-import { Vector, Rectangle } from '../../model';
+import { Vector, Rectangle, Sprite } from '../../model';
 import { RenderCall } from '../render/renderCall';
 import { Animate } from '../render/animate';
 import { Context } from '../';
+import { CollisionData } from '../collision';
+
 import { Gravity } from '../forces/gravity';
 
 export class Player {
 
 	public position: Vector;
-	public defaultJumpSpeed: number = -8;
+	public defaultJumpSpeed: number = -12;
 	public jumpSpeed: number = this.defaultJumpSpeed;
+	public velocity: Vector = new Vector(0, 0);
 	private context: Context;
 	private runningAnimation: Animate = new Animate();
 	private inverse: boolean = false;
-	private velocity: Vector = new Vector(0, 0);
 	private drag: number = 0.4;
 	private moving: boolean = false;
 	private spriteSizeX: number;
@@ -20,6 +22,7 @@ export class Player {
 	private lastStablePosition: Vector;
 	private gravity: Gravity = new Gravity();
 	private jumping: boolean = false;
+	private idleSprite: Sprite;
 
 	constructor(position: Vector, context: Context, spriteSizeX: number, spriteSizeY: number) {
 		this.position = position;
@@ -29,10 +32,11 @@ export class Player {
 		this.spriteSizeX = spriteSizeX;
 		this.spriteSizeY = spriteSizeY;
 
+		this.idleSprite = new Sprite(new Rectangle(0, 292, 30, 35));
 		//this.animate.frames.push(new Point(1, 282));
-		this.runningAnimation.frames.push(new Vector(28, 280));
-		this.runningAnimation.frames.push(new Vector(55, 280));
-		this.runningAnimation.frames.push(new Vector(85, 280));
+		this.runningAnimation.frames.push(new Sprite(new Rectangle(32, 292, 30, 35)));
+		this.runningAnimation.frames.push(new Sprite(new Rectangle(64, 292, 30, 35)));
+		this.runningAnimation.frames.push(new Sprite(new Rectangle(96, 292, 30, 35)));
 
 	}
 
@@ -44,15 +48,15 @@ export class Player {
 		var x2: number;
 		
 		if(this.inverse) {
-			x2 = x - (this.spriteSizeX / 2);
-			x1 = x + (this.spriteSizeX / 2);
+			x2 = x - (this.spriteSizeX);
+			x1 = x + (this.spriteSizeX);
 		} else {
-			x2 = x + (this.spriteSizeX / 2);
-			x1 = x - (this.spriteSizeX / 2);
+			x2 = x + (this.spriteSizeX);
+			x1 = x - (this.spriteSizeX);
 		}
   		
-  		var y1 = this.position.y - (this.spriteSizeY / 2);
-  		var y2 = this.position.y + (this.spriteSizeY / 2);
+  		var y1 = this.position.y - (this.spriteSizeY);
+  		var y2 = this.position.y + (this.spriteSizeY);
 
 		call.context = this.context;
 
@@ -65,16 +69,19 @@ export class Player {
      		x1, y2
 		];
 
-		var relX = this.runningAnimation.getCurrentFrame().x/512;
-		var relY = this.runningAnimation.getCurrentFrame().y/512;		
+		var x1 = this.runningAnimation.getCurrentFrame().position.x/512;
+		var y1 = this.runningAnimation.getCurrentFrame().position.y/512;
+		var x2 = (this.runningAnimation.getCurrentFrame().position.x + this.runningAnimation.getCurrentFrame().position.width)/512;
+		var y2 = (this.runningAnimation.getCurrentFrame().position.y + this.runningAnimation.getCurrentFrame().position.height)/512;
+
 
 		call.textureCoords = [
-			relX,  relY,
-		    (relX + 0.05),  (relY + 0.06),
-		    (relX + 0.05),  relY,
-		    relX,  relY,
-		    (relX + 0.05),  (relY + 0.06),
-		    relX,  (relY + 0.06),
+			x1,  y1,
+		    x2,  y2,
+		    x2,  y1,
+		    x1,  y1,
+		    x2,  y2,
+		    x1,  y2,
 		];
 		call.indecies = [0, 1, 2, 3, 4, 5];
 
@@ -82,8 +89,34 @@ export class Player {
 
 	}
 
-	public update() {
-		this.position.add(this.velocity);
+
+	public update(collisionData: CollisionData) {
+
+		this.position.y += this.velocity.y * collisionData.collisionTime;
+		this.position.x += this.velocity.x * collisionData.collisionTime;
+
+
+		if(collisionData.wallCollision) {
+			//this.velocity.y = 0;
+		}
+
+		if(collisionData.groundCollision) {
+
+			if(collisionData.wallCollision) {
+				var test = "derp";
+			}
+
+			//this.position.x += this.velocity.x;	
+
+			if(this.jumping) {
+				//this.velocity.y = this.jumpSpeed;
+				//this.position.y += this.velocity.y;
+			} else {
+				this.velocity.y = 0;
+			}
+
+		}
+		
 		if(this.velocity.x != 0) {
 			this.runningAnimation.next();	
 		}
@@ -101,6 +134,7 @@ export class Player {
 			}	
 		}
 
+		this.jumping = false;
 		this.moving = false;
 	}
 
@@ -122,34 +156,13 @@ export class Player {
 	}
 
 	public getCollisionArea() {
-		var collision = new Rectangle();
+		var collisionArea = new Rectangle(this.position.x, this.position.y, 30, 30);
 
-		collision.width = this.spriteSizeX;
-		collision.height = this.spriteSizeY;
-		collision.x = this.position.x;
-		collision.y = this.position.y;
-
-		return collision;
+		return collisionArea;
 	}
-
-	public wallCollision() {
-		this.position.x -= this.velocity.x;
-		this.velocity.x = 0;
-	}
-
-
 
 	public fall() {
 		this.gravity.apply(this.velocity);
-	}
-
-	public groundCollision() {
-		let groundCollision = this.velocity.y > 0;
-
-		this.position.y -= this.velocity.y;
-		this.velocity.y = 0;
-
-		return groundCollision;
 	}
 
 	public getNextCollisionArea(row: boolean) {
@@ -164,14 +177,9 @@ export class Player {
 
 	public jump() {
 		if(!this.jumping) {
-			this.velocity.y = this.jumpSpeed;
 			this.jumping = true;
 		}
 		
-	}
-
-	public resetJump() {
-		this.jumping = false;
 	}
 
 }

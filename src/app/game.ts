@@ -14,7 +14,7 @@ export class Game
 	private render: Render;
 	private renderCalls: RenderCall[] = [];
 	private editor: Editor = new Editor();
-	private collision: CollisionDetection = new CollisionDetection();
+	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
 	private leftKeyPress: boolean;
 	private rightKeyPress: boolean;
@@ -35,7 +35,7 @@ export class Game
 		this.context.init(1200, 800);
 		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas);
 		this.tileMap.create(this.context, this.editor.tiles);
-		this.player = new Player(new Vector(200, 600), this.context, 42, 50);
+		this.player = new Player(new Vector(200, 600), this.context, 30, 30);
 	}
 
 	private start() {
@@ -61,11 +61,16 @@ export class Game
 		      		}
 	      			this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
 	      		} else {
-	      			this.collision.checkPowerUps(this.player, this.tileMap, this.tileSizeX);
 	      			this.checkKeys();
-	      			this.collision.checkIfWallCollision(this.player, this.tileMap, this.tileSizeX);
-	      			this.player.update();
-		      		this.checkSolid();
+	      			this.player.fall();
+	      			let collisionData = this.collision.checkCollision(this.tileMap.tiles, this.player, this.tileSizeX);
+	      			this.player.update(collisionData);
+	      			//this.collision.checkPowerUps(this.player, this.tileMap, this.tileSizeX);
+	      			
+	      			//this.collision.checkIfWallCollision(this.player, this.tileMap, this.tileSizeX);
+	      			//this.player.update();
+		      		//this.checkSolid();
+		      		
 	      		}
 
 	      		nextGameTick += skipTicks;
@@ -94,7 +99,7 @@ export class Game
 		}
 	}
 
-	private checkSolid() {
+	/*private checkSolid() {
 		var tilesToCheck = this.collision.detectPossibleCollisions(this.player.position, this.tileMap.tiles, this.tileSizeX);
 		let groundCollision = this.collision.checkCollision(tilesToCheck, this.player.getCollisionArea());
 
@@ -113,7 +118,7 @@ export class Game
 		if(groundCollision && !wallCollision) {
 			this.player.resetJump();
 		}	
-	}
+	}*/
 
 	private initKeyBindings() {
 

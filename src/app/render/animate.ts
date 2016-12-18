@@ -1,8 +1,8 @@
-import { Vector } from '../../model'
+import { Sprite } from '../../model'
 
 export class Animate {
 
-	public frames: Vector[] = [];
+	public frames: Sprite[] = [];
 	private frameIndex: number = 0;
 	private frameRenderTimes: number = 0;
 	private frameRenderMaxTimes: number = 4;

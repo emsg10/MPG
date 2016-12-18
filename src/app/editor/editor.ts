@@ -34,7 +34,7 @@ export class Editor {
 		for(var i = 0; i < columnNumber; i++) {
 			this.tiles[i] = [];
 			for(var j = 0; j < rowNumber; j++) {
-				this.tiles[i][j] = new Tile((tileSizeX * i) + (tileSizeX / 2), (tileSizeY * j) + (tileSizeY / 2), tileSizeX, tileSizeY, 0);
+				this.tiles[i][j] = new Tile((tileSizeX * i) + (tileSizeX), (tileSizeY * j) + (tileSizeY), tileSizeX, tileSizeY, 0);
 			}
 		}
 

@@ -1,4 +1,4 @@
-import { Collision } from './collision';
+import { CollisionData } from './collisionData';
 import { CollisionDetection } from './collisionDetection';
 
-export { Collision, CollisionDetection };
+export { CollisionData, CollisionDetection };

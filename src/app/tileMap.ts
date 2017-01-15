@@ -44,10 +44,10 @@ export class TileMap {
 
 	private getVertecies(x: number, y: number, width: number, height:number, currentVertecies: number[]) {
 
-		var x1 = x - (width / 2);
-  		var x2 = x + (width / 2);
-  		var y1 = y - (height / 2);
-  		var y2 = y + (height / 2);
+		var x1 = x;
+  		var x2 = x + width;
+  		var y1 = y;
+  		var y2 = y + height;
 
   		var newVertecies = [
      		x1, y1,

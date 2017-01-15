@@ -25,6 +25,11 @@ export class Context
 		this.initShaders();
 	}
 
+	public clear() {
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
+		this.gl.clearColor(0, 0, 0, 0.95);
+	}
+
 	private initContext(width: number, height: number) {
 		
 		var div = document.createElement("div");

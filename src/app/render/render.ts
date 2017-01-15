@@ -15,7 +15,6 @@ export class Render {
 	}
 
 	public render(renderCalls: RenderCall[]) {
-		
 
 		for(let renderCall of renderCalls) {
 
@@ -47,6 +46,8 @@ export class Render {
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.drawElements(this.gl.TRIANGLES, renderCall.indecies.length, this.gl.UNSIGNED_SHORT, 0)
 		}
+
+		
 	}
 
 	private setBuffers(renderCall: RenderCall) {

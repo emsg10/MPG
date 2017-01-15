@@ -35,7 +35,7 @@ export class Game
 		this.context.init(1200, 800);
 		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas);
 		this.tileMap.create(this.context, this.editor.tiles);
-		this.player = new Player(new Vector(200, 600), this.context, 30, 30);
+		this.player = new Player(new Vector(200, 600), this.context, 55, 55);
 	}
 
 	private start() {
@@ -65,12 +65,6 @@ export class Game
 	      			this.player.fall();
 	      			let collisionData = this.collision.checkCollision(this.tileMap.tiles, this.player, this.tileSizeX);
 	      			this.player.update(collisionData);
-	      			//this.collision.checkPowerUps(this.player, this.tileMap, this.tileSizeX);
-	      			
-	      			//this.collision.checkIfWallCollision(this.player, this.tileMap, this.tileSizeX);
-	      			//this.player.update();
-		      		//this.checkSolid();
-		      		
 	      		}
 
 	      		nextGameTick += skipTicks;
@@ -78,6 +72,7 @@ export class Game
 	    	}
 	    
 	    	if(loops) {
+	    		this.context.clear();
 	    		this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
 				this.renderCalls.push(this.player.createRenderCall());
 				this.render.render(this.renderCalls);
@@ -98,27 +93,6 @@ export class Game
 			this.player.jump();
 		}
 	}
-
-	/*private checkSolid() {
-		var tilesToCheck = this.collision.detectPossibleCollisions(this.player.position, this.tileMap.tiles, this.tileSizeX);
-		let groundCollision = this.collision.checkCollision(tilesToCheck, this.player.getCollisionArea());
-
-		if(!groundCollision) {
-			this.player.fall();
-		} else {
-			groundCollision = this.player.groundCollision();
-		}
-
-		let wallCollision = this.collision.checkCollision(tilesToCheck, this.player.getCollisionArea());
-
-		if(wallCollision) {
-			this.player.wallCollision();
-		}
-
-		if(groundCollision && !wallCollision) {
-			this.player.resetJump();
-		}	
-	}*/
 
 	private initKeyBindings() {
 

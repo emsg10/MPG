@@ -9,13 +9,14 @@ import { Gravity } from '../forces/gravity';
 export class Player {
 
 	public position: Vector;
-	public defaultJumpSpeed: number = -12;
+	public defaultJumpSpeed: number = -10;
 	public jumpSpeed: number = this.defaultJumpSpeed;
 	public velocity: Vector = new Vector(0, 0);
+	private maxSpeed: number = 6;
 	private context: Context;
 	private runningAnimation: Animate = new Animate();
 	private inverse: boolean = false;
-	private drag: number = 0.4;
+	private drag: number = 0.8;
 	private moving: boolean = false;
 	private spriteSizeX: number;
 	private spriteSizeY: number;
@@ -32,11 +33,11 @@ export class Player {
 		this.spriteSizeX = spriteSizeX;
 		this.spriteSizeY = spriteSizeY;
 
-		this.idleSprite = new Sprite(new Rectangle(0, 292, 30, 35));
+		this.idleSprite = new Sprite(new Rectangle(0, 292, 28, 30));
 		//this.animate.frames.push(new Point(1, 282));
-		this.runningAnimation.frames.push(new Sprite(new Rectangle(32, 292, 30, 35)));
-		this.runningAnimation.frames.push(new Sprite(new Rectangle(64, 292, 30, 35)));
-		this.runningAnimation.frames.push(new Sprite(new Rectangle(96, 292, 30, 35)));
+		this.runningAnimation.frames.push(new Sprite(new Rectangle(28, 292, 28, 28)));
+		this.runningAnimation.frames.push(new Sprite(new Rectangle(56, 292, 28, 28)));
+		this.runningAnimation.frames.push(new Sprite(new Rectangle(84, 292, 28, 28)));
 
 	}
 
@@ -48,14 +49,14 @@ export class Player {
 		var x2: number;
 		
 		if(this.inverse) {
-			x2 = x - (this.spriteSizeX);
+			x2 = x;
 			x1 = x + (this.spriteSizeX);
 		} else {
 			x2 = x + (this.spriteSizeX);
-			x1 = x - (this.spriteSizeX);
+			x1 = x;
 		}
   		
-  		var y1 = this.position.y - (this.spriteSizeY);
+  		var y1 = this.position.y;
   		var y2 = this.position.y + (this.spriteSizeY);
 
 		call.context = this.context;
@@ -92,29 +93,18 @@ export class Player {
 
 	public update(collisionData: CollisionData) {
 
-		this.position.y += this.velocity.y * collisionData.collisionTime;
-		this.position.x += this.velocity.x * collisionData.collisionTime;
+		if(collisionData.groundCollision) {
+			this.velocity.y = 0;
 
-
-		if(collisionData.wallCollision) {
-			//this.velocity.y = 0;
+			if(collisionData.normalY == -1) {
+				if(this.jumping) {
+					this.velocity.y = this.jumpSpeed;
+				}	
+			}
 		}
 
-		if(collisionData.groundCollision) {
-
-			if(collisionData.wallCollision) {
-				var test = "derp";
-			}
-
-			//this.position.x += this.velocity.x;	
-
-			if(this.jumping) {
-				//this.velocity.y = this.jumpSpeed;
-				//this.position.y += this.velocity.y;
-			} else {
-				this.velocity.y = 0;
-			}
-
+		if(collisionData.wallCollision) {
+			this.velocity.x = 0;
 		}
 		
 		if(this.velocity.x != 0) {
@@ -139,7 +129,7 @@ export class Player {
 	}
 
 	public moveRight() {
-		if(this.velocity.x < 3) {
+		if(this.velocity.x < this.maxSpeed) {
 			this.velocity.x += 0.5;
 		}
 		this.inverse = false;
@@ -148,7 +138,7 @@ export class Player {
 
 	public moveLeft() {
 		
-		if(this.velocity.x > -3) {
+		if(this.velocity.x > -this.maxSpeed) {
 			this.velocity.x -= 0.5;
 		}
 		this.inverse = true;
@@ -156,23 +146,13 @@ export class Player {
 	}
 
 	public getCollisionArea() {
-		var collisionArea = new Rectangle(this.position.x, this.position.y, 30, 30);
+		var collisionArea = new Rectangle(this.position.x, this.position.y, 55, 51);
 
 		return collisionArea;
 	}
 
 	public fall() {
 		this.gravity.apply(this.velocity);
-	}
-
-	public getNextCollisionArea(row: boolean) {
-		if(row) {
-			this.position.x += this.velocity.x;
-		} else {
-			this.position.y += this.velocity.y;
-		}
-		
-		return this.getCollisionArea();
 	}
 
 	public jump() {

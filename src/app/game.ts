@@ -8,7 +8,7 @@ import { Gravity } from './forces/gravity';
 
 export class Game
 {
-	private fps = 30;
+	private fps = 60;
 	private context: Context = new Context();
 	private tileMap: TileMap = new TileMap();
 	private render: Render;

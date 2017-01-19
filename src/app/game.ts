@@ -8,7 +8,7 @@ import { Gravity } from './forces/gravity';
 
 export class Game
 {
-	private fps = 60;
+	private fps = 30;
 	private context: Context = new Context();
 	private tileMap: TileMap = new TileMap();
 	private render: Render;
@@ -22,6 +22,7 @@ export class Game
 	private tileSizeX: number = 25;
 	private tileSizeY: number = 25;
 	private started: boolean = false;
+	private lastUpdate: number;
 
 	constructor() {
 		var doneLoading = this.context.doneListener();
@@ -35,24 +36,25 @@ export class Game
 		this.context.init(1200, 800);
 		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas);
 		this.tileMap.create(this.context, this.editor.tiles);
-		this.player = new Player(new Vector(200, 600), this.context, 55, 55);
+		this.player = new Player(new Vector(200, 600), this.context, 45, 45);
 	}
 
 	private start() {
 		this.initKeyBindings();
-		setInterval(this.run(), (1000/this.fps));
+		setInterval(this.run(), 0);
 	}
 
 	private run() {
-		var loops = 0, skipTicks = 1000 / this.fps,
+		let loops = 0, skipTicks = 1000 / this.fps,
       	maxFrameSkip = 10,
       	nextGameTick = (new Date).getTime();
-  
+
   		return () => {
 	    	loops = 0;
-	    
+	    	
 	    	while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
-	      		//Todo gamelogic update
+	    		let delta = nextGameTick - this.lastUpdate;
+				this.lastUpdate = nextGameTick;
 	      		this.renderCalls = [];
 
 	      		if(!this.started) {
@@ -61,10 +63,9 @@ export class Game
 		      		}
 	      			this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
 	      		} else {
-	      			this.checkKeys();
-	      			this.player.fall();
 	      			let collisionData = this.collision.checkCollision(this.tileMap.tiles, this.player, this.tileSizeX);
-	      			this.player.update(collisionData);
+	      			this.checkKeys(delta);
+	      			this.player.update(collisionData, delta);
 	      		}
 
 	      		nextGameTick += skipTicks;
@@ -80,13 +81,13 @@ export class Game
   		};
 	}
 
-	private checkKeys() {
+	private checkKeys(delta: number) {
 		if(this.leftKeyPress) {
-			this.player.moveLeft();
+			this.player.moveLeft(delta);
 		}
 
 		if(this.rightKeyPress) {
-			this.player.moveRight();
+			this.player.moveRight(delta);
 		}
 
 		if(this.jumpKeyPress) {

@@ -28,6 +28,7 @@ export class Context
 	public clear() {
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 		this.gl.clearColor(0, 0, 0, 0.95);
+
 	}
 
 	private initContext(width: number, height: number) {
@@ -78,8 +79,7 @@ export class Context
 	private handleTextureLoaded(image: HTMLImageElement, texture: WebGLTexture, gl: WebGLRenderingContext) {
   		gl.bindTexture(gl.TEXTURE_2D, texture);
   		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-  		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+  		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   		gl.generateMipmap(gl.TEXTURE_2D);
   		gl.bindTexture(gl.TEXTURE_2D, null);
 

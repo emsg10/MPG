@@ -1,10 +1,13 @@
 import { Vector } from '../../model';
 
 export class Gravity {
-	constructor() {
+	private strength = 0;
+
+	constructor(strength: number) {
+		this.strength = strength;
 	}
 
-	public apply(vector: Vector) {
-		vector.y += 0.5;
+	public apply(vector: Vector, delta: number) {
+		vector.y += this.strength * delta;
 	}
 }

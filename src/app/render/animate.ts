@@ -3,19 +3,19 @@ import { Sprite } from '../../model'
 export class Animate {
 
 	public frames: Sprite[] = [];
+	public timeToChange: number = 100;
+	private lastChange: number = 0;
 	private frameIndex: number = 0;
-	private frameRenderTimes: number = 0;
-	private frameRenderMaxTimes: number = 6;
 
 	constructor() {
 	}
 
-	public next() {
+	public next(delta: number) {
 
-		this.frameRenderTimes++;
+		this.lastChange += delta;
 
-		if(this.frameRenderTimes >= this.frameRenderMaxTimes) {
-			this.frameRenderTimes = 0;
+		if(this.lastChange >= this.timeToChange) {
+			this.lastChange = 0;
 			this.frameIndex++;
 			if(this.frameIndex >= this.frames.length) {
 				this.frameIndex = 0;

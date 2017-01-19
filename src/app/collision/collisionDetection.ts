@@ -47,25 +47,25 @@ export class CollisionDetection {
 		var tilesToCheck = this.detectPossibleCollisions(player.position, tiles, tileSize);
 		let collisionData: CollisionData = new CollisionData();
 		var rect1 = player.getCollisionArea();
-		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, player.velocity);
+		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, player.toMove);
 		for(let tile of tilesToCheck) {
 			if(this.aabbCheck(broadphasebox, tile)) {
-				collisionData = this.aabbCollisionY(player.getCollisionArea(), tile, player.velocity, collisionData);
+				collisionData = this.aabbCollisionY(player.getCollisionArea(), tile, player.toMove, collisionData);
 				if(collisionData.groundCollision) {
 					break;
 				}
 			}
 		}
 
-		player.position.y += player.velocity.y * collisionData.collisionTimeY;
+		player.position.y += player.toMove.y * collisionData.collisionTimeY;
 
 		rect1 = player.getCollisionArea();
-		broadphasebox = this.getSweptBroadphaseBoxX(rect1, player.velocity);
+		broadphasebox = this.getSweptBroadphaseBoxX(rect1, player.toMove);
 
 		for(let tile of tilesToCheck) {
 			if(tile.tileTextureType != 0) {
 				if(this.aabbCheck(broadphasebox, tile)) {
-					collisionData = this.aabbCollisionX(player.getCollisionArea(), tile, player.velocity, collisionData);
+					collisionData = this.aabbCollisionX(player.getCollisionArea(), tile, player.toMove, collisionData);
 					if(collisionData.wallCollision) {
 						break;
 					}
@@ -73,7 +73,7 @@ export class CollisionDetection {
 			}
 		}
 
-		player.position.x += player.velocity.x * collisionData.collisionTimeX;
+		player.position.x += player.toMove.x * collisionData.collisionTimeX;
 		
 		collisionData.remainingTime = 1 - collisionData.collisionTimeY;
 

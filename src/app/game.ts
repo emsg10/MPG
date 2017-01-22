@@ -2,9 +2,10 @@ import { Context, TileMap, Render } from './';
 import { RenderCall } from './render/renderCall';
 import { Editor } from './editor/editor';
 import { Player } from './player/player';
-import { Vector } from '../model';
+import { Vector, Rectangle } from '../model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
+import { TextRenderer } from './text/textRenderer';
 
 export class Game
 {
@@ -23,6 +24,9 @@ export class Game
 	private tileSizeY: number = 25;
 	private started: boolean = false;
 	private lastUpdate: number;
+	private textRenderer: TextRenderer;
+	private intevalTimer: any;
+	private gameArea = new Rectangle(-50, -50, 1300, 900);
 
 	constructor() {
 		var doneLoading = this.context.doneListener();
@@ -33,15 +37,17 @@ export class Game
 			this.start();
 		});
 
-		this.context.init(1200, 800);
-		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas);
+
+		this.context.init(1200, 800, false);
+		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas, this.collision);
 		this.tileMap.create(this.context, this.editor.tiles);
 		this.player = new Player(new Vector(200, 600), this.context, 45, 45);
+		this.textRenderer = new TextRenderer(this.context);
 	}
 
 	private start() {
 		this.initKeyBindings();
-		setInterval(this.run(), 0);
+		this.intevalTimer = setInterval(this.run(), 0);
 	}
 
 	private run() {
@@ -61,9 +67,9 @@ export class Game
 	      			if(this.editor.doneLoading) {
 		      			this.renderCalls.push(this.editor.createRenderCall());
 		      		}
-	      			this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
 	      		} else {
-	      			let collisionData = this.collision.checkCollision(this.tileMap.tiles, this.player, this.tileSizeX);
+	      			this.collision.checkDeath(this.player, this.gameArea);
+	      			let collisionData = this.collision.checkCollision(this.tileMap.tiles, this.player);
 	      			this.checkKeys(delta);
 	      			this.player.update(collisionData, delta);
 	      		}
@@ -74,6 +80,17 @@ export class Game
 	    
 	    	if(loops) {
 	    		this.context.clear();
+
+	    		//EDITOR
+	    		this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
+	    		this.renderCalls.push(this.editor.preview.createRenderCall());
+
+	    		//Game
+	    		if(this.player.dead) {
+	    			this.renderCalls.push(this.textRenderer.createTextRenderCall(400, 64, 50));
+	    			clearInterval(this.intevalTimer);
+	    		}
+	    		
 	    		this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
 				this.renderCalls.push(this.player.createRenderCall());
 				this.render.render(this.renderCalls);

@@ -19,41 +19,21 @@ export class CollisionDetection {
 		return CollisionDetection.instance;
 	}
 
-	public detectPossibleCollisions(position: Vector, tiles: Tile[][], tileSize: number) {
-		var column = Math.floor(position.x/tileSize);
-		var row = Math.floor(position.y/tileSize);
-
-		var tilesToCheck: Tile[] = [];
-
-		for(let tilecol of tiles) {
-			for(let tile of tilecol) {
-				if(tile.tileTextureType != 0) {
-					tilesToCheck.push(tile);	
-				}
-			}
-		}
-
-		return tilesToCheck;
-	}
-
 	private pushNull(tile: Tile, tilesToCheck: Tile[]) {
 		if(tile != null) {
 			tilesToCheck.push(tile);
 		}
 	}
 
-	public checkCollision(tiles: Tile[][], player: Player, tileSize: number) {
+	public checkCollision(tiles: Tile[], player: Player) {
 
-		var tilesToCheck = this.detectPossibleCollisions(player.position, tiles, tileSize);
+		var tilesToCheck = tiles;
 		let collisionData: CollisionData = new CollisionData();
 		var rect1 = player.getCollisionArea();
 		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, player.toMove);
 		for(let tile of tilesToCheck) {
 			if(this.aabbCheck(broadphasebox, tile)) {
 				collisionData = this.aabbCollisionY(player.getCollisionArea(), tile, player.toMove, collisionData);
-				if(collisionData.groundCollision) {
-					break;
-				}
 			}
 		}
 
@@ -66,9 +46,6 @@ export class CollisionDetection {
 			if(tile.tileTextureType != 0) {
 				if(this.aabbCheck(broadphasebox, tile)) {
 					collisionData = this.aabbCollisionX(player.getCollisionArea(), tile, player.toMove, collisionData);
-					if(collisionData.wallCollision) {
-						break;
-					}
 				}
 			}
 		}
@@ -78,6 +55,16 @@ export class CollisionDetection {
 		collisionData.remainingTime = 1 - collisionData.collisionTimeY;
 
 		return collisionData;
+	}
+
+	public checkDeath(player: Player, area: Rectangle) {
+		if(!this.aabbCheck(player.getCollisionArea(), area)) {
+			player.dead = true;
+		}
+	}
+
+	public aabbCheck(rect1: Rectangle, rect2: Rectangle) {
+		return (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.height + rect1.y > rect2.y)
 	}
 
 	private getSweptBroadphaseBoxX(rect: Rectangle, velocity: Vector)
@@ -98,10 +85,6 @@ export class CollisionDetection {
     	let height = rect.height + Math.abs(velocity.y);
 
     	return new Rectangle(x, y, width, height);
-	}
-
-	private aabbCheck(rect1: Rectangle, rect2: Rectangle) {
-		return (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.height + rect1.y > rect2.y)
 	}
 
 	private aabbCollisionY(rect1: Rectangle, rect2: Rectangle, velocity: Vector, collisionData: CollisionData) {
@@ -139,7 +122,11 @@ export class CollisionDetection {
 	        	else {
 		        	collisionData.normalY = -1;
             	}
-            	collisionData.collisionTimeY = entryTime;
+
+            	if(collisionData.collisionTimeY > entryTime) {
+            		collisionData.collisionTimeY = entryTime;	
+            	}
+            	
             	collisionData.groundCollision = true;
 		}
         return collisionData;
@@ -180,7 +167,10 @@ export class CollisionDetection {
                 collisionData.normalX = -1;
             }
 
-            collisionData.collisionTimeX = entryTime;
+            if(collisionData.collisionTimeX > entryTime) {
+            	collisionData.collisionTimeX = entryTime;	
+            }
+
             collisionData.wallCollision = true;
     	}
 

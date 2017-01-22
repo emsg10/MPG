@@ -20,18 +20,17 @@ export class Context
 		});
 	}
 
-	public init(width: number, height: number) {
-		this.initContext(width, height);
+	public init(width: number, height: number, pointer: boolean, parent?: HTMLElement) {
+		this.initContext(width, height, pointer, parent);
 		this.initShaders();
 	}
 
 	public clear() {
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 		this.gl.clearColor(0, 0, 0, 0.95);
-
 	}
 
-	private initContext(width: number, height: number) {
+	private initContext(width: number, height: number, pointer: boolean, parent?: HTMLElement) {
 		
 		var div = document.createElement("div");
 
@@ -40,9 +39,16 @@ export class Context
 		this.canvas.height = height;
 		div.style.border = "1px solid #aaa";
 		div.style.display = "inline-block";
+		if(!pointer) {
+			div.style.cursor = "none";	
+		}
 		
 		div.appendChild(this.canvas);
-		document.body.appendChild(div);
+		if(parent) {
+			parent.appendChild(div);
+		} else {
+			document.body.appendChild(div);	
+		}
 
 		this.gl = this.canvas.getContext("experimental-webgl");
 

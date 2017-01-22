@@ -13,6 +13,8 @@ export class Player {
 	public toMove: Vector = new Vector(0, 0);
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
+	public dead: boolean = false;
+
 	private maxSpeed: number = 0.3;
 	private drag: number = 0.0015;
 	private acceleration: number = 0.009;
@@ -101,6 +103,7 @@ export class Player {
 		return call;
 
 	}
+
 
 
 	public update(collisionData: CollisionData, delta: number) {

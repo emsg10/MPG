@@ -69,7 +69,7 @@ export class Game
 		      		}
 	      		} else {
 	      			this.collision.checkDeath(this.player, this.gameArea);
-	      			let collisionData = this.collision.checkCollision(this.tileMap.tiles, this.player);
+	      			let collisionData = this.collision.collisionDetection(this.tileMap.tiles, this.player);
 	      			this.checkKeys(delta);
 	      			this.player.update(collisionData, delta);
 	      		}

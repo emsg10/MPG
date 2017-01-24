@@ -25,32 +25,48 @@ export class CollisionDetection {
 		}
 	}
 
-	public checkCollision(tiles: Tile[], player: Player) {
+	public collisionDetection(tiles: Tile[], player: Player) {
+
+		let collisionData = this.checkCollision(tiles, player, player.toMove);
+
+		if(collisionData.wallCollision) {
+			let position = new Vector(player.position.x, player.position.y);
+			collisionData.wallCollision = false;
+			collisionData = this.checkCollision(tiles, player, new Vector((player.toMove.x * (1 - collisionData.collisionTimeX)) ,-5));
+			if(collisionData.wallCollision) {
+				player.position = position;
+			}
+		}
+
+		return collisionData;
+	}
+
+	public checkCollision(tiles: Tile[], player: Player, frameVelocity: Vector) {
 
 		var tilesToCheck = tiles;
 		let collisionData: CollisionData = new CollisionData();
 		var rect1 = player.getCollisionArea();
-		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, player.toMove);
+		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, frameVelocity);
 		for(let tile of tilesToCheck) {
 			if(this.aabbCheck(broadphasebox, tile)) {
-				collisionData = this.aabbCollisionY(player.getCollisionArea(), tile, player.toMove, collisionData);
+				collisionData = this.aabbCollisionY(player.getCollisionArea(), tile, frameVelocity, collisionData);
 			}
 		}
 
-		player.position.y += player.toMove.y * collisionData.collisionTimeY;
+		player.position.y += frameVelocity.y * collisionData.collisionTimeY;
 
 		rect1 = player.getCollisionArea();
-		broadphasebox = this.getSweptBroadphaseBoxX(rect1, player.toMove);
+		broadphasebox = this.getSweptBroadphaseBoxX(rect1, frameVelocity);
 
 		for(let tile of tilesToCheck) {
 			if(tile.tileTextureType != 0) {
 				if(this.aabbCheck(broadphasebox, tile)) {
-					collisionData = this.aabbCollisionX(player.getCollisionArea(), tile, player.toMove, collisionData);
+					collisionData = this.aabbCollisionX(player.getCollisionArea(), tile, frameVelocity, collisionData);
 				}
 			}
 		}
 
-		player.position.x += player.toMove.x * collisionData.collisionTimeX;
+		player.position.x += frameVelocity.x * collisionData.collisionTimeX;
 		
 		collisionData.remainingTime = 1 - collisionData.collisionTimeY;
 
@@ -65,6 +81,10 @@ export class CollisionDetection {
 
 	public aabbCheck(rect1: Rectangle, rect2: Rectangle) {
 		return (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.height + rect1.y > rect2.y)
+	}
+
+	private checkStep(tiles: Tile[], player: Player, collisionData: CollisionData) {
+
 	}
 
 	private getSweptBroadphaseBoxX(rect: Rectangle, velocity: Vector)

@@ -1,48 +1,47 @@
 import { Context, TileMap, Render } from './';
 import { RenderCall } from './render/renderCall';
-import { Editor } from './editor/editor';
 import { Player } from './player/player';
-import { Vector, Rectangle } from '../model';
+import { Vector, Rectangle, Asset, Level } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
+import { Observable } from 'rxjs';
+import { Editor } from './editor/editor';
 
 export class Game
 {
+	public canvasWidth = 1200;
+	public canvasHeight = 800;
 	private fps = 60;
-	private context: Context = new Context();
-	private tileMap: TileMap = new TileMap();
-	private render: Render;
+	private context: Context;
+	private tileMap: TileMap;
+	private render: Render = new Render();
 	private renderCalls: RenderCall[] = [];
-	private editor: Editor = new Editor();
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
 	private leftKeyPress: boolean;
 	private rightKeyPress: boolean;
 	private jumpKeyPress: boolean;
-	private tileSizeX: number = 25;
-	private tileSizeY: number = 25;
 	private started: boolean = false;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
 	private intevalTimer: any;
-	private gameArea = new Rectangle(-50, -50, 1300, 900);
+	private gameArea = new Rectangle(-50, -50, this.canvasWidth + 100, this.canvasHeight + 100);
+	private startElement: HTMLElement;
+	private level: Level;
+	private editor: Editor;
 
-	constructor() {
-		var doneLoading = this.context.doneListener();
-		var tileEdited = this.editor.tileEdited().subscribe(() => {});
+	constructor(private asset: Asset, startElement: HTMLElement, canvas: HTMLCanvasElement, level: Level, editor?: Editor) {
+		this.startElement = startElement;
+		this.level = level;
+		this.editor = editor;
 
-		doneLoading.subscribe(() => {
-			this.render = new Render();
-			this.start();
-		});
+		this.context = new Context(asset, 1200, 800, canvas);
 
-
-		this.context.init(1200, 800, false);
-		this.editor.init(this.tileSizeX, this.tileSizeY, this.context.canvas, this.collision);
-		this.tileMap.create(this.context, this.editor.tiles);
-		this.player = new Player(new Vector(200, 600), this.context, 45, 45);
+		this.tileMap = new TileMap(this.context);
+		this.player = new Player(this.level.playerPosition, this.context, 45, 45);
 		this.textRenderer = new TextRenderer(this.context);
+		this.start();		
 	}
 
 	private start() {
@@ -64,12 +63,12 @@ export class Game
 	      		this.renderCalls = [];
 
 	      		if(!this.started) {
-	      			if(this.editor.doneLoading) {
-		      			this.renderCalls.push(this.editor.createRenderCall());
-		      		}
+					if(this.editor) {
+						this.renderCalls.push(this.editor.createRenderCall());
+					}
 	      		} else {
 	      			this.collision.checkDeath(this.player, this.gameArea);
-	      			let collisionData = this.collision.collisionDetection(this.tileMap.tiles, this.player);
+	      			let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
 	      			this.checkKeys(delta);
 	      			this.player.update(collisionData, delta);
 	      		}
@@ -91,7 +90,7 @@ export class Game
 	    			clearInterval(this.intevalTimer);
 	    		}
 	    		
-	    		this.renderCalls.push(this.tileMap.createRenderCall(this.editor.tiles));
+				this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
 				this.renderCalls.push(this.player.createRenderCall());
 				this.render.render(this.renderCalls);
 	    	} 
@@ -149,7 +148,7 @@ export class Game
 
 		});
 
-		document.getElementById("start").addEventListener("click", (event: MouseEvent) => {
+		this.startElement.addEventListener("click", (event: MouseEvent) => {
 			this.started = true;
 		});
 

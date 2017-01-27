@@ -1,6 +1,5 @@
-import $ = require('jquery');
 import { Observable, Subscription, Observer } from 'rxjs';
-import { ShaderType } from '../model';
+import { ShaderType } from './';
 
 export class Context
 {
@@ -12,6 +11,7 @@ export class Context
 	
 
 	constructor(){
+		
 	}
 
 	public doneListener() {
@@ -20,9 +20,9 @@ export class Context
 		});
 	}
 
-	public init(width: number, height: number, pointer: boolean, parent?: HTMLElement) {
+	public init(vertexShader: string, fragmentShader: string, width: number, height: number, pointer: boolean, parent?: HTMLElement) {
 		this.initContext(width, height, pointer, parent);
-		this.initShaders();
+		this.initShaders(vertexShader, fragmentShader);
 	}
 
 	public clear() {
@@ -55,22 +55,20 @@ export class Context
 		console.log("Context initialized...");
 	}
 
-	private initShaders() {
-		$.when( this.loadShader(ShaderType.Vertex), this.loadShader(ShaderType.Fragment) ).then((vertexData: string, fragmentData: string) => {
-			var vertexShader = this.compileShader(vertexData[0], ShaderType.Vertex);
-			var fragmentShader = this.compileShader(fragmentData[0], ShaderType.Fragment);
+	private initShaders(vertexShaderRaw: string, fragmentShaderRaw: string,) {
+		let vertexShader = this.compileShader(vertexShaderRaw, ShaderType.Vertex);
+		let fragmentShader = this.compileShader(fragmentShaderRaw, ShaderType.Fragment);
 
-			this.shaderProgram = this.gl.createProgram();
-			this.gl.attachShader(this.shaderProgram, vertexShader);
-			this.gl.attachShader(this.shaderProgram, fragmentShader);
-			this.gl.linkProgram(this.shaderProgram);		 
-			if (!this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
-			 	alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.shaderProgram));
-			}
-			this.gl.useProgram(this.shaderProgram);
+		this.shaderProgram = this.gl.createProgram();
+		this.gl.attachShader(this.shaderProgram, vertexShader);
+		this.gl.attachShader(this.shaderProgram, fragmentShader);
+		this.gl.linkProgram(this.shaderProgram);		 
+		if (!this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
+			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.shaderProgram));
+		}
+		this.gl.useProgram(this.shaderProgram);
 
-			this.initTextures(this.gl);
-		});
+		this.initTextures(this.gl);
 	}
 
 	private initTextures(gl: WebGLRenderingContext) {
@@ -113,21 +111,5 @@ export class Context
    		}
 
    		return shader;
-	}
-
-	private loadShader(shaderType: ShaderType) {
-
-		var shaderSource = "";
-
-		if(shaderType == ShaderType.Fragment)
-		{
-			shaderSource = "src/shader/fragmentShader.c";
-		} else if(shaderType == ShaderType.Vertex) {
-			shaderSource = "src/shader/vertexShader.c";
-		}
-
-		var promise = $.ajax({url: shaderSource});
-
-    	return promise;
 	}
 }

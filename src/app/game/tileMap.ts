@@ -1,20 +1,13 @@
-import { Tile, Vector } from '../model';
+import { Tile, Vector } from './model';
 import { RenderCall } from './render/renderCall';
 import { RenderHelper } from './render/renderHelper';
-import { TextureMapper } from './render/textureMapper';
 import { Context } from './';
 
 export class TileMap {
-	public tiles: Tile[] = [];
-	private textureMapper = new TextureMapper();
 	private renderHelper = RenderHelper.getInstance();
 	private context: Context;
 
-	constructor() {
-	}
-
-	public create(context: Context, tiles: Tile[]) {
-		this.tiles = tiles;
+	constructor(context: Context) {
 		this.context = context;
 	}
 

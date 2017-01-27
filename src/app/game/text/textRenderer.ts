@@ -18,7 +18,7 @@ export class TextRenderer {
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
 
-		vertecies = this.renderHelper.getVertecies(((this.context.canvas.width/2) - (sizeX/2)), ((this.context.canvas.height/2) - (sizeY/2)), sizeX, sizeY, vertecies);
+		vertecies = this.renderHelper.getVertecies(((this.context.gl.canvas.width/2) - (sizeX/2)), ((this.context.gl.canvas.height/2) - (sizeY/2)), sizeX, sizeY, vertecies);
 		textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, type);
 		indecies = this.renderHelper.getIndecies(indecies);
 

@@ -1,4 +1,4 @@
-import { Sprite } from '../../model'
+import { Sprite } from '../model'
 
 export class Animate {
 

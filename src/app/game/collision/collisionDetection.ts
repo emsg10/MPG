@@ -1,7 +1,6 @@
-import { Vector, Tile, Rectangle } from '../../model';
+import { Vector, Tile, Rectangle } from '../model';
 import { CollisionData } from './';
 import { Player } from '../player/player';
-import { TileMap } from '../tileMap';
 
 export class CollisionDetection {
 
@@ -197,20 +196,4 @@ export class CollisionDetection {
         return collisionData;
     }
 
-
-
-	public checkPowerUps(player: Player, tilemap: TileMap, tileSize: number) {
-		var column = Math.floor(player.position.x/tileSize);
-		var row = Math.floor(player.position.y/tileSize);
-
-		var tile = tilemap.tiles[column][row + 1];
-		if(tile != null) {
-			if(tile.tileTextureType == 15) {
-			player.jumpSpeed = (player.defaultJumpSpeed * 1.5);
-			} else {
-				player.jumpSpeed = (player.defaultJumpSpeed);
-			}	
-		}
-		
-	}
 }

@@ -1,22 +1,29 @@
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Context } from '../context';
-import { Tile } from '../../model';
+import { Tile, Asset } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 
-export class Preview {
+@Component({
+	selector: 'preview',
+	templateUrl: './preview.html'
+})
 
+export class Preview {
+	@ViewChild('previewCanvas') previewCanvas: ElementRef;
 	public tileSizeXElement: HTMLInputElement;
 	public tileSizeXTextElement: HTMLSpanElement;
 	public tileSizeYElement: HTMLInputElement;
 	public tileSizeYTextElement: HTMLSpanElement;
-	public doneLoading: boolean = false;
 	public currentTile: Tile = new Tile(0, 0, 25, 25, 1);
-	private previewContext: Context = new Context();
-	private renderHelper: RenderHelper = new RenderHelper();
-	
+	private previewContext: Context;
+	private renderHelper: RenderHelper = RenderHelper.getInstance();
+
 
 	constructor() {
+	}
 
+	public init(asset: Asset) {
 		let div = document.createElement("div");
 		div.style.position = "absolute";
 		div.style.top = "200px";
@@ -28,7 +35,7 @@ export class Preview {
 		this.tileSizeXElement.step = "5";
 		this.tileSizeXElement.value = "25";
 		this.tileSizeXElement.style.display = "block";
-		
+
 		this.tileSizeYElement = document.createElement("input");
 		this.tileSizeYElement.type = "range";
 		this.tileSizeYElement.min = "10";
@@ -49,15 +56,10 @@ export class Preview {
 		div.appendChild(this.tileSizeXTextElement);
 		div.appendChild(this.tileSizeYElement);
 		div.appendChild(this.tileSizeYTextElement);
-		
-		this.previewContext.init(150, 150, true, div);
 
-		document.body.appendChild(div);		
+		this.previewContext = new Context(asset, 150, 150, this.previewCanvas.nativeElement);
 
-		this.previewContext.doneListener().subscribe(() => {
-			this.doneLoading = true;
-		});
-
+		document.body.appendChild(div);
 	}
 
 	public createRenderCall() {
@@ -67,7 +69,7 @@ export class Preview {
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
 
-		vertecies = this.renderHelper.getVertecies((75-(this.currentTile.width/2)), 75-(this.currentTile.height/2), this.currentTile.width, this.currentTile.height, vertecies);
+		vertecies = this.renderHelper.getVertecies((75 - (this.currentTile.width / 2)), 75 - (this.currentTile.height / 2), this.currentTile.width, this.currentTile.height, vertecies);
 		textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, this.currentTile.tileTextureType);
 		indecies = this.renderHelper.getIndecies(indecies);
 

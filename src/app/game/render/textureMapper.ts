@@ -1,4 +1,4 @@
-import { Vector, Rectangle } from '../../model';
+import { Vector, Rectangle } from '../model';
 
 export class TextureMapper {
 

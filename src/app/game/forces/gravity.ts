@@ -1,4 +1,4 @@
-import { Vector } from '../../model';
+import { Vector } from '../model';
 
 export class Gravity {
 	private strength = 0;

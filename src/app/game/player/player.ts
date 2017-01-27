@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite } from '../../model';
+import { Vector, Rectangle, Sprite } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { Animate } from '../render/animate';
 import { Context } from '../';

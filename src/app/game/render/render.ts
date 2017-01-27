@@ -34,13 +34,13 @@ export class Render {
 
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 			this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-			this.gl.uniform2f(resolutionLocation, renderCall.context.canvas.width, renderCall.context.canvas.height);
+			this.gl.uniform2f(resolutionLocation, renderCall.context.gl.canvas.width, renderCall.context.gl.canvas.height);
 
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
 			this.gl.vertexAttribPointer(textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.activeTexture(this.gl.TEXTURE0);
-			this.gl.bindTexture(this.gl.TEXTURE_2D, renderCall.context.texture);
+			this.gl.bindTexture(this.gl.TEXTURE_2D, renderCall.context.glTexture);
 			this.gl.uniform1i(this.gl.getUniformLocation(this.shaderProgram, "u_sampler"), 0);
 
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);

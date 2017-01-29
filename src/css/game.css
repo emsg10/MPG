@@ -1,0 +1,13 @@
+html *
+{
+   color: #000 !important;
+   font-family: Helvetica, sans-serif !important;
+}
+
+.noPointer {
+    cursor: none;
+}
+
+.start-button {
+    font-size: 36px;
+}

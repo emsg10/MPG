@@ -1,10 +1,11 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Tile, Asset } from '../model';
+import { Component, ViewChild, ElementRef, AfterViewInit, Output, EventEmitter } from '@angular/core';
+import { Tile, Asset, Vector, Level } from '../model';
 import { Observable, Subscription, Observer } from 'rxjs';
 import { Context } from '../';
 import { RenderCall } from '../render/renderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { Preview } from './preview';
+import { LoadHelper } from '../service/loadHelper';
 
 @Component({
 	selector: 'editor',
@@ -14,10 +15,15 @@ import { Preview } from './preview';
 export class Editor {
 	@ViewChild('editorCanvas') editorCanvas: ElementRef;
 	@ViewChild('preview') preview: Preview;
+	@ViewChild('start') startElement: ElementRef;
+	@ViewChild('restart') restartElement: ElementRef;
+	@ViewChild('importElement') importElement: ElementRef;
+
+	@Output() newLevelLoaded = new EventEmitter<boolean>();
 
 	public doneLoading: boolean = false;
-	public tiles: Tile[] = [];
 	public currentTile: Tile = new Tile(0, 0, 25, 25, 1);
+	public level: Level;
 
 	private canvas: HTMLCanvasElement;
 	private editorContext: Context;
@@ -25,6 +31,7 @@ export class Editor {
 
 	private mouseDown: boolean = false;
 	private accuracy: number = 5;
+	private loadHelper = LoadHelper.getInstance();
 
 	constructor() {
 	}
@@ -33,8 +40,8 @@ export class Editor {
 		this.canvas = canvas;
 		this.preview.init(asset);
 
-		this.createInputListeners(this.preview);
 		this.initMouseEventListener(this.canvas);
+		this.initImportChangeListener();
 
 		this.editorContext = new Context(asset, 256, 256, this.editorCanvas.nativeElement);
 		this.initEditorEventListener(this.editorCanvas.nativeElement);
@@ -46,11 +53,11 @@ export class Editor {
 
 		var textureCoordinates = [
 			0.0, 0.0,
-			0.5, 0.5,
-			0.5, 0.0,
+			0.25, 0.25,
+			0.25, 0.0,
 			0.0, 0.0,
-			0.5, 0.5,
-			0.0, 0.5
+			0.25, 0.25,
+			0.0, 0.25
 		];
 
 		var vertecies = [
@@ -74,26 +81,79 @@ export class Editor {
 		return rendercall;
 	}
 
+	public playerXValueChanged(value: number) {
+		this.level.playerPosition.x = +value;
+	}
+
+	public playerYValueChanged(value: number) {
+		this.level.playerPosition.y = +value;
+	}
+
+	public xValueChanged(value: number) {
+		this.currentTile.width = value;
+	}
+
+	public yValueChanged(value: number) {
+		this.currentTile.height = value;
+	}
+
+	public export() {
+		let jsonLevel = JSON.stringify(this.level);
+		let blob = new Blob([jsonLevel], { type: "application/json" });
+		let textToSaveAsURL = window.URL.createObjectURL(blob);
+		let fileNameToSaveAs = "level" + Date.now() + ".json";
+
+		let downloadLink = document.createElement("a");
+		downloadLink.download = fileNameToSaveAs;
+		downloadLink.innerHTML = "Download File";
+		downloadLink.href = textToSaveAsURL;
+		downloadLink.onclick = this.destroyClickedElement;
+		downloadLink.style.display = "none";
+		document.body.appendChild(downloadLink);
+
+		downloadLink.click();
+	}
+
+	public import() {
+
+		this.importElement.nativeElement.click();
+
+	}
+
+	private initImportChangeListener() {
+		this.importElement.nativeElement.addEventListener('change', () => {
+			let editorComp = this;
+			let fileReader = new FileReader();
+			fileReader.onload = (fileLoadedEvent: any) => {
+				editorComp.loadLevel(fileLoadedEvent.target.result);
+			}
+
+			fileReader.readAsText(this.importElement.nativeElement.files[0], "UTF-8")
+		});
+	}
+
+	private loadLevel(data: string) {
+		try {
+			let level = JSON.parse(data);
+			if (this.loadHelper.checkLevelType(level)) {
+				this.level = level;
+				this.newLevelLoaded.emit(true);
+			}
+		} catch (error) {
+			console.log("Invalid json");
+		}
+	}
+
+	private destroyClickedElement(event: any) {
+		document.body.removeChild(event.target);
+	}
+
 	private initEditorEventListener(canvas: HTMLCanvasElement) {
 		canvas.addEventListener('click', (event: MouseEvent) => {
 			var mousePos = this.getMousePos(canvas, event);
 
 			this.setSelectedTileType(mousePos.x, mousePos.y);
 
-		}, false);
-	}
-
-	private createInputListeners(preview: Preview) {
-		this.preview.tileSizeXElement.addEventListener('input', (event: any) => {
-			this.currentTile.width = +this.preview.tileSizeXElement.value;
-			this.preview.currentTile = this.currentTile;
-			this.preview.tileSizeXTextElement.innerHTML = this.preview.tileSizeXElement.value;
-		}, false);
-
-		this.preview.tileSizeYElement.addEventListener('input', (event: any) => {
-			this.currentTile.height = +this.preview.tileSizeYElement.value;
-			this.preview.currentTile = this.currentTile;
-			this.preview.tileSizeYTextElement.innerHTML = this.preview.tileSizeYElement.value;
 		}, false);
 	}
 
@@ -105,7 +165,6 @@ export class Editor {
 		var ypos = Math.floor(y / part);
 
 		this.currentTile.tileTextureType = (xpos + (ypos * 5) + 1);
-		this.preview.currentTile = this.currentTile;
 	}
 
 	private editTile(x: number, y: number) {
@@ -113,14 +172,14 @@ export class Editor {
 		let newTile = this.getAccurateTile(x, y);
 
 		let collision = false;
-		for (let tile of this.tiles) {
+		for (let tile of this.level.tiles) {
 			if (this.collisionDetection.aabbCheck(newTile, tile)) {
 				collision = true;
 			}
 		}
 
 		if (!collision) {
-			this.tiles.push(newTile);
+			this.level.tiles.push(newTile);
 		}
 	}
 

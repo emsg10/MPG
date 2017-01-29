@@ -6,4 +6,5 @@ export class CollisionData {
 	remainingTime: number = 0;
 	wallCollision: boolean = false;
 	groundCollision: boolean = false;
+	fallDeath: boolean = false;
 }

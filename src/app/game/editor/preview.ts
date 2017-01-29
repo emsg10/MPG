@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, Output, Input, EventEmitter } from '@angular/core';
 import { Context } from '../context';
 import { Tile, Asset } from '../model';
 import { RenderCall } from '../render/renderCall';
@@ -10,12 +10,17 @@ import { RenderHelper } from '../render/renderHelper';
 })
 
 export class Preview {
+	@Input() currentTile: Tile = new Tile(0, 0, 25, 25, 1);
+	@Output() onXvalueChange = new EventEmitter<number>();
+	@Output() onYvalueChange = new EventEmitter<number>();
+
 	@ViewChild('previewCanvas') previewCanvas: ElementRef;
 	public tileSizeXElement: HTMLInputElement;
 	public tileSizeXTextElement: HTMLSpanElement;
 	public tileSizeYElement: HTMLInputElement;
 	public tileSizeYTextElement: HTMLSpanElement;
-	public currentTile: Tile = new Tile(0, 0, 25, 25, 1);
+	public xValue = 25;
+	public yValue = 25;
 	private previewContext: Context;
 	private renderHelper: RenderHelper = RenderHelper.getInstance();
 
@@ -24,42 +29,7 @@ export class Preview {
 	}
 
 	public init(asset: Asset) {
-		let div = document.createElement("div");
-		div.style.position = "absolute";
-		div.style.top = "200px";
-		div.style.left = "1260px";
-		this.tileSizeXElement = document.createElement("input");
-		this.tileSizeXElement.type = "range";
-		this.tileSizeXElement.min = "10";
-		this.tileSizeXElement.max = "100";
-		this.tileSizeXElement.step = "5";
-		this.tileSizeXElement.value = "25";
-		this.tileSizeXElement.style.display = "block";
-
-		this.tileSizeYElement = document.createElement("input");
-		this.tileSizeYElement.type = "range";
-		this.tileSizeYElement.min = "10";
-		this.tileSizeYElement.max = "100";
-		this.tileSizeYElement.step = "5";
-		this.tileSizeYElement.value = "25";
-		this.tileSizeYElement.style.display = "block";
-
-		this.tileSizeXTextElement = document.createElement("span");
-		this.tileSizeXTextElement.innerHTML = this.tileSizeXElement.value;
-		this.tileSizeXTextElement.style.display = "block";
-
-		this.tileSizeYTextElement = document.createElement("span");
-		this.tileSizeYTextElement.innerHTML = this.tileSizeYElement.value;
-		this.tileSizeYTextElement.style.display = "block";
-
-		div.appendChild(this.tileSizeXElement);
-		div.appendChild(this.tileSizeXTextElement);
-		div.appendChild(this.tileSizeYElement);
-		div.appendChild(this.tileSizeYTextElement);
-
 		this.previewContext = new Context(asset, 150, 150, this.previewCanvas.nativeElement);
-
-		document.body.appendChild(div);
 	}
 
 	public createRenderCall() {
@@ -81,4 +51,15 @@ export class Preview {
 		return renderCall;
 	}
 
+	public xValueChange(value: number) {
+		this.xValue = +value;
+		this.currentTile.width = this.xValue;
+		this.onXvalueChange.emit(this.xValue);
+	}
+
+	public yValueChange(value: number) {
+		this.yValue = +value;
+		this.currentTile.height = this.yValue;
+		this.onYvalueChange.emit(this.yValue);
+	}
 }

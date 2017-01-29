@@ -1,9 +1,10 @@
-<div>
-	<button #start>start</button>
+<div style="width: 100%;">
+ <div style="float: left; width: 1200;">
+	 <canvas class="noPointer" #gameCanvas></canvas>
+</div>
+ <div style="float: left; margin-left: 10px; padding-top: 0px;">
+	 <editor (newLevelLoaded)="levelLoaded()" #editor></editor>
+</div>
 </div>
 
-<div>
-	<canvas #gameCanvas></canvas>
-</div>
 
-<editor #editor></editor>

@@ -72,7 +72,7 @@ export class CollisionDetection {
 		return collisionData;
 	}
 
-	public checkDeath(player: Player, area: Rectangle) {
+	public checkCoutOfBounds(player: Player, area: Rectangle) {
 		if(!this.aabbCheck(player.getCollisionArea(), area)) {
 			player.dead = true;
 		}
@@ -106,7 +106,7 @@ export class CollisionDetection {
     	return new Rectangle(x, y, width, height);
 	}
 
-	private aabbCollisionY(rect1: Rectangle, rect2: Rectangle, velocity: Vector, collisionData: CollisionData) {
+	private aabbCollisionY(rect1: Rectangle, rect2: Tile, velocity: Vector, collisionData: CollisionData) {
 		let yInvEntry: number;
 		let yInvExit: number;
 
@@ -145,8 +145,17 @@ export class CollisionDetection {
             	if(collisionData.collisionTimeY > entryTime) {
             		collisionData.collisionTimeY = entryTime;	
             	}
+
+				if(rect2.tileTextureType == 25 && velocity.y > 5) {
+					collisionData.fallDeath = true;
+				}
             	
+				if(velocity.y > 18) {
+					collisionData.fallDeath = true;
+				}
+
             	collisionData.groundCollision = true;
+
 		}
         return collisionData;
 	}

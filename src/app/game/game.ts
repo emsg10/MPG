@@ -7,7 +7,8 @@ import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
 import { Observable } from 'rxjs';
 import { Editor } from './editor/editor';
-import { Animation } from './animation/animation';
+import { AnimationHandler } from './handler/animationHandler';
+import { ProjectileHandler } from './handler/projectileHandler';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -22,6 +23,7 @@ export class Game {
 	private leftKeyPress: boolean;
 	private rightKeyPress: boolean;
 	private jumpKeyPress: boolean;
+	private channelingKeyPress: boolean;
 	private started: boolean = false;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
@@ -32,7 +34,8 @@ export class Game {
 	private level: Level;
 	private loadedLevel: Level;
 	private editor: Editor;
-	private animation: Animation;
+	private animationHandler: AnimationHandler;
+	private projectileHandler: ProjectileHandler;
 	
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: Level, editor?: Editor) {
@@ -44,17 +47,18 @@ export class Game {
 
 		this.context = new Context(asset, 1200, 800, canvas);
 
-		this.animation = new Animation(this.context);
+		this.animationHandler = new AnimationHandler(this.context);
+		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 		this.tileMap = new TileMap(this.context);
-		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, 45, 45);
+		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler,  45, 45);
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
 		this.initLoop();
 	}
 
 	public reset(level: Level) {
-		this.level = this.loadedLevel.copy();
-		this.player = new Player(this.level.playerPosition, this.context, 45, 45);
+		this.level = level.copy();
+		this.player = new Player(this.level.playerPosition, this.context, this.projectileHandler, this.animationHandler, 45, 45);
 		this.started = false;
 	}
 
@@ -85,10 +89,11 @@ export class Game {
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
 						this.checkKeys(delta);
 						this.player.update(collisionData, delta);
-						this.animation.update(delta);
-						this.animation.checkForAnimation(collisionData, this.player);
+						this.animationHandler.update(delta);
+						this.animationHandler.checkForAnimation(collisionData, this.player);
+						this.projectileHandler.update(delta);
 					} else {
-						this.animation.update(delta);
+						this.animationHandler.update(delta);
 					}
 
 				}
@@ -115,13 +120,14 @@ export class Game {
 				}
 
 				this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
-				this.renderCalls.push(this.animation.createRenderCall());
+				this.renderCalls.push(this.animationHandler.createRenderCall());
 				this.render.render(this.renderCalls);
 			}
 		};
 	}
 
 	private checkKeys(delta: number) {
+		this.player.channelingCanceled = false;
 		if (this.leftKeyPress) {
 			this.player.moveLeft(delta);
 		}
@@ -133,40 +139,67 @@ export class Game {
 		if (this.jumpKeyPress) {
 			this.player.jump();
 		}
+
+		this.player.channel(this.channelingKeyPress, delta);
 	}
 
 	private initKeyBindings() {
 
-		document.body.addEventListener("keypress", (event: KeyboardEvent) => {
+		document.body.addEventListener("keydown", (event: KeyboardEvent) => {
 
-			var keyCode = event.keyCode;
+			var keyCode = event.code;
 
 			switch (keyCode) {
-				case 97:
+				case 'KeyA':
 					this.leftKeyPress = true;
 					break;
-				case 100:
+				case 'KeyD':
 					this.rightKeyPress = true;
 					break;
-				case 119:
+				case 'KeyW':
 					this.jumpKeyPress = true;
+					break;
+				case 'Numpad1': 
+					this.channelingKeyPress = true;
+					break;
+				case 'ArrowUp': 
+					this.jumpKeyPress = true;
+					break;
+				case 'ArrowRight': 
+					this.rightKeyPress = true;
+					break;
+				case 'ArrowLeft': 
+					this.leftKeyPress = true;
+					break;
 			}
 
 		});
 
 		document.body.addEventListener("keyup", (event: KeyboardEvent) => {
 
-			var keyCode = event.keyCode;
+			var keyCode = event.code;
 
 			switch (keyCode) {
-				case 65:
+				case 'KeyA':
 					this.leftKeyPress = false;
 					break;
-				case 68:
+				case 'KeyD':
 					this.rightKeyPress = false;
 					break;
-				case 87:
+				case 'KeyW':
 					this.jumpKeyPress = false;
+					break;
+				case 'Numpad1': 
+					this.channelingKeyPress = false;
+					break;
+				case 'ArrowUp': 
+					this.jumpKeyPress = false;
+					break;
+				case 'ArrowRight': 
+					this.rightKeyPress = false;
+					break;
+				case 'ArrowLeft': 
+					this.leftKeyPress = false;
 					break;
 			}
 		});

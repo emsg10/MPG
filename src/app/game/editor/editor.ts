@@ -136,7 +136,9 @@ export class Editor {
 		try {
 			let level = JSON.parse(data);
 			if (this.loadHelper.checkLevelType(level)) {
-				this.level = level;
+				this.level = new Level();
+				this.level.playerPosition = level.playerPosition;
+				this.level.tiles = level.tiles;
 				this.newLevelLoaded.emit(true);
 			}
 		} catch (error) {

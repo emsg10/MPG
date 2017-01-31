@@ -1,6 +1,6 @@
 import { Rectangle } from '../model'
 
-export class Animate {
+export class Animation {
 
 	public textureNumber: number[] = [];
 	public timeToChange: number = 100;

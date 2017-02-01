@@ -1,4 +1,4 @@
-import { Vector, Tile, Rectangle } from '../model';
+import { Vector, Tile, Rectangle, Projectile } from '../model';
 import { CollisionData } from './';
 import { Player } from '../player/player';
 
@@ -40,11 +40,28 @@ export class CollisionDetection {
 		return collisionData;
 	}
 
+	public checkProjectileCollision(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
+
+		let broadphasebox = this.getSweptBroadphaseBoxX(projectile.collisionArea, frameVelocity);
+
+		let collisionData: CollisionData = new CollisionData();
+
+		for(let collidable of collidables) {
+			if(this.aabbCheck(broadphasebox, collidable)) {
+				collisionData = this.aabbCollisionX(projectile.collisionArea, collidable, frameVelocity, collisionData);
+			}
+		}
+
+		projectile.area.x += frameVelocity.x * collisionData.collisionTimeX;
+
+		return collisionData;
+	}
+
 	public checkCollision(tiles: Tile[], player: Player, frameVelocity: Vector) {
 
-		var tilesToCheck = tiles;
+		let tilesToCheck = tiles;
 		let collisionData: CollisionData = new CollisionData();
-		var rect1 = player.getCollisionArea();
+		let rect1 = player.getCollisionArea();
 		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, frameVelocity);
 		for(let tile of tilesToCheck) {
 			if(this.aabbCheck(broadphasebox, tile)) {

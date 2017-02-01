@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellCast } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../';
@@ -15,7 +15,6 @@ export class Player {
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
 	public dead: boolean = false;
-	public channelingCanceled: boolean = false;
 	private context: Context;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
@@ -25,8 +24,6 @@ export class Player {
 	private gravityStrength: number = 0.0025;
 	private runningAnimation: Animation = new Animation();
 	private idleAnimation: Animation = new Animation();
-	private channelAnimation: Animation = new Animation();
-	private castAnimation: Animation = new Animation();
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
 	private inverse: boolean = false;
@@ -36,31 +33,30 @@ export class Player {
 	private gravity: Gravity = new Gravity(this.gravityStrength);
 	private jumping: boolean = false;
 	private renderHelper = RenderHelper.getInstance();
-	private channeling: boolean = false;
-	private channelValue: number;
-	private defaultChannelValue: number = 20;
-	private maxChannelValue: number = 100;
-	private channelSpeed: number = 0.03;
-	private channelSpellAnimation: Animation = null;
-	private savedCast: boolean;
+	private spellCast: SpellCast;
 
 	constructor(position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, spriteSizeX: number, spriteSizeY: number) {
 		this.context = context;
 		this.position = position;
 		this.projectileHandler = projectileHandler;
 		this.animationHandler = animationHandler;
+		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
+
+		this.spellCast.defaultValue = 20;
+		this.spellCast.maxValue = 100;
+		this.spellCast.speed = 0.03;
+
+		this.spellCast.channelAnimation.textureNumber.push(204);
+
+		this.spellCast.castAnimation.textureNumber.push(205);
+		this.spellCast.castAnimation.textureNumber.push(208);
+		this.spellCast.castAnimation.repetitions = 0;
+		this.spellCast.castAnimation.timeToChange = 120;
 
 		this.spriteSizeX = spriteSizeX;
 		this.spriteSizeY = spriteSizeY;
 
 		this.idleAnimation.textureNumber.push(203);
-
-		this.channelAnimation.textureNumber.push(204);
-
-		this.castAnimation.textureNumber.push(205);
-		this.castAnimation.textureNumber.push(208);
-		this.castAnimation.repetitions = 0;
-		this.castAnimation.timeToChange = 120;
 
 		this.runningAnimation.textureNumber.push(200);
 		this.runningAnimation.textureNumber.push(201);
@@ -97,10 +93,10 @@ export class Player {
 			x1, y2
 		];
 
-		if (this.castAnimation.repetitions > 0) {
-			textureNumber = this.castAnimation.getCurrentFrame();
-		} else if (this.channeling && this.velocity.x == 0) {
-			textureNumber = this.channelAnimation.getCurrentFrame();
+		if (this.spellCast.casting) {
+			textureNumber = this.spellCast.castAnimation.getCurrentFrame();
+		} else if (this.spellCast.channeling && this.velocity.x == 0) {
+			textureNumber = this.spellCast.channelAnimation.getCurrentFrame();
 			this.idleTime = this.idleTimeChange;
 		} else if (this.idleTime >= this.idleTimeChange) {
 			textureNumber = this.idleAnimation.getCurrentFrame();
@@ -114,8 +110,6 @@ export class Player {
 		return call;
 
 	}
-
-
 
 	public update(collisionData: CollisionData, delta: number) {
 
@@ -161,17 +155,6 @@ export class Player {
 			}
 		}
 
-		if(this.castAnimation.repetitions > 0) {
-			this.castAnimation.next(delta);
-			if(this.castAnimation.repetitions == 1) {
-				if(this.savedCast) {
-					this.projectileHandler.createFireball(this.getCalculatedPos(), this.channelValue, this.inverse);
-					this.savedCast = false;
-				}
-			}
-		}
-
-
 		this.fall(delta);
 		this.jumping = false;
 		this.moving = false;
@@ -180,7 +163,7 @@ export class Player {
 	}
 
 	public moveRight(delta: number) {
-		this.channelingCanceled = true;
+		this.spellCast.cancel = true;
 
 		if (this.velocity.x < this.maxSpeed) {
 			this.velocity.x += this.acceleration * delta;
@@ -195,7 +178,7 @@ export class Player {
 	}
 
 	public moveLeft(delta: number) {
-		this.channelingCanceled = true;
+		this.spellCast.cancel = true;
 
 		if (this.velocity.x > -this.maxSpeed) {
 			this.velocity.x -= this.acceleration * delta;
@@ -220,7 +203,7 @@ export class Player {
 	}
 
 	public jump() {
-		this.channelingCanceled = true;
+		this.spellCast.cancel = true;
 
 		if (!this.jumping) {
 			this.jumping = true;
@@ -228,64 +211,7 @@ export class Player {
 	}
 
 	public channel(channeling: boolean, delta: number) {
-		if (channeling) {
-			if (this.channelingCanceled) {
-				this.channelValue = this.defaultChannelValue;
-			}
-			if (this.channeling) {
-				this.createSpellChannelAnimation(this.inverse);
-				if (this.channelValue <= this.maxChannelValue) {
-					this.channelValue += (this.channelSpeed * delta);
-				} else {
-					this.channelValue = this.maxChannelValue;
-				}
-			} else {
-				this.channelValue = this.defaultChannelValue;
-				this.channeling = true;
-			}
-		} else {
-			if (this.channeling) {
-				this.channeling = false;
-				if (this.channelingCanceled) {
-					this.removeSpellChanneling();
-					this.projectileHandler.createFireball(this.getCalculatedPos(), this.defaultChannelValue, this.inverse);
-					this.castAnimation.repetitions = 2;
-				} else {
-					this.removeSpellChanneling();
-					//this.projectileHandler.createFireball(this.getCalculatedPos(), this.channelValue, this.inverse);
-					this.savedCast = true;
-					this.castAnimation.repetitions = 2;
-				}
-			}
-		}
+		this.spellCast.update(channeling, delta, this.inverse, this.position);
 	}
 
-	private getCalculatedPos() {
-		return new Vector(this.calcPos(this.position.x, this.channelValue, 22), this.calcPos(this.position.y, this.channelValue, 30))
-	}
-
-	private calcPos(value: number, size: number, offset: number) {
-		return value - (size / 2 - offset);
-	}
-
-	private createSpellChannelAnimation(inverse: boolean) {
-		if (!this.channelSpellAnimation) {
-			if(inverse) {
-				this.channelSpellAnimation = this.animationHandler.fireball_left(this.getCalculatedPos(), this.channelValue);
-			} else {
-				this.channelSpellAnimation = this.animationHandler.fireball_right(this.getCalculatedPos(), this.channelValue);
-			}
-		} else {
-			let calcPos = this.getCalculatedPos();
-			this.channelSpellAnimation.areaToRender.width = this.channelValue;
-			this.channelSpellAnimation.areaToRender.height = this.channelValue;
-			this.channelSpellAnimation.areaToRender.x = calcPos.x;
-			this.channelSpellAnimation.areaToRender.y = calcPos.y;
-		}
-	}
-
-	private removeSpellChanneling() {
-		this.animationHandler.remove(this.channelSpellAnimation);
-		this.channelSpellAnimation = null;
-	}
 }

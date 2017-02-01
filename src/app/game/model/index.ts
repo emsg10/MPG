@@ -7,5 +7,6 @@ import { Level } from './level';
 import { Asset } from './assets';
 import { Projectile } from './projectile';
 import { Animation } from './animation';
+import { SpellCast } from './spellCast'
 
-export { ShaderType, Tile, Vector, Rectangle, Sprite, Level, Asset, Projectile, Animation };
+export { ShaderType, Tile, Vector, Rectangle, Sprite, Level, Asset, Projectile, Animation, SpellCast };

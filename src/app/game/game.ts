@@ -49,6 +49,9 @@ export class Game {
 
 		this.animationHandler = new AnimationHandler(this.context);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
+
+		
+
 		this.tileMap = new TileMap(this.context);
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler,  45, 45);
 		this.textRenderer = new TextRenderer(this.context);
@@ -91,7 +94,7 @@ export class Game {
 						this.player.update(collisionData, delta);
 						this.animationHandler.update(delta);
 						this.animationHandler.checkForAnimation(collisionData, this.player);
-						this.projectileHandler.update(delta);
+						this.projectileHandler.update(delta, this.level.tiles);
 					} else {
 						this.animationHandler.update(delta);
 					}
@@ -127,7 +130,6 @@ export class Game {
 	}
 
 	private checkKeys(delta: number) {
-		this.player.channelingCanceled = false;
 		if (this.leftKeyPress) {
 			this.player.moveLeft(delta);
 		}

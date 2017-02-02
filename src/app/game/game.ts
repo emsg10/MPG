@@ -1,7 +1,7 @@
 import { Context, TileMap, Render } from './';
 import { RenderCall } from './render/renderCall';
-import { Player } from './player/player';
-import { Vector, Rectangle, Asset, Level } from './model';
+import { Player } from './character/player';
+import { Vector, Rectangle, Asset, Level, SpellType } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
@@ -24,6 +24,7 @@ export class Game {
 	private rightKeyPress: boolean;
 	private jumpKeyPress: boolean;
 	private channelingKeyPress: boolean;
+	private spellType: SpellType;
 	private started: boolean = false;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
@@ -36,7 +37,7 @@ export class Game {
 	private editor: Editor;
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
-	
+
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: Level, editor?: Editor) {
 		this.startElement = startElement;
@@ -50,10 +51,10 @@ export class Game {
 		this.animationHandler = new AnimationHandler(this.context);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 
-		
+
 
 		this.tileMap = new TileMap(this.context);
-		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler,  45, 45);
+		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, 45, 45);
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
 		this.initLoop();
@@ -91,7 +92,7 @@ export class Game {
 						this.collision.checkCoutOfBounds(this.player, this.gameArea);
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
 						this.checkKeys(delta);
-						this.player.update(collisionData, delta);
+						this.player.update(collisionData, delta, this.spellType);
 						this.animationHandler.update(delta);
 						this.animationHandler.checkForAnimation(collisionData, this.player);
 						this.projectileHandler.update(delta, this.level.tiles);
@@ -109,7 +110,7 @@ export class Game {
 				this.context.clear();
 
 				//EDITOR
-				if(!this.started) {
+				if (!this.started) {
 					this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
 					this.renderCalls.push(this.editor.preview.createRenderCall());
 				}
@@ -142,7 +143,7 @@ export class Game {
 			this.player.jump();
 		}
 
-		this.player.channel(this.channelingKeyPress, delta);
+		this.player.channel(this.channelingKeyPress, delta, this.spellType);
 	}
 
 	private initKeyBindings() {
@@ -161,16 +162,21 @@ export class Game {
 				case 'KeyW':
 					this.jumpKeyPress = true;
 					break;
-				case 'Numpad1': 
+				case 'Numpad1':
 					this.channelingKeyPress = true;
+					this.spellType = SpellType.fireball;
 					break;
-				case 'ArrowUp': 
+				case 'Numpad2':
+					this.channelingKeyPress = true;
+					this.spellType = SpellType.electricbolt;
+					break;
+				case 'ArrowUp':
 					this.jumpKeyPress = true;
 					break;
-				case 'ArrowRight': 
+				case 'ArrowRight':
 					this.rightKeyPress = true;
 					break;
-				case 'ArrowLeft': 
+				case 'ArrowLeft':
 					this.leftKeyPress = true;
 					break;
 			}
@@ -191,16 +197,19 @@ export class Game {
 				case 'KeyW':
 					this.jumpKeyPress = false;
 					break;
-				case 'Numpad1': 
+				case 'Numpad1':
 					this.channelingKeyPress = false;
 					break;
-				case 'ArrowUp': 
+				case 'Numpad2':
+					this.channelingKeyPress = false;
+					break;
+				case 'ArrowUp':
 					this.jumpKeyPress = false;
 					break;
-				case 'ArrowRight': 
+				case 'ArrowRight':
 					this.rightKeyPress = false;
 					break;
-				case 'ArrowLeft': 
+				case 'ArrowLeft':
 					this.leftKeyPress = false;
 					break;
 			}

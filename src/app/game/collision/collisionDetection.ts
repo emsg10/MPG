@@ -1,6 +1,6 @@
 import { Vector, Tile, Rectangle, Projectile } from '../model';
 import { CollisionData } from './';
-import { Player } from '../player/player';
+import { Player } from '../character/player';
 
 export class CollisionDetection {
 

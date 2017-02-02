@@ -1,4 +1,4 @@
-import { Projectile, Vector, Rectangle } from '../model';
+import { Projectile, Vector, Rectangle, SpellType} from '../model';
 import { AnimationHandler } from './animationHandler';
 import { CollisionDetection } from '../collision/collisionDetection';
 
@@ -12,13 +12,13 @@ export class ProjectileHandler {
         this.animationHandler = animationHandler;
     }
 
-    public createFireball(position: Vector, size: number, inverse: boolean) {
+    public createBolt(position: Vector, size: number, inverse: boolean, type: SpellType) {
         let projectile: Projectile;
 
         if(inverse) {
-            projectile = new Projectile(new Vector(-0.6, 0), new Rectangle(position.x, position.y, size, size), this.animationHandler.fireball_left(new Vector(position.x, position.y), size), (size * 10), 0.2);
+            projectile = new Projectile(new Vector(-0.6, 0), new Rectangle(position.x, position.y, size, size), this.animationHandler.createSpellAnimation(new Vector(position.x, position.y), size, inverse, type), (size * 10), 0.2, type);
         } else {
-            projectile = new Projectile(new Vector(0.6, 0), new Rectangle(position.x, position.y, size, size), this.animationHandler.fireball_right(new Vector(position.x, position.y), size), (size * 10), 0.2);
+            projectile = new Projectile(new Vector(0.6, 0), new Rectangle(position.x, position.y, size, size), this.animationHandler.createSpellAnimation(new Vector(position.x, position.y), size, inverse, type), (size * 10), 0.2, type);
         }
 
         this.projectiles.push(projectile);
@@ -40,8 +40,12 @@ export class ProjectileHandler {
         }
 
         for(let projectile of removeProjectile) {
-            this.animationHandler.fireball_destroy(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
-
+            if(projectile.type == SpellType.electricbolt) {
+                this.animationHandler.sizzle(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
+            } else {
+                this.animationHandler.fireball_destroy(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
+            }
+            
             this.animationHandler.animations.splice(this.animationHandler.animations.indexOf(projectile.animation), 1);
 
             this.projectiles.splice(this.projectiles.indexOf(projectile), 1);

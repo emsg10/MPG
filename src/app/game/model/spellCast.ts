@@ -1,9 +1,9 @@
-import { Animation, Vector } from './';
+import { Animation, Vector, SpellType } from './';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
 
 export class SpellCast {
-    
+
 	public maxValue: number;
 	public speed: number;
 	public defaultValue: number
@@ -17,22 +17,22 @@ export class SpellCast {
 
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
-    private value: number = this.defaultValue;
-	private spellAnimation: Animation = null; 
+	private value: number = this.defaultValue;
+	private spellAnimation: Animation = null;
 	private castSpell = false;
-    
-    constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler) {
-        this.animationHandler = animationHandler;
-		this.projectileHandler = projectileHandler;
-    }
 
-    update(channel: boolean, delta: number, inverse: boolean, position: Vector) {
-        if (channel) {
+	constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler) {
+		this.animationHandler = animationHandler;
+		this.projectileHandler = projectileHandler;
+	}
+
+	update(channel: boolean, delta: number, inverse: boolean, position: Vector, type: SpellType) {
+		if (channel) {
 			if (this.cancel) {
 				this.value = this.defaultValue;
 			}
 			if (this.channeling) {
-				this.createSpellAnimation(inverse, this.value, position);
+				this.createSpellAnimation(position, this.value, inverse, type);
 				if (this.value <= this.maxValue) {
 					this.value += (this.speed * delta);
 				} else {
@@ -47,7 +47,7 @@ export class SpellCast {
 				this.channeling = false;
 				if (this.cancel) {
 					this.removeSpellChanneling();
-					this.projectileHandler.createFireball(this.getCalculatedPos(position, this.value), this.defaultValue, inverse);
+					this.projectileHandler.createBolt(this.getCalculatedPos(position, this.value), this.defaultValue, inverse, type);
 					this.castAnimation.repetitions = 2;
 				} else {
 					this.removeSpellChanneling();
@@ -57,24 +57,20 @@ export class SpellCast {
 			}
 		}
 
-		if(this.castAnimation.repetitions > 0) {
+		if (this.castAnimation.repetitions > 0) {
 			this.casting = true;
 		} else {
 			this.casting = false;
 		}
 
-		this.updateCast(delta, position, inverse);
+		this.updateCast(delta, position, inverse, type);
 
 		this.cancel = false;
-    }
+	}
 
-    private createSpellAnimation(inverse: boolean, animationSize: number, position: Vector) {
+	private createSpellAnimation(position: Vector, animationSize: number, inverse: boolean, type: SpellType) {
 		if (!this.spellAnimation) {
-			if(inverse) {
-				this.spellAnimation = this.animationHandler.fireball_left(this.getCalculatedPos(position, animationSize), animationSize);
-			} else {
-				this.spellAnimation = this.animationHandler.fireball_right(this.getCalculatedPos(position, animationSize), animationSize);
-			}
+			this.spellAnimation = this.animationHandler.createSpellAnimation(this.getCalculatedPos(position, animationSize), animationSize, inverse, type);
 		} else {
 			let calcPos = this.getCalculatedPos(position, animationSize);
 			this.spellAnimation.areaToRender.width = animationSize;
@@ -84,7 +80,19 @@ export class SpellCast {
 		}
 	}
 
-    private getCalculatedPos(position: Vector, size: number) {
+	public switchAnimation(position: Vector, type: SpellType) {
+		if (this.spellAnimation != null) {
+			if (this.spellAnimation.inverse) {
+				this.removeSpellChanneling();
+				this.spellAnimation = this.animationHandler.createSpellAnimation(position, this.defaultValue, false, type);
+			} else {
+				this.removeSpellChanneling();
+				this.spellAnimation = this.animationHandler.createSpellAnimation(position, this.defaultValue, true, type);
+			}
+		}
+	}
+
+	private getCalculatedPos(position: Vector, size: number) {
 		return new Vector(this.calcPos(position.x, size, 22), this.calcPos(position.y, size, 30))
 	}
 
@@ -92,17 +100,17 @@ export class SpellCast {
 		return value - (size / 2 - offset);
 	}
 
-    private removeSpellChanneling() {
+	private removeSpellChanneling() {
 		this.animationHandler.remove(this.spellAnimation);
 		this.spellAnimation = null;
 	}
 
-	private updateCast(delta: number, position: Vector, inverse: boolean) {
-		if(this.castAnimation.repetitions > 0) {
+	private updateCast(delta: number, position: Vector, inverse: boolean, type: SpellType) {
+		if (this.castAnimation.repetitions > 0) {
 			this.castAnimation.next(delta);
-			if(this.castAnimation.repetitions == 1) {
-				if(this.castSpell) {
-					this.projectileHandler.createFireball(this.getCalculatedPos(position, this.value), this.value, inverse);
+			if (this.castAnimation.repetitions == 1) {
+				if (this.castSpell) {
+					this.projectileHandler.createBolt(this.getCalculatedPos(position, this.value), this.value, inverse, type);
 					this.castSpell = false;
 				}
 			}

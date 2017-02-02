@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Animation } from '../model';
+import { Vector, Rectangle, Animation, SpellType } from '../model';
 
 export class Projectile {
     public velocity: Vector;
@@ -6,12 +6,14 @@ export class Projectile {
     public collisionArea: Rectangle;
     public animation: Animation;
     public distance: number;
+    public type: SpellType;
 
-    constructor(velocity: Vector, area: Rectangle, animation: Animation, distance: number, collisionRatio: number) {
+    constructor(velocity: Vector, area: Rectangle, animation: Animation, distance: number, collisionRatio: number, type: SpellType) {
         this.velocity = velocity;
         this.area = area;
         this.animation = animation;
         this.distance = distance;
+        this.type = type;
         this.collisionArea = new Rectangle(this.area.x + (this.area.width/2) - ((this.area.width * collisionRatio)/2), this.area.y + (this.area.height/2) - ((this.area.height * collisionRatio)/2), this.area.width * collisionRatio, this.area.height * collisionRatio);
     }
 

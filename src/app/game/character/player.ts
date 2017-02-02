@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellCast } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellCast, SpellType } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../';
@@ -6,38 +6,25 @@ import { CollisionData } from '../collision';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
 import { Gravity } from '../forces/gravity';
+import { Character } from './character';
 
-export class Player {
+export class Player extends Character{
 
-	public position: Vector;
-	public velocity: Vector = new Vector(0, 0);
-	public toMove: Vector = new Vector(0, 0);
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
-	public dead: boolean = false;
-	private context: Context;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
-	private maxSpeed: number = 0.3;
 	private drag: number = 0.0015;
-	private acceleration: number = 0.009;
-	private gravityStrength: number = 0.0025;
-	private runningAnimation: Animation = new Animation();
 	private idleAnimation: Animation = new Animation();
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
-	private inverse: boolean = false;
-	private moving: boolean = false;
-	private spriteSizeX: number;
-	private spriteSizeY: number;
-	private gravity: Gravity = new Gravity(this.gravityStrength);
 	private jumping: boolean = false;
 	private renderHelper = RenderHelper.getInstance();
 	private spellCast: SpellCast;
+	private spellType: SpellType;
 
-	constructor(position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, spriteSizeX: number, spriteSizeY: number) {
-		this.context = context;
-		this.position = position;
+	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, width: number, height: number) {
+		super(position, context, width, height);
 		this.projectileHandler = projectileHandler;
 		this.animationHandler = animationHandler;
 		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
@@ -52,9 +39,6 @@ export class Player {
 		this.spellCast.castAnimation.textureNumber.push(208);
 		this.spellCast.castAnimation.repetitions = 0;
 		this.spellCast.castAnimation.timeToChange = 120;
-
-		this.spriteSizeX = spriteSizeX;
-		this.spriteSizeY = spriteSizeY;
 
 		this.idleAnimation.textureNumber.push(203);
 
@@ -73,14 +57,14 @@ export class Player {
 
 		if (this.inverse) {
 			x2 = x;
-			x1 = x + (this.spriteSizeX);
+			x1 = x + (this.width);
 		} else {
-			x2 = x + (this.spriteSizeX);
+			x2 = x + (this.width);
 			x1 = x;
 		}
 
 		let y1 = this.position.y;
-		let y2 = this.position.y + (this.spriteSizeY);
+		let y2 = this.position.y + (this.height);
 
 		call.context = this.context;
 
@@ -111,7 +95,7 @@ export class Player {
 
 	}
 
-	public update(collisionData: CollisionData, delta: number) {
+	public update(collisionData: CollisionData, delta: number, type: SpellType) {
 
 		let deltaDrag = delta * this.drag;
 
@@ -155,6 +139,7 @@ export class Player {
 			}
 		}
 
+		this.spellType = type;
 		this.fall(delta);
 		this.jumping = false;
 		this.moving = false;
@@ -165,41 +150,26 @@ export class Player {
 	public moveRight(delta: number) {
 		this.spellCast.cancel = true;
 
-		if (this.velocity.x < this.maxSpeed) {
-			this.velocity.x += this.acceleration * delta;
+		if(this.inverse) {
+			this.spellCast.switchAnimation(this.position, this.spellType);
 		}
 
-		if (this.velocity.x > this.maxSpeed) {
-			this.velocity.x = this.maxSpeed;
-		}
-
-		this.inverse = false;
-		this.moving = true;
+		super.moveRight(delta);
 	}
 
 	public moveLeft(delta: number) {
 		this.spellCast.cancel = true;
-
-		if (this.velocity.x > -this.maxSpeed) {
-			this.velocity.x -= this.acceleration * delta;
+		if(!this.inverse) {
+			this.spellCast.switchAnimation(this.position, this.spellType);
 		}
 
-		if (this.velocity.x < this.maxSpeed) {
-			this.velocity.x = -this.maxSpeed;
-		}
-
-		this.inverse = true;
-		this.moving = true;
+		super.moveLeft(delta);
 	}
 
 	public getCollisionArea() {
 		var collisionArea = new Rectangle(this.position.x, this.position.y, 45, 42);
 
 		return collisionArea;
-	}
-
-	public fall(delta: number) {
-		this.gravity.apply(this.velocity, delta);
 	}
 
 	public jump() {
@@ -210,8 +180,8 @@ export class Player {
 		}
 	}
 
-	public channel(channeling: boolean, delta: number) {
-		this.spellCast.update(channeling, delta, this.inverse, this.position);
+	public channel(channeling: boolean, delta: number, type: SpellType) {
+		this.spellCast.update(channeling, delta, this.inverse, this.position, type);
 	}
 
 }

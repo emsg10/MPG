@@ -1,10 +1,10 @@
-import { Vector, Sprite, Rectangle, Animation } from '../model'
+import { Vector, Sprite, Rectangle, Animation, SpellType } from '../model'
 import { TextureMapper } from '../render/textureMapper';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
-import { Player } from '../player/player';
+import { Player } from '../character/player';
 
 export class AnimationHandler {
 
@@ -70,34 +70,29 @@ export class AnimationHandler {
         return animation;
     }
 
-    public fireball_right(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(112);
-        animation.textureNumber.push(113);
-        animation.textureNumber.push(114);
-        animation.textureNumber.push(115);
-        animation.textureNumber.push(116);
-        animation.textureNumber.push(117);
-        animation.timeToChange = 50;
-        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
-
-        this.animations.push(animation);
-
-        return animation;
+    public createSpellAnimation(position: Vector, animationSize: number, inverse: boolean, type: SpellType) {
+        switch(type) {
+			case SpellType.fireball: return this.fireball(position, animationSize, inverse);
+			case SpellType.electricbolt: return this.electricbolt(position, animationSize, inverse);
+		}
     }
 
-    public fireball_left(position: Vector, size: number) {
+    public sizzle(position: Vector, size: number) {
         let animation = new Animation();
-        animation.textureNumber.push(112);
-        animation.textureNumber.push(113);
-        animation.textureNumber.push(114);
-        animation.textureNumber.push(115);
-        animation.textureNumber.push(116);
-        animation.textureNumber.push(117);
+        animation.textureNumber.push(137);
+        animation.textureNumber.push(138);
+        animation.textureNumber.push(139);
+        animation.textureNumber.push(140);
+        animation.textureNumber.push(141);
+        animation.textureNumber.push(142);
+        animation.textureNumber.push(143);
+        animation.textureNumber.push(144);
+        animation.textureNumber.push(145);
+        animation.textureNumber.push(146);
         animation.timeToChange = 50;
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
-        animation.inverse = true;
+        animation.repetitions = 10;
 
         this.animations.push(animation);
 
@@ -117,8 +112,6 @@ export class AnimationHandler {
         animation.textureNumber.push(126);
         animation.timeToChange = 50;
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
-
-        animation.inverse = true;
 
         animation.repetitions = 9;
 
@@ -147,7 +140,11 @@ export class AnimationHandler {
         }
 
         for(let completedAnimation of completedAnimations) {
-            this.animations.splice(this.animations.indexOf(completedAnimation), 1);
+            let index = this.animations.indexOf(completedAnimation);
+
+            if(index != -1) {
+                 this.animations.splice(index, 1);
+            }
         }
     }
 
@@ -178,7 +175,49 @@ export class AnimationHandler {
 
     public remove(animation: Animation) {
         let index = this.animations.indexOf(animation);
-        this.animations.splice(index, 1);
+        if(index != -1) {
+            this.animations.splice(index, 1);
+        }
+    }
+
+    private fireball(position: Vector, size: number, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(112);
+        animation.textureNumber.push(113);
+        animation.textureNumber.push(114);
+        animation.textureNumber.push(115);
+        animation.textureNumber.push(116);
+        animation.textureNumber.push(117);
+        animation.timeToChange = 50;
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    private electricbolt(position: Vector, size: number, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(127);
+        animation.textureNumber.push(128);
+        animation.textureNumber.push(129);
+        animation.textureNumber.push(130);
+        animation.textureNumber.push(131);
+        animation.textureNumber.push(132);
+        animation.textureNumber.push(133);
+        animation.textureNumber.push(134);
+        animation.textureNumber.push(135);
+        animation.textureNumber.push(136);
+        animation.timeToChange = 50;
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
     }
 
 }

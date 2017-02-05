@@ -1,6 +1,7 @@
 import { Vector, Tile, Rectangle, Projectile } from '../model';
 import { CollisionData } from './';
-import { Player } from '../character/player';
+import { Character } from '../character/character';
+import { Enemy } from '../character/enemy';
 
 export class CollisionDetection {
 
@@ -24,23 +25,23 @@ export class CollisionDetection {
 		}
 	}
 
-	public collisionDetection(tiles: Tile[], player: Player) {
+	public collisionDetection(tiles: Tile[], character: Character) {
 
-		let collisionData = this.checkCollision(tiles, player, player.toMove);
+		let collisionData = this.checkCollision(tiles, character, character.toMove);
 
 		if(collisionData.wallCollision) {
-			let position = new Vector(player.position.x, player.position.y);
+			let position = new Vector(character.position.x, character.position.y);
 			collisionData.wallCollision = false;
-			collisionData = this.checkCollision(tiles, player, new Vector((player.toMove.x * (1 - collisionData.collisionTimeX)) ,-5));
+			collisionData = this.checkCollision(tiles, character, new Vector((character.toMove.x * (1 - collisionData.collisionTimeX)) ,-5));
 			if(collisionData.wallCollision) {
-				player.position = position;
+				character.position = position;
 			}
 		}
 
 		return collisionData;
 	}
 
-	public checkProjectileCollision(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
+	public checkProjectileCollisionX(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
 
 		let broadphasebox = this.getSweptBroadphaseBoxX(projectile.collisionArea, frameVelocity);
 
@@ -52,55 +53,63 @@ export class CollisionDetection {
 			}
 		}
 
-		projectile.area.x += frameVelocity.x * collisionData.collisionTimeX;
+		return collisionData;
+	}
+
+	public checkProjectileCollisionY(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
+		let broadphasebox = this.getSweptBroadphaseBoxY(projectile.collisionArea, frameVelocity);
+
+		let collisionData: CollisionData = new CollisionData();
+
+		for(let collidable of collidables) {
+			if(this.aabbCheck(broadphasebox, collidable)) {
+				collisionData = this.aabbCollisionY(projectile.collisionArea, collidable, frameVelocity, collisionData);
+			}
+		}
 
 		return collisionData;
 	}
 
-	public checkCollision(tiles: Tile[], player: Player, frameVelocity: Vector) {
+	public checkCollision(tiles: Tile[], character: Character, frameVelocity: Vector) {
 
 		let tilesToCheck = tiles;
 		let collisionData: CollisionData = new CollisionData();
-		let rect1 = player.getCollisionArea();
+		let rect1 = character.getCollisionArea();
 		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, frameVelocity);
 		for(let tile of tilesToCheck) {
 			if(this.aabbCheck(broadphasebox, tile)) {
-				collisionData = this.aabbCollisionY(player.getCollisionArea(), tile, frameVelocity, collisionData);
+				collisionData = this.aabbCollisionY(character.getCollisionArea(), tile, frameVelocity, collisionData, tile.tileTextureType);
 			}
 		}
 
-		player.position.y += frameVelocity.y * collisionData.collisionTimeY;
+		character.position.y += frameVelocity.y * collisionData.collisionTimeY;
 
-		rect1 = player.getCollisionArea();
+		rect1 = character.getCollisionArea();
 		broadphasebox = this.getSweptBroadphaseBoxX(rect1, frameVelocity);
 
 		for(let tile of tilesToCheck) {
 			if(tile.tileTextureType != 0) {
 				if(this.aabbCheck(broadphasebox, tile)) {
-					collisionData = this.aabbCollisionX(player.getCollisionArea(), tile, frameVelocity, collisionData);
+					collisionData = this.aabbCollisionX(character.getCollisionArea(), tile, frameVelocity, collisionData);
 				}
 			}
 		}
 
-		player.position.x += frameVelocity.x * collisionData.collisionTimeX;
+		character.position.x += frameVelocity.x * collisionData.collisionTimeX;
 		
 		collisionData.remainingTime = 1 - collisionData.collisionTimeY;
 
 		return collisionData;
 	}
 
-	public checkCoutOfBounds(player: Player, area: Rectangle) {
-		if(!this.aabbCheck(player.getCollisionArea(), area)) {
-			player.dead = true;
+	public checkCoutOfBounds(character: Character, area: Rectangle) {
+		if(!this.aabbCheck(character.getCollisionArea(), area)) {
+			character.dead = true;
 		}
 	}
 
 	public aabbCheck(rect1: Rectangle, rect2: Rectangle) {
 		return (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.height + rect1.y > rect2.y)
-	}
-
-	private checkStep(tiles: Tile[], player: Player, collisionData: CollisionData) {
-
 	}
 
 	private getSweptBroadphaseBoxX(rect: Rectangle, velocity: Vector)
@@ -123,7 +132,7 @@ export class CollisionDetection {
     	return new Rectangle(x, y, width, height);
 	}
 
-	private aabbCollisionY(rect1: Rectangle, rect2: Tile, velocity: Vector, collisionData: CollisionData) {
+	private aabbCollisionY(rect1: Rectangle, rect2: Rectangle, velocity: Vector, collisionData: CollisionData, tileTextureType?: number) {
 		let yInvEntry: number;
 		let yInvExit: number;
 
@@ -163,7 +172,7 @@ export class CollisionDetection {
             		collisionData.collisionTimeY = entryTime;	
             	}
 
-				if(rect2.tileTextureType == 25 && velocity.y > 5) {
+				if(tileTextureType == 25 && velocity.y > 5) {
 					collisionData.fallDeath = true;
 				}
             	

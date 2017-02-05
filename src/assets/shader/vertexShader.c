@@ -2,12 +2,16 @@ attribute vec2 a_position;
 attribute vec2 a_texture_coord;
 
 uniform vec2 u_resolution;
+uniform vec2 u_rotation;
 
 varying highp vec2 v_texture_coord;
 
 void main() {
 
-  vec2 zeroToOne = a_position / u_resolution;
+  vec2 rotatedPosition = vec2(
+     a_position.x * u_rotation.y + a_position.y * u_rotation.x,
+     a_position.y * u_rotation.y - a_position.x * u_rotation.x);
+  vec2 zeroToOne = rotatedPosition / u_resolution;
   vec2 zeroToTwo = zeroToOne * 2.0;
   vec2 clipSpace = zeroToTwo - 1.0;
 

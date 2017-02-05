@@ -24,6 +24,9 @@ export class Render {
 
 			var positionLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
 			this.gl.enableVertexAttribArray(positionLocation);
+			var rotationLocation = this.gl.getUniformLocation(this.shaderProgram, "u_rotation");
+			var rotation = [0, 1];
+
 			var resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
 			var colorLocation = this.gl.getUniformLocation(this.shaderProgram, "u_color");
 			var textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
@@ -31,7 +34,7 @@ export class Render {
 			this.gl.uniform1i(this.gl.getUniformLocation(this.shaderProgram, "u_sampler"), 0);
 
 			this.setBuffers(renderCall);
-
+			this.gl.uniform2fv(rotationLocation, rotation);
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 			this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
 			this.gl.uniform2f(resolutionLocation, renderCall.context.gl.canvas.width, renderCall.context.gl.canvas.height);

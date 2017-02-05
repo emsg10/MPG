@@ -6,6 +6,10 @@ import { RenderCall } from '../render/renderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { Preview } from './preview';
 import { LoadHelper } from '../service/loadHelper';
+import { RenderHelper } from '../render/renderHelper';
+import { TextureMapper } from '../render/textureMapper';
+import { Enemy } from '../character/enemy';
+import { Swordman } from '../character/swordman';
 
 @Component({
 	selector: 'editor',
@@ -20,11 +24,18 @@ export class Editor {
 	@ViewChild('importElement') importElement: ElementRef;
 
 	@Output() newLevelLoaded = new EventEmitter<boolean>();
+	@Output() levelChanged = new EventEmitter<boolean>();
 
 	public doneLoading: boolean = false;
 	public currentTile: Tile = new Tile(0, 0, 25, 25, 1);
+	public currentTileType: number = 1;
+	public currentTileWidth: number = 25;
+	public currentTileHeight: number = 25;
+	public currentEnemy: Enemy;
 	public level: Level;
 
+	private renderHelper = RenderHelper.getInstance();
+	private textureMapper = TextureMapper.getInstance();
 	private canvas: HTMLCanvasElement;
 	private editorContext: Context;
 	private collisionDetection: CollisionDetection = CollisionDetection.getInstance();
@@ -43,8 +54,48 @@ export class Editor {
 		this.initMouseEventListener(this.canvas);
 		this.initImportChangeListener();
 
-		this.editorContext = new Context(asset, 256, 256, this.editorCanvas.nativeElement);
+		this.editorContext = new Context(asset, 256, 512, this.editorCanvas.nativeElement);
 		this.initEditorEventListener(this.editorCanvas.nativeElement);
+	}
+
+	public currentEnemyRenderCall(context: Context) {
+		let renderCall = new RenderCall();
+
+		var vertecies: number[] = [];
+		var textureCoords: number[] = [];
+		var indecies: number[] = [];
+
+		if (this.currentEnemy != null) {
+			vertecies = this.renderHelper.getVertecies(this.currentEnemy.position.x, this.currentEnemy.position.y, this.currentEnemy.width, this.currentEnemy.height, vertecies);
+			textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, this.currentEnemy.runningAnimation.getCurrentFrame());
+			indecies = this.renderHelper.getIndecies(indecies);
+		}
+
+		renderCall.vertecies = vertecies;
+		renderCall.textureCoords = textureCoords;
+		renderCall.indecies = indecies;
+		renderCall.context = context;
+
+		return renderCall;
+	}
+
+	public createEnemyRenderCall() {
+		let renderCall = new RenderCall();
+
+		var vertecies: number[] = [];
+		var textureCoords: number[] = [];
+		var indecies: number[] = [];
+
+		vertecies = this.renderHelper.getVertecies(0, 256, 56, 58, vertecies);
+		textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, 211);
+		indecies = this.renderHelper.getIndecies(indecies);
+
+		renderCall.vertecies = vertecies;
+		renderCall.textureCoords = textureCoords;
+		renderCall.indecies = indecies;
+		renderCall.context = this.editorContext;
+
+		return renderCall;
 	}
 
 	public createRenderCall() {
@@ -53,11 +104,11 @@ export class Editor {
 
 		var textureCoordinates = [
 			0.0, 0.0,
-			0.25, 0.25,
-			0.25, 0.0,
+			0.125, 0.125,
+			0.125, 0.0,
 			0.0, 0.0,
-			0.25, 0.25,
-			0.0, 0.25
+			0.125, 0.125,
+			0.0, 0.125
 		];
 
 		var vertecies = [
@@ -83,18 +134,20 @@ export class Editor {
 
 	public playerXValueChanged(value: number) {
 		this.level.playerPosition.x = +value;
+		this.levelChanged.emit(true);
 	}
 
 	public playerYValueChanged(value: number) {
 		this.level.playerPosition.y = +value;
+		this.levelChanged.emit(true);
 	}
 
 	public xValueChanged(value: number) {
-		this.currentTile.width = value;
+		this.currentTileWidth = value;
 	}
 
 	public yValueChanged(value: number) {
-		this.currentTile.height = value;
+		this.currentTileHeight = value;
 	}
 
 	public export() {
@@ -136,9 +189,7 @@ export class Editor {
 		try {
 			let level = JSON.parse(data);
 			if (this.loadHelper.checkLevelType(level)) {
-				this.level = new Level();
-				this.level.playerPosition = level.playerPosition;
-				this.level.tiles = level.tiles;
+				this.level = this.loadHelper.loadJsonLevel(level);
 				this.newLevelLoaded.emit(true);
 			}
 		} catch (error) {
@@ -154,9 +205,33 @@ export class Editor {
 		canvas.addEventListener('click', (event: MouseEvent) => {
 			var mousePos = this.getMousePos(canvas, event);
 
-			this.setSelectedTileType(mousePos.x, mousePos.y);
+			if (mousePos.y > 256) {
+				this.setEnemyType(mousePos.x, mousePos.y);
+				this.currentTile = null;
+			} else {
+				this.setSelectedTileType(mousePos.x, mousePos.y);
+				this.currentTile = this.getAccurateTile(mousePos.x, mousePos.y);
+				this.currentEnemy = null;
+			}
+
 
 		}, false);
+	}
+
+	private setEnemyType(x: number, y: number) {
+		if (x > 0 && x < 56 && y > 256 && y < 256 + 59) {
+			this.currentEnemy = new Swordman(new Vector(0, 0), 56, 59);
+		}
+	}
+
+	private setCurrentEnemy(x: number, y: number) {
+		this.currentEnemy.position.x = x;
+		this.currentEnemy.position.y = y;
+	}
+
+	private addEnemy() {
+		this.level.enemies.push(new Swordman(new Vector(this.currentEnemy.position.x, this.currentEnemy.position.y), this.currentEnemy.width, this.currentEnemy.height));
+		this.levelChanged.emit(true);
 	}
 
 	private setSelectedTileType(x: number, y: number) {
@@ -166,7 +241,7 @@ export class Editor {
 		var xpos = Math.floor(x / part);
 		var ypos = Math.floor(y / part);
 
-		this.currentTile.tileTextureType = (xpos + (ypos * 5) + 1);
+		this.currentTileType = (xpos + (ypos * 5) + 1);
 	}
 
 	private editTile(x: number, y: number) {
@@ -191,7 +266,7 @@ export class Editor {
 		x = x - modX;
 		y = y - modY;
 
-		let newTile = new Tile(x, y, this.currentTile.width, this.currentTile.height, this.currentTile.tileTextureType);
+		let newTile = new Tile(x, y, this.currentTileWidth, this.currentTileHeight, this.currentTileType);
 
 		return newTile;
 	}
@@ -212,15 +287,25 @@ export class Editor {
 
 		canvas.addEventListener('click', (event: MouseEvent) => {
 			var mousePos = this.getMousePos(canvas, event);
-			this.editTile(mousePos.x, mousePos.y);
+			if(this.currentTile) {
+				this.editTile(mousePos.x, mousePos.y);
+			} else {
+				this.addEnemy();
+			}
+			
 		}, false);
 		canvas.addEventListener('mousemove', (event: MouseEvent) => {
 			let mousePos = this.getMousePos(canvas, event);
-			if (this.mouseDown) {
-				this.editTile(mousePos.x, mousePos.y);
+			if (this.currentTile != null) {
+				if (this.mouseDown) {
+					this.editTile(mousePos.x, mousePos.y);
+				} else {
+					this.setCurrentTile(mousePos.x, mousePos.y);
+				}
 			} else {
-				this.setCurrentTile(mousePos.x, mousePos.y);
+				this.setCurrentEnemy(mousePos.x, mousePos.y);
 			}
+
 		}, false);
 	}
 

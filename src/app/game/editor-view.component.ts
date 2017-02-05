@@ -1,17 +1,19 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { AssetsLoader } from './service/assetsLoader';
 import { Observable } from 'rxjs';
 import { Asset, Level, Vector } from './model';
 import { Game } from './game';
 import { Editor } from './editor/editor';
 import { LoadHelper } from './service/loadHelper';
+import { Swordman } from './character/swordman';
+import { Enemy } from './character/enemy';
 
 @Component({
-  selector: 'editor-view',
-  templateUrl: './editor-view.component.html'
+    selector: 'editor-view',
+    templateUrl: './editor-view.component.html'
 })
 
-export class EditorViewComponent implements AfterViewInit{
+export class EditorViewComponent implements AfterViewInit {
     @ViewChild('gameCanvas') gameCanvas: ElementRef;
     @ViewChild('editor') editor: Editor;
     private loadHelper = LoadHelper.getInstance();
@@ -23,9 +25,9 @@ export class EditorViewComponent implements AfterViewInit{
 
     ngAfterViewInit() {
         Observable.forkJoin(
-			this.assetsLoader.getVertexShader(),
-	    	this.assetsLoader.getFragmentShader(),
-	    	this.assetsLoader.getTexture(),
+            this.assetsLoader.getVertexShader(),
+            this.assetsLoader.getFragmentShader(),
+            this.assetsLoader.getTexture(),
             this.assetsLoader.getLevel("1")
         ).subscribe(data => {
             this.asset.vertexShader = data[0] as string;
@@ -33,13 +35,8 @@ export class EditorViewComponent implements AfterViewInit{
             this.asset.texture = data[2] as HTMLImageElement;
 
             this.editor.init(this.asset, this.gameCanvas.nativeElement);
+            this.editor.level = this.loadHelper.loadJsonLevel(data[3]);
 
-            let level = new Level();
-            level.playerPosition = data[3].playerPosition;
-            level.tiles = data[3].tiles;
-
-            this.editor.level = level;
-            
             this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.level, this.editor);
         });
     }

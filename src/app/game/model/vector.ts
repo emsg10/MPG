@@ -18,4 +18,19 @@ export class Vector {
 	public copy(vector: Vector) {
 		return new Vector(vector.x, vector.y);
 	}
+
+	public normalize() {
+		let mag = this.magnitude();
+		this.x = this.x/mag;
+		this.y = this.y/mag;
+	}
+
+	public magnitude() {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+
+	public multiply(factor: number) {
+		this.x = this.x * factor;
+		this.y = this.y * factor;
+	}
 }

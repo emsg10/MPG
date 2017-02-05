@@ -17,7 +17,7 @@ export class AnimationHandler {
         this.context = context;
     }
 
-    public bloodAnimation_A(position: Vector) {
+    public bloodAnimation_A(position: Vector, size: number) {
         let animation = new Animation();
         animation.textureNumber.push(100);
         animation.textureNumber.push(101);
@@ -25,7 +25,7 @@ export class AnimationHandler {
         animation.textureNumber.push(103);
         animation.textureNumber.push(104);
         animation.textureNumber.push(105);
-        animation.areaToRender = new Rectangle(position.x, position.y, 50, 50);
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.repetitions = 6;
 
@@ -34,7 +34,7 @@ export class AnimationHandler {
         return animation;
     }
 
-    public bloodAnimation_B_Right(position: Vector) {
+    public bloodAnimation_B_Right(position: Vector, size: number) {
         let animation = new Animation();
         animation.textureNumber.push(106);
         animation.textureNumber.push(107);
@@ -42,7 +42,7 @@ export class AnimationHandler {
         animation.textureNumber.push(109);
         animation.textureNumber.push(110);
         animation.textureNumber.push(111);
-        animation.areaToRender = new Rectangle(position.x, position.y, 100, 100);
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.repetitions = 6;
 
@@ -51,7 +51,7 @@ export class AnimationHandler {
         return animation;
     }
 
-    public bloodAnimation_B_Left(position: Vector) {
+    public bloodAnimation_B_Left(position: Vector, size: number) {
         let animation = new Animation();
         animation.textureNumber.push(106);
         animation.textureNumber.push(107);
@@ -59,7 +59,7 @@ export class AnimationHandler {
         animation.textureNumber.push(109);
         animation.textureNumber.push(110);
         animation.textureNumber.push(111);
-        animation.areaToRender = new Rectangle(position.x, position.y, 100, 100);
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.inverse = true;
 
@@ -70,11 +70,86 @@ export class AnimationHandler {
         return animation;
     }
 
+    public bloodAnimation_C(position: Vector, size: number) {
+        let animation = new Animation();
+        animation.textureNumber.push(147);
+        animation.textureNumber.push(148);
+        animation.textureNumber.push(149);
+        animation.textureNumber.push(150);
+        animation.textureNumber.push(151);
+        animation.textureNumber.push(152);
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
+
+        animation.repetitions = 6;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public swordman_death(position: Vector, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(214);
+        animation.textureNumber.push(216);
+        animation.textureNumber.push(217);
+        animation.textureNumber.push(218);
+
+        animation.timeToChange = 120;
+
+        animation.repetitions = 4;
+
+        animation.areaToRender = new Rectangle(position.x, position.y, 56, 59);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public swordman_corpse(position: Vector, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(219);
+
+        animation.timeToChange = 120;
+
+        animation.delay = 4;
+
+        animation.areaToRender = new Rectangle(position.x, position.y, 56, 59);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public swordman_head(position: Vector, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(215);
+        animation.textureNumber.push(220);
+        animation.textureNumber.push(221);
+        animation.textureNumber.push(222);
+        animation.textureNumber.push(223);
+        animation.textureNumber.push(224);
+        animation.textureNumber.push(225);
+        animation.textureNumber.push(226);
+
+        animation.timeToChange = 75;
+        animation.areaToRender = new Rectangle(position.x, position.y, 56, 59);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
     public createSpellAnimation(position: Vector, animationSize: number, inverse: boolean, type: SpellType) {
-        switch(type) {
-			case SpellType.fireball: return this.fireball(position, animationSize, inverse);
-			case SpellType.electricbolt: return this.electricbolt(position, animationSize, inverse);
-		}
+        switch (type) {
+            case SpellType.fireball: return this.fireball(position, animationSize, inverse);
+            case SpellType.electricbolt: return this.electricbolt(position, animationSize, inverse);
+        }
     }
 
     public sizzle(position: Vector, size: number) {
@@ -121,29 +196,29 @@ export class AnimationHandler {
     }
 
     public checkForAnimation(collisionData: CollisionData, player: Player) {
-        if(collisionData.fallDeath) {
-            this.bloodAnimation_A(new Vector(player.position.x, player.position.y));
-            this.bloodAnimation_B_Right(new Vector(player.position.x + 5, player.position.y - 15));
-            this.bloodAnimation_B_Left(new Vector(player.position.x - 55, player.position.y - 15));
+        if (collisionData.fallDeath) {
+            this.bloodAnimation_A(new Vector(player.position.x, player.position.y), 50);
+            this.bloodAnimation_B_Right(new Vector(player.position.x + 5, player.position.y - 15), 100);
+            this.bloodAnimation_B_Left(new Vector(player.position.x - 55, player.position.y - 15), 100);
         }
     }
 
     public update(delta: number) {
 
-        let completedAnimations: Animation[] = [];        
+        let completedAnimations: Animation[] = [];
 
-        for(let animation of this.animations) {
+        for (let animation of this.animations) {
             animation.next(delta);
-            if(animation.repetitions <= 0) {
+            if (animation.repetitions <= 0) {
                 completedAnimations.push(animation);
             }
         }
 
-        for(let completedAnimation of completedAnimations) {
+        for (let completedAnimation of completedAnimations) {
             let index = this.animations.indexOf(completedAnimation);
 
-            if(index != -1) {
-                 this.animations.splice(index, 1);
+            if (index != -1) {
+                this.animations.splice(index, 1);
             }
         }
     }
@@ -151,33 +226,51 @@ export class AnimationHandler {
     public createRenderCall() {
         let renderCall = new RenderCall();
 
-		var vertecies: number[] = [];
-		var textureCoords: number[] = [];
-		var indecies: number[] = [];
+        var vertecies: number[] = [];
+        var textureCoords: number[] = [];
+        var indecies: number[] = [];
 
-		for(let animation of this.animations) {
-            if(animation.inverse) {
-                vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x , animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, vertecies);
-            } else {
-                vertecies = this.renderHelper.getVertecies(animation.areaToRender.x , animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, vertecies);
+        for (let animation of this.animations) {
+            if (animation.delay <= 0) {
+                if (animation.inverse) {
+                    vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, vertecies);
+                } else {
+                    vertecies = this.renderHelper.getVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, vertecies);
+                }
+                textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, animation.getCurrentFrame());
+                indecies = this.renderHelper.getIndecies(indecies);
             }
-            textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, animation.getCurrentFrame());
-			indecies = this.renderHelper.getIndecies(indecies);
-		}
+        }
 
-		renderCall.vertecies = vertecies;
-		renderCall.textureCoords = textureCoords;
-		renderCall.indecies = indecies;
-		renderCall.context = this.context;
+        renderCall.vertecies = vertecies;
+        renderCall.textureCoords = textureCoords;
+        renderCall.indecies = indecies;
+        renderCall.context = this.context;
 
-		return renderCall;
+        return renderCall;
     }
 
     public remove(animation: Animation) {
         let index = this.animations.indexOf(animation);
-        if(index != -1) {
+        if (index != -1) {
             this.animations.splice(index, 1);
         }
+    }
+
+    public enemy(position: Vector, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(209);
+        animation.textureNumber.push(211);
+        animation.textureNumber.push(210);
+
+        animation.timeToChange = 120;
+        animation.areaToRender = new Rectangle(position.x, position.y, 56, 58);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
     }
 
     private fireball(position: Vector, size: number, inverse: boolean) {
@@ -219,5 +312,7 @@ export class AnimationHandler {
 
         return animation;
     }
+
+
 
 }

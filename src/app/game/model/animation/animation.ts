@@ -1,4 +1,4 @@
-import { Rectangle } from '../model'
+import { Rectangle } from '../'
 
 export class Animation {
 
@@ -7,8 +7,10 @@ export class Animation {
 	public areaToRender: Rectangle;
 	public repetitions: number;
 	public inverse = false;
+	public delay = 0;
+	public frameIndex: number = 0;
 	private lastChange: number = 0;
-	private frameIndex: number = 0;
+	
 
 	constructor() {
 	}
@@ -19,6 +21,9 @@ export class Animation {
 
 		if(this.lastChange >= this.timeToChange) {
 			this.lastChange = 0;
+			if(this.delay > 0) {
+				this.delay--;
+			}
 			this.frameIndex++;
 			if(this.repetitions) {
 				this.repetitions--;

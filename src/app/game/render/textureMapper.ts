@@ -18,6 +18,7 @@ export class TextureMapper {
 
 	public mapTexture(textureType: number) {
 		switch(textureType) {
+			case 0: return new Rectangle(0, 0, 0, 0);
 			case 1: return new Rectangle(0, 0, 51.2, 51.2);
 			case 2: return new Rectangle(51.2, 0, 51.2, 51.2);
 			case 3: return new Rectangle(102.4, 0, 51.2, 51.2);
@@ -72,7 +73,6 @@ export class TextureMapper {
 			case 124: return new Rectangle(0, 768, 128, 128);
 			case 125: return new Rectangle(128, 768, 128, 128);
 			case 126: return new Rectangle(256, 768, 128, 128);
-
 			case 127: return new Rectangle(384, 512, 128, 128);
 			case 128: return new Rectangle(512, 512, 128, 128);
 			case 129: return new Rectangle(640, 512, 128, 128);
@@ -83,7 +83,6 @@ export class TextureMapper {
 			case 134: return new Rectangle(640, 640, 128, 128);
 			case 135: return new Rectangle(768, 640, 128, 128);
 			case 136: return new Rectangle(896, 640, 128, 128);
-
 			case 137: return new Rectangle(384, 768, 128, 128);
 			case 138: return new Rectangle(512, 768, 128, 128);
 			case 139: return new Rectangle(640, 768, 128, 128);
@@ -95,6 +94,13 @@ export class TextureMapper {
 			case 145: return new Rectangle(768, 896, 128, 128);
 			case 146: return new Rectangle(896, 896, 128, 128);
 
+			case 147: return new Rectangle(0, 896, 128, 128);
+			case 148: return new Rectangle(128, 896, 128, 128);
+			case 149: return new Rectangle(256, 896, 128, 128);
+			case 150: return new Rectangle(0, 1024, 128, 128);
+			case 151: return new Rectangle(128, 1024, 128, 128);
+			case 152: return new Rectangle(256, 1024, 128, 128);
+
 			case 200: return new Rectangle(28, 293, 28, 26);
 			case 201: return new Rectangle(56, 293, 28, 26);
 			case 202: return new Rectangle(84, 293, 28, 26);
@@ -104,6 +110,29 @@ export class TextureMapper {
 			case 206: return new Rectangle(168, 290, 28, 29);
 			case 207: return new Rectangle(196, 290, 28, 29);
 			case 208: return new Rectangle(224, 290, 28, 29);
+
+			case 209: return new Rectangle(0, 480, 28, 29);
+			case 210: return new Rectangle(28, 480, 28, 29);
+			case 211: return new Rectangle(56, 480, 28, 29);
+			case 212: return new Rectangle(84, 480, 28, 29);
+			case 213: return new Rectangle(112, 480, 28, 29);
+
+			case 214: return new Rectangle(0, 448, 28, 29);
+			case 215: return new Rectangle(28, 448, 28, 29);
+			case 216: return new Rectangle(56, 448, 28, 29);
+			case 217: return new Rectangle(84, 448, 28, 29);
+			case 218: return new Rectangle(112, 448, 28, 29);
+			case 219: return new Rectangle(140, 448, 28, 29);
+
+			case 220: return new Rectangle(0, 416, 28, 29);
+			case 221: return new Rectangle(28, 416, 28, 29);
+			case 222: return new Rectangle(56, 416, 28, 29);
+			case 223: return new Rectangle(84, 416, 28, 29);
+
+			case 224: return new Rectangle(0, 384, 28, 29);
+			case 225: return new Rectangle(28, 384, 28, 29);
+			case 226: return new Rectangle(56, 384, 28, 29);
+
 		}
 	}
 

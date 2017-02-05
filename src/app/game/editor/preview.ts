@@ -39,9 +39,11 @@ export class Preview {
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
 
-		vertecies = this.renderHelper.getVertecies((75 - (this.currentTile.width / 2)), 75 - (this.currentTile.height / 2), this.currentTile.width, this.currentTile.height, vertecies);
-		textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, this.currentTile.tileTextureType);
-		indecies = this.renderHelper.getIndecies(indecies);
+		if(this.currentTile) {
+			vertecies = this.renderHelper.getVertecies((75 - (this.currentTile.width / 2)), 75 - (this.currentTile.height / 2), this.currentTile.width, this.currentTile.height, vertecies);
+			textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, this.currentTile.tileTextureType);
+			indecies = this.renderHelper.getIndecies(indecies);
+		}
 
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;

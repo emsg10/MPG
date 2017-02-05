@@ -4,7 +4,7 @@ export class RenderHelper {
 
   private static instance: RenderHelper = new RenderHelper();
   private textureMapper = TextureMapper.getInstance();
-  private static textureSize = 1024;
+  private static textureSize = 2048;
 
   constrcuctor() {
 		if(RenderHelper.instance) {

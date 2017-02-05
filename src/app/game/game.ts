@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { Editor } from './editor/editor';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
+import { EnemyHandler } from './handler/enemyHandler';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -37,6 +38,7 @@ export class Game {
 	private editor: Editor;
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
+	private enemyHandler: EnemyHandler;
 
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: Level, editor?: Editor) {
@@ -49,20 +51,21 @@ export class Game {
 		this.context = new Context(asset, 1200, 800, canvas);
 
 		this.animationHandler = new AnimationHandler(this.context);
-		this.projectileHandler = new ProjectileHandler(this.animationHandler);
-
-
+		this.enemyHandler = new EnemyHandler(this.context);
+		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.enemyHandler);
 
 		this.tileMap = new TileMap(this.context);
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, 45, 45);
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
 		this.initLoop();
+		this.reset(this.level);
 	}
 
 	public reset(level: Level) {
 		this.level = level.copy();
 		this.player = new Player(this.level.playerPosition, this.context, this.projectileHandler, this.animationHandler, 45, 45);
+		this.enemyHandler.enemies = this.level.enemies;
 		this.started = false;
 	}
 
@@ -93,6 +96,7 @@ export class Game {
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
 						this.checkKeys(delta);
 						this.player.update(collisionData, delta, this.spellType);
+						this.enemyHandler.update(delta, this.level.tiles);
 						this.animationHandler.update(delta);
 						this.animationHandler.checkForAnimation(collisionData, this.player);
 						this.projectileHandler.update(delta, this.level.tiles);
@@ -111,8 +115,12 @@ export class Game {
 
 				//EDITOR
 				if (!this.started) {
-					this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
+					if(this.editor.currentTile != null) {
+						this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
+					}
+					this.renderCalls.push(this.editor.currentEnemyRenderCall(this.context));
 					this.renderCalls.push(this.editor.preview.createRenderCall());
+					this.renderCalls.push(this.editor.createEnemyRenderCall());
 				}
 
 				//Game
@@ -123,6 +131,7 @@ export class Game {
 					this.renderCalls.push(this.player.createRenderCall());
 				}
 
+				this.renderCalls.push(this.enemyHandler.createRenderCall());
 				this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
 				this.renderCalls.push(this.animationHandler.createRenderCall());
 				this.render.render(this.renderCalls);

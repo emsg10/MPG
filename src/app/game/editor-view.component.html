@@ -3,7 +3,7 @@
 	 <canvas class="noPointer" #gameCanvas></canvas>
 </div>
  <div style="float: left; margin-left: 10px; padding-top: 0px;">
-	 <editor (newLevelLoaded)="levelLoaded()" #editor></editor>
+	 <editor (levelChanged)="levelLoaded()" (newLevelLoaded)="levelLoaded()" #editor></editor>
 </div>
 </div>
 

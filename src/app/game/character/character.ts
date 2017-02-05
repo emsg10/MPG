@@ -1,26 +1,23 @@
-import { Vector, Animation } from '../model';
-import { Context } from '../context';
+import { Vector, Animation, Rectangle } from '../model';
 import { Gravity } from '../forces/gravity';
 
-export class Character {
+export abstract class Character {
     public position: Vector;
 	public velocity: Vector = new Vector(0, 0);
 	public toMove: Vector = new Vector(0, 0);
     public dead: boolean = false;
-    protected runningAnimation: Animation = new Animation();
-    protected context: Context;
-    protected width: number;
-	protected height: number;
+	public inverse: boolean = false;
+	public width: number;
+	public height: number;
+    public runningAnimation: Animation = new Animation();
     protected maxSpeed: number = 0.3;
     protected acceleration: number = 0.009;
-    protected inverse: boolean = false;
 	protected moving: boolean = false;
     protected gravityStrength: number = 0.0025;
     protected gravity: Gravity = new Gravity(this.gravityStrength);
 
-    constructor(position: Vector, context: Context, width: number, height: number) {
+    constructor(position: Vector, width: number, height: number) {
         this.position = position;
-        this.context = context;
         this.width = width;
         this.height = height;
     }
@@ -54,5 +51,11 @@ export class Character {
 
     public fall(delta: number) {
 		this.gravity.apply(this.velocity, delta);
+	}
+
+	public getCollisionArea() {
+		var collisionArea = new Rectangle(this.position.x, this.position.y, this.width, this.height);
+
+		return collisionArea;
 	}
 }

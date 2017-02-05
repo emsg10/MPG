@@ -5,7 +5,7 @@ import { Context } from '../';
 import { CollisionData } from '../collision';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
-import { Gravity } from '../forces/gravity';
+import { Drag } from '../forces/drag';
 import { Character } from './character';
 
 export class Player extends Character{
@@ -15,6 +15,7 @@ export class Player extends Character{
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private drag: number = 0.0015;
+	private dragForce: Drag = new Drag(this.drag);
 	private idleAnimation: Animation = new Animation();
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
@@ -22,9 +23,11 @@ export class Player extends Character{
 	private renderHelper = RenderHelper.getInstance();
 	private spellCast: SpellCast;
 	private spellType: SpellType;
+	private context: Context;
 
 	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, width: number, height: number) {
-		super(position, context, width, height);
+		super(position, width, height);
+		this.context = context;
 		this.projectileHandler = projectileHandler;
 		this.animationHandler = animationHandler;
 		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
@@ -97,8 +100,6 @@ export class Player extends Character{
 
 	public update(collisionData: CollisionData, delta: number, type: SpellType) {
 
-		let deltaDrag = delta * this.drag;
-
 		if (collisionData.fallDeath) {
 			this.dead = true;
 		}
@@ -126,17 +127,7 @@ export class Player extends Character{
 		}
 
 		if (!this.moving) {
-			if (this.velocity.x > 0) {
-				this.velocity.x -= deltaDrag;
-				if (this.velocity.x < deltaDrag) {
-					this.velocity.x = 0;
-				}
-			} else if (this.velocity.x < 0) {
-				this.velocity.x += deltaDrag;
-				if (this.velocity.x > deltaDrag) {
-					this.velocity.x = 0;
-				}
-			}
+			this.dragForce.apply(this.velocity, delta);
 		}
 
 		this.spellType = type;
@@ -167,7 +158,7 @@ export class Player extends Character{
 	}
 
 	public getCollisionArea() {
-		var collisionArea = new Rectangle(this.position.x, this.position.y, 45, 42);
+		var collisionArea = new Rectangle(this.position.x, this.position.y, 43, 42);
 
 		return collisionArea;
 	}

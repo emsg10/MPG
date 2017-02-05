@@ -39,8 +39,10 @@ export class SpellCast {
 					this.value = this.maxValue;
 				}
 			} else {
-				this.value = this.defaultValue;
-				this.channeling = true;
+				if (!this.castSpell) {
+					this.value = this.defaultValue;
+					this.channeling = true;
+				}
 			}
 		} else {
 			if (this.channeling) {

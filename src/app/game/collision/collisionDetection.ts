@@ -19,12 +19,6 @@ export class CollisionDetection {
 		return CollisionDetection.instance;
 	}
 
-	private pushNull(tile: Tile, tilesToCheck: Tile[]) {
-		if(tile != null) {
-			tilesToCheck.push(tile);
-		}
-	}
-
 	public collisionDetection(tiles: Tile[], character: Character) {
 
 		let collisionData = this.checkCollision(tiles, character, character.toMove);
@@ -39,6 +33,18 @@ export class CollisionDetection {
 		}
 
 		return collisionData;
+	}
+
+	public checkEdge(rect: Rectangle, tiles: Tile[]) {
+		let edge = true;
+		
+		for(let tile of tiles) {
+			if(this.aabbCheck(rect, tile)) {
+				edge = false;
+			}
+		}
+
+		return edge;
 	}
 
 	public checkProjectileCollisionX(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {

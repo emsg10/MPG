@@ -195,12 +195,10 @@ export class AnimationHandler {
         return animation;
     }
 
-    public checkForAnimation(collisionData: CollisionData, player: Player) {
-        if (collisionData.fallDeath) {
-            this.bloodAnimation_A(new Vector(player.position.x, player.position.y), 50);
-            this.bloodAnimation_B_Right(new Vector(player.position.x + 5, player.position.y - 15), 100);
-            this.bloodAnimation_B_Left(new Vector(player.position.x - 55, player.position.y - 15), 100);
-        }
+    public fallDeath(position: Vector) {
+        this.bloodAnimation_A(new Vector(position.x, position.y), 50);
+        this.bloodAnimation_B_Right(new Vector(position.x + 5, position.y - 15), 100);
+        this.bloodAnimation_B_Left(new Vector(position.x - 55, position.y - 15), 100);
     }
 
     public update(delta: number) {

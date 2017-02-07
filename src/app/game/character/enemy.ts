@@ -1,9 +1,12 @@
 import { Vector, Tile, Rectangle } from '../model'
 import { Character } from './character';
 import { CollisionDetection } from '../collision/collisionDetection';
+import { AnimationHandler } from '../handler/animationHandler';
 
-export class Enemy extends Character{
+export class Enemy extends Character {
 
+    protected direction = false;
+    protected oldDirection = false;
     private collisionDetection = CollisionDetection.getInstance();
 
     constructor(position: Vector, width: number, height: number) {
@@ -18,20 +21,36 @@ export class Enemy extends Character{
 
         this.fall(delta);
 
+        if(this.collisionDetection.checkEdge(new Rectangle(this.position.x, this.position.y + this.height + 5, 1, 1), tiles)) {
+            this.direction = false;
+        }
+
+        if(this.collisionDetection.checkEdge(new Rectangle(this.position.x + this.width, this.position.y + this.height + 5, 1, 1), tiles)) {
+            this.direction = true;
+        }
+
         if (collisionData.groundCollision) {
-			this.velocity.y = 0;
-		}
+            this.velocity.y = 0;
+        }
 
-		if (collisionData.wallCollision) {
-			this.velocity.x = 0;
-		}
+        if (collisionData.wallCollision) {
+            if(collisionData.normalX == 1) {
+                this.direction = true;
+            } else {
+                this.direction = false;
+            }
+            this.velocity.x = 0;
+        }
 
+        if (this.velocity.x != 0 || collisionData.wallCollision) {
+			this.runningAnimation.next(delta);
+		}
     }
 
     public getCollisionArea() {
-		var collisionArea = new Rectangle(this.position.x, this.position.y, this.width, 55);
+        let collisionArea = new Rectangle(this.position.x, this.position.y, this.width, 55);
 
-		return collisionArea;
-	}
+        return collisionArea;
+    }
 
 }

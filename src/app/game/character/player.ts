@@ -102,6 +102,7 @@ export class Player extends Character{
 
 		if (collisionData.fallDeath) {
 			this.dead = true;
+			this.animationHandler.fallDeath(this.position);
 		}
 
 		if (collisionData.groundCollision) {

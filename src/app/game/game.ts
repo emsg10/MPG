@@ -1,6 +1,8 @@
 import { Context, TileMap, Render } from './';
 import { RenderCall } from './render/renderCall';
 import { Player } from './character/player';
+import { Enemy } from './character/enemy';
+import { Swordman } from './character/swordman';
 import { Vector, Rectangle, Asset, Level, SpellType } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
@@ -56,6 +58,7 @@ export class Game {
 
 		this.tileMap = new TileMap(this.context);
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, 45, 45);
+
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
 		this.initLoop();
@@ -65,7 +68,9 @@ export class Game {
 	public reset(level: Level) {
 		this.level = level.copy();
 		this.player = new Player(this.level.playerPosition, this.context, this.projectileHandler, this.animationHandler, 45, 45);
+		
 		this.enemyHandler.enemies = this.level.enemies;
+		
 		this.started = false;
 	}
 
@@ -98,7 +103,6 @@ export class Game {
 						this.player.update(collisionData, delta, this.spellType);
 						this.enemyHandler.update(delta, this.level.tiles);
 						this.animationHandler.update(delta);
-						this.animationHandler.checkForAnimation(collisionData, this.player);
 						this.projectileHandler.update(delta, this.level.tiles);
 					} else {
 						this.animationHandler.update(delta);

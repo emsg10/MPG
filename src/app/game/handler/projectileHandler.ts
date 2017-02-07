@@ -131,7 +131,7 @@ export class ProjectileHandler {
     private calculateDirection(projectile: Projectile, enemy: Enemy) {
         let velocity = new Vector((enemy.position.x + enemy.width/2) - (projectile.area.x + (projectile.area.width/2)), enemy.position.y - (projectile.area.y + (projectile.area.height/2)))
         velocity.normalize();
-        velocity.multiply((projectile.area.width/75));
+        velocity.multiply((projectile.area.width/90));
 
         return velocity;
     }

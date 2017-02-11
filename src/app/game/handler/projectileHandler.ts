@@ -1,4 +1,5 @@
-import { Projectile, Vector, Rectangle, SpellType, Spell, PhysicalProjectile } from '../model';
+import { Projectile, Vector, Rectangle, SpellType, Spell, PhysicalProjectile, Meele, Animation } from '../model';
+import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
 import { EnemyHandler } from './enemyHandler';
 import { CollisionDetection } from '../collision/collisionDetection';
@@ -8,6 +9,7 @@ import { Enemy } from '../character/enemy';
 export class ProjectileHandler {
 
     private projectiles: Projectile[] = [];
+    private enemyProjectiles: Projectile[] = [];
     private animationHandler: AnimationHandler;
     private enemyHandler: EnemyHandler;
     private collisionDetection = CollisionDetection.getInstance();
@@ -42,12 +44,60 @@ export class ProjectileHandler {
         this.projectiles.push(projectile);
     }
 
-    public update(delta: number, collidables: Rectangle[]) {
+    public update(delta: number, collidables: Rectangle[], player: Player) {
         let removeProjectile: Projectile[] = [];
-        let collisionData: CollisionData;
+        let removeEnemyProjectile: Projectile[] = [];
 
-        for (let projectile of this.projectiles) {
+        removeProjectile = this.updateFriendslyProjectiles(delta, collidables);
+        removeEnemyProjectile = this.updateEnemyProjectiles(delta, player);
 
+        for (let projectile of removeProjectile) {
+            this.destroyProjectile(projectile, this.projectiles);
+        }
+
+        for(let projectile of removeEnemyProjectile) {
+            this.destroyProjectile(projectile, this.enemyProjectiles);
+        }
+
+        this.enemyCollisionCheck(delta);
+        
+    }
+
+    private updateEnemyProjectiles(delta: number, player: Player) {
+        let removeProjectiles: Projectile[] = [];
+
+        for(let projectile of this.enemyProjectiles) {
+            let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
+            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, delta, player, removeProjectiles);
+        }
+
+        return removeProjectiles;
+    }
+
+    private updateAndCollCheckEnemyProjectile(projectile: Projectile, delta: number, player: Player, removeProjectiles: Projectile[]) {
+         let collisionData: CollisionData;
+            let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
+            collisionData = this.collisionDetection.checkProjectileCollisionY([player.getCollisionArea()], projectile, frameVelocity);
+            projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
+
+            if (collisionData.groundCollision) {
+                this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
+                projectile.velocity.y = 0;
+            }
+
+            collisionData = this.collisionDetection.checkProjectileCollisionX([player.getCollisionArea()], projectile, frameVelocity);
+            projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
+
+            if (collisionData.wallCollision) {
+                this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
+                projectile.velocity.x = 0;
+            }
+
+            return removeProjectiles;
+    }
+
+    private updateAndCollCheck(projectile: Projectile, delta: number, collidables: Rectangle[], removeProjectiles: Projectile[]) {
+            let collisionData: CollisionData;
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
             collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity);
             projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
@@ -69,7 +119,7 @@ export class ProjectileHandler {
 
             if (projectile instanceof Spell) {
                 if (projectile.distance <= 0 || collisionData.wallCollision) {
-                    removeProjectile.push(projectile);
+                    removeProjectiles.push(projectile);
                 }
             }
 
@@ -77,19 +127,27 @@ export class ProjectileHandler {
                 projectile.velocity.x = 0;
             }
 
-        }
-
-        for (let projectile of removeProjectile) {
-            this.destroyProjectile(projectile);
-        }
-
-        this.enemyCollisionCheck(delta);
+            return removeProjectiles;
     }
 
-    private destroyProjectile(projectile: Projectile) {
+    private updateFriendslyProjectiles(delta: number, collidables: Rectangle[]) {
+        let collisionData: CollisionData;
+        let removeProjectiles: Projectile[] = [];
+
+        for (let projectile of this.projectiles) {
+            this.updateAndCollCheck(projectile, delta, collidables, removeProjectiles);
+        }
+
+        return removeProjectiles;
+    }
+
+    private destroyProjectile(projectile: Projectile, projectiles: Projectile[]) {
         this.destroyAnimation(projectile);
         this.animationHandler.animations.splice(this.animationHandler.animations.indexOf(projectile.animation), 1);
-        this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
+        let index = projectiles.indexOf(projectile);
+        if(index != -1) {
+            projectiles.splice(index, 1);
+        }
     }
 
     private destroyAnimation(projectile: Projectile) {
@@ -115,7 +173,7 @@ export class ProjectileHandler {
                     let collisionData = this.collisionDetection.checkProjectileCollisionX([new Rectangle(enemy.position.x + (enemy.width / 2) - ((enemy.width * 0.5) / 2), enemy.position.y, enemy.width * 0.5, enemy.height)], projectile, velocityDelta);
 
                     if (collisionData.wallCollision) {
-                        this.destroyProjectile(projectile);
+                        this.destroyProjectile(projectile, this.projectiles);
                         this.createSwordman_death(enemy.position, enemy.inverse, this.calculateDirection(projectile, enemy));
                         removeEnemy.push(enemy);
                     }

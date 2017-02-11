@@ -164,7 +164,7 @@ export class AnimationHandler {
         animation.textureNumber.push(144);
         animation.textureNumber.push(145);
         animation.textureNumber.push(146);
-        animation.timeToChange = 50;
+        animation.timeToChange = 70;
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.repetitions = 10;
@@ -190,6 +190,34 @@ export class AnimationHandler {
 
         animation.repetitions = 9;
 
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public swordscut_a(position: Vector, size: number, inverse: boolean) {
+
+        let animation = new Animation();
+        animation.textureNumber.push(153);
+        animation.textureNumber.push(154);
+        animation.textureNumber.push(155);
+        animation.textureNumber.push(156);
+        animation.textureNumber.push(157);
+        animation.inverse = inverse;
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
+
+        this.animations.push(animation);
+
+        animation.repetitions = 5;
+
+        return animation;
+    }
+
+    public createDebugAnimation(position: Vector, size: number, repetitions: number) {
+        let animation = new Animation();
+        animation.textureNumber.push(5);
+        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
+        animation.repetitions = repetitions;
         this.animations.push(animation);
 
         return animation;

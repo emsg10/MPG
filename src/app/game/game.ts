@@ -3,7 +3,7 @@ import { RenderCall } from './render/renderCall';
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
-import { Vector, Rectangle, Asset, Level, SpellType } from './model';
+import { Vector, Rectangle, Asset, SpellType, Level, Tile } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
@@ -12,6 +12,7 @@ import { Editor } from './editor/editor';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
 import { EnemyHandler } from './handler/enemyHandler';
+import { LevelData, EnemyType } from './map/model';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -35,19 +36,18 @@ export class Game {
 	private gameArea = new Rectangle(-50, -50, this.canvasWidth + 100, this.canvasHeight + 100);
 	private startElement: HTMLElement;
 	private restartElement: HTMLElement;
-	private level: Level;
-	private loadedLevel: Level;
+	private level: Level = new Level();
+	private levelData: LevelData;
 	private editor: Editor;
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
 	private enemyHandler: EnemyHandler;
 
 
-	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: Level, editor?: Editor) {
+	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData, editor?: Editor) {
 		this.startElement = startElement;
 		this.restartElement = restartElement;
-		this.loadedLevel = level;
-		this.level = this.loadedLevel.copy();
+		this.levelData = levelData;
 		this.editor = editor;
 
 		this.context = new Context(asset, 1200, 800, canvas);
@@ -57,20 +57,15 @@ export class Game {
 		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.enemyHandler);
 
 		this.tileMap = new TileMap(this.context);
-		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, 45, 45);
 
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
 		this.initLoop();
-		this.reset(this.level);
+		this.reset(this.levelData);
 	}
 
-	public reset(level: Level) {
-		this.level = level.copy();
-		this.player = new Player(this.level.playerPosition, this.context, this.projectileHandler, this.animationHandler, 45, 45);
-		
-		this.enemyHandler.enemies = this.level.enemies;
-		
+	public reset(levelData: LevelData) {
+		this.loadLevel(levelData);
 		this.started = false;
 	}
 
@@ -101,9 +96,9 @@ export class Game {
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
 						this.checkKeys(delta);
 						this.player.update(collisionData, delta, this.spellType);
-						this.enemyHandler.update(delta, this.level.tiles);
+						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
-						this.projectileHandler.update(delta, this.level.tiles);
+						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					} else {
 						this.animationHandler.update(delta);
 					}
@@ -128,6 +123,9 @@ export class Game {
 				}
 
 				//Game
+				this.renderCalls.push(this.enemyHandler.createRenderCall());
+				this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
+
 				if (this.player.dead) {
 					this.renderCalls.push(this.textRenderer.createTextRenderCall(400, 64, 50));
 					//clearInterval(this.intevalTimer);
@@ -135,9 +133,8 @@ export class Game {
 					this.renderCalls.push(this.player.createRenderCall());
 				}
 
-				this.renderCalls.push(this.enemyHandler.createRenderCall());
-				this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
 				this.renderCalls.push(this.animationHandler.createRenderCall());
+
 				this.render.render(this.renderCalls);
 			}
 		};
@@ -233,8 +230,26 @@ export class Game {
 		});
 
 		this.restartElement.addEventListener("click", (event: MouseEvent) => {
-			this.reset(this.loadedLevel);
+			this.reset(this.levelData);
 		});
+
+	}
+
+	private loadLevel(levelData: LevelData) {
+		let tiles: Tile[] = JSON.parse(JSON.stringify(levelData.tiles));
+		this.level.tiles = tiles;
+		this.level.playerPosition = new Vector(levelData.playerPosition.x, levelData.playerPosition.y);
+		
+		let enemies: Enemy[] = [];
+
+		for(let enemyData of levelData.enemies) {
+			if(enemyData.type == EnemyType.swordman) {
+				enemies.push(new Swordman(new Vector(enemyData.area.x, enemyData.area.y), enemyData.area.width, enemyData.area.height, this.projectileHandler, this.animationHandler));
+			}	
+		}
+
+		this.enemyHandler.enemies = enemies;
+		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, 45, 45);
 
 	}
 }

@@ -1,5 +1,7 @@
 import { Tile } from '../model';
 import { Enemy } from '../character/enemy';
+import { Player } from '../character/player';
+import { Swordman } from '../character/swordman';
 import { RenderCall, RenderHelper } from '../render';
 import { Context } from '../context';
 
@@ -14,9 +16,9 @@ export class EnemyHandler {
         this.context = context;
     }
 
-    public update(delta: number, tiles: Tile[]) {
+    public update(delta: number, tiles: Tile[], player: Player) {
         for(let enemy of this.enemies) {
-            enemy.update(delta, tiles);
+            enemy.update(delta, tiles, player);
         }
     }
 

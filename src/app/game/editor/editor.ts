@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, Output, EventEmitter } from '@angular/core';
-import { Tile, Asset, Vector, Level } from '../model';
+import { Tile, Asset, Vector, Level, Rectangle } from '../model';
 import { Observable, Subscription, Observer } from 'rxjs';
 import { Context } from '../';
 import { RenderCall } from '../render/renderCall';
@@ -10,6 +10,7 @@ import { RenderHelper } from '../render/renderHelper';
 import { TextureMapper } from '../render/textureMapper';
 import { Enemy } from '../character/enemy';
 import { Swordman } from '../character/swordman';
+import { LevelData, EnemyData, EnemyType } from '../map/model';
 
 @Component({
 	selector: 'editor',
@@ -27,18 +28,22 @@ export class Editor {
 	@Output() levelChanged = new EventEmitter<boolean>();
 
 	public doneLoading: boolean = false;
+	public currentTiles: Tile[] = [];
 	public currentTile: Tile = new Tile(0, 0, 25, 25, 1);
 	public currentTileType: number = 1;
 	public currentTileWidth: number = 25;
 	public currentTileHeight: number = 25;
-	public currentEnemy: Enemy;
-	public level: Level;
+	public currentEnemy: EnemyData;
+	public levelData: LevelData;
 
 	private renderHelper = RenderHelper.getInstance();
 	private textureMapper = TextureMapper.getInstance();
 	private canvas: HTMLCanvasElement;
 	private editorContext: Context;
 	private collisionDetection: CollisionDetection = CollisionDetection.getInstance();
+
+	private anchor: Vector;
+	private endPoint: Vector;
 
 	private mouseDown: boolean = false;
 	private accuracy: number = 5;
@@ -64,10 +69,14 @@ export class Editor {
 		var vertecies: number[] = [];
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
+		let textureNumber = 0;
 
 		if (this.currentEnemy != null) {
-			vertecies = this.renderHelper.getVertecies(this.currentEnemy.position.x, this.currentEnemy.position.y, this.currentEnemy.width, this.currentEnemy.height, vertecies);
-			textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, this.currentEnemy.runningAnimation.getCurrentFrame());
+			vertecies = this.renderHelper.getVertecies(this.currentEnemy.area.x, this.currentEnemy.area.y, this.currentEnemy.area.width, this.currentEnemy.area.height, vertecies);
+			if (this.currentEnemy.type == EnemyType.swordman) {
+				textureNumber = 211
+			}
+			textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, textureNumber);
 			indecies = this.renderHelper.getIndecies(indecies);
 		}
 
@@ -133,12 +142,12 @@ export class Editor {
 	}
 
 	public playerXValueChanged(value: number) {
-		this.level.playerPosition.x = +value;
+		this.levelData.playerPosition.x = +value;
 		this.levelChanged.emit(true);
 	}
 
 	public playerYValueChanged(value: number) {
-		this.level.playerPosition.y = +value;
+		this.levelData.playerPosition.y = +value;
 		this.levelChanged.emit(true);
 	}
 
@@ -150,8 +159,15 @@ export class Editor {
 		this.currentTileHeight = value;
 	}
 
+	public clear() {
+		this.levelData.tiles = [];
+		this.levelData.playerPosition = new Vector(200, 200);
+		this.levelData.enemies = [];
+		this.levelChanged.emit(true);
+	}
+
 	public export() {
-		let jsonLevel = JSON.stringify(this.level);
+		let jsonLevel = JSON.stringify(this.levelData);
 		let blob = new Blob([jsonLevel], { type: "application/json" });
 		let textToSaveAsURL = window.URL.createObjectURL(blob);
 		let fileNameToSaveAs = "level" + Date.now() + ".json";
@@ -189,7 +205,7 @@ export class Editor {
 		try {
 			let level = JSON.parse(data);
 			if (this.loadHelper.checkLevelType(level)) {
-				this.level = this.loadHelper.loadJsonLevel(level);
+				this.levelData = level;
 				this.newLevelLoaded.emit(true);
 			}
 		} catch (error) {
@@ -220,17 +236,24 @@ export class Editor {
 
 	private setEnemyType(x: number, y: number) {
 		if (x > 0 && x < 56 && y > 256 && y < 256 + 59) {
-			this.currentEnemy = new Swordman(new Vector(0, 0), 56, 59);
+			let enemyData = new EnemyData();
+			enemyData.area = new Rectangle(0, 0, 56, 59);
+			enemyData.type = EnemyType.swordman;
+
+			this.currentEnemy = enemyData;
 		}
 	}
 
 	private setCurrentEnemy(x: number, y: number) {
-		this.currentEnemy.position.x = x;
-		this.currentEnemy.position.y = y;
+		this.currentEnemy.area.x = x;
+		this.currentEnemy.area.y = y;
 	}
 
 	private addEnemy() {
-		this.level.enemies.push(new Swordman(new Vector(this.currentEnemy.position.x, this.currentEnemy.position.y), this.currentEnemy.width, this.currentEnemy.height));
+		let enemyData = new EnemyData();
+		enemyData.area = new Rectangle(this.currentEnemy.area.x, this.currentEnemy.area.y, this.currentEnemy.area.width, this.currentEnemy.area.height);
+		enemyData.type = EnemyType.swordman;
+		this.levelData.enemies.push(enemyData);
 		this.levelChanged.emit(true);
 	}
 
@@ -249,15 +272,46 @@ export class Editor {
 		let newTile = this.getAccurateTile(x, y);
 
 		let collision = false;
-		for (let tile of this.level.tiles) {
+		for (let tile of this.levelData.tiles) {
 			if (this.collisionDetection.aabbCheck(newTile, tile)) {
 				collision = true;
 			}
 		}
 
 		if (!collision) {
-			this.level.tiles.push(newTile);
+			this.levelData.tiles.push(newTile);
+			this.levelChanged.emit(true);
 		}
+	}
+
+	private setAnchor(x: number, y: number) {
+		this.anchor = new Vector(x, y);
+	}
+
+	private setEndPoint(x: number, y: number) {
+		this.endPoint = new Vector(x, y);
+	}
+
+	private setAchorToEndPoint() {
+
+		this.currentTiles = [];
+
+		let distanceY = Math.abs(this.anchor.y - this.endPoint.y);
+		let distanceX = Math.abs(this.anchor.x - this.endPoint.x);
+
+		if(distanceX > distanceY) {
+			for(let i = 1; i <= (distanceX/this.currentTile.width); i++) {
+				this.editTile(this.anchor.x + (this.currentTile.width * i), this.anchor.y);
+			}
+		} else {
+			for(let i = 1; i <= (distanceY/this.currentTile.height); i++) {
+				this.editTile(this.anchor.x, this.anchor.y + (this.currentTile.height * i));
+			}
+		}
+
+		
+		
+
 	}
 
 	private getAccurateTile(x: number, y: number) {
@@ -283,27 +337,33 @@ export class Editor {
 
 		document.body.addEventListener('mouseup', (event: MouseEvent) => {
 			this.mouseDown = false;
+
+			if (this.endPoint) {
+				this.setAchorToEndPoint();
+			}
+
+			this.endPoint = null;
+
 		}, false);
 
-		canvas.addEventListener('click', (event: MouseEvent) => {
+		canvas.addEventListener('mousedown', (event: MouseEvent) => {
 			var mousePos = this.getMousePos(canvas, event);
-			if(this.currentTile) {
+			if (this.currentTile) {
 				this.editTile(mousePos.x, mousePos.y);
+				this.setAnchor(mousePos.x, mousePos.y);
 			} else {
 				this.addEnemy();
 			}
-			
+
 		}, false);
 		canvas.addEventListener('mousemove', (event: MouseEvent) => {
 			let mousePos = this.getMousePos(canvas, event);
 			if (this.currentTile != null) {
 				if (this.mouseDown) {
-					this.editTile(mousePos.x, mousePos.y);
+					this.setEndPoint(mousePos.x, mousePos.y);
 				} else {
 					this.setCurrentTile(mousePos.x, mousePos.y);
 				}
-			} else {
-				this.setCurrentEnemy(mousePos.x, mousePos.y);
 			}
 
 		}, false);

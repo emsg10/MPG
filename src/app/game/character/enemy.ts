@@ -1,5 +1,6 @@
 import { Vector, Tile, Rectangle } from '../model'
 import { Character } from './character';
+import { Player } from './player';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { AnimationHandler } from '../handler/animationHandler';
 
@@ -7,17 +8,17 @@ export class Enemy extends Character {
 
     protected direction = false;
     protected oldDirection = false;
-    private collisionDetection = CollisionDetection.getInstance();
+    protected collisionDetection = CollisionDetection.getInstance();
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
     }
 
-    public update(delta: number, tiles: Tile[]) {
+    public update(delta: number, tiles: Tile[], player: Player) {
         this.toMove.x = this.velocity.x * delta;
         this.toMove.y = this.velocity.y * delta;
 
-        let collisionData = this.collisionDetection.checkCollision(tiles, this, this.toMove);
+        let collisionData = this.collisionDetection.collisionDetection(tiles, this);
 
         this.fall(delta);
 

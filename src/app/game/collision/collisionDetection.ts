@@ -118,6 +118,16 @@ export class CollisionDetection {
 		return (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.height + rect1.y > rect2.y)
 	}
 
+	public aabbCheckS(rect1: Rectangle, areas: Rectangle[]) {
+		for(let rect2 of areas) {
+			if((rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.height + rect1.y > rect2.y)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	private getSweptBroadphaseBoxX(rect: Rectangle, velocity: Vector)
 	{
 		let x = rect.x + velocity.x;

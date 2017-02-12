@@ -290,28 +290,36 @@ export class Editor {
 
 	private setEndPoint(x: number, y: number) {
 		this.endPoint = new Vector(x, y);
+
+		this.setAchorToEndPoint();
 	}
 
 	private setAchorToEndPoint() {
 
 		this.currentTiles = [];
 
-		let distanceY = Math.abs(this.anchor.y - this.endPoint.y);
-		let distanceX = Math.abs(this.anchor.x - this.endPoint.x);
+		let distanceX = this.anchor.x - this.endPoint.x;
+		let distanceY = this.anchor.y - this.endPoint.y;
+		let absDistanceX = Math.abs(distanceX);
+		let absDistanceY = Math.abs(distanceY);
 
-		if(distanceX > distanceY) {
-			for(let i = 1; i <= (distanceX/this.currentTile.width); i++) {
-				this.editTile(this.anchor.x + (this.currentTile.width * i), this.anchor.y);
+		if (absDistanceX > absDistanceY) {
+			for (let i = 1; i <= (absDistanceX / this.currentTile.width); i++) {
+				if (distanceX < 0) {
+					this.editTile(this.anchor.x + (this.currentTile.width * i), this.anchor.y);
+				} else {
+					this.editTile(this.anchor.x - (this.currentTile.width * i), this.anchor.y);
+				}
 			}
 		} else {
-			for(let i = 1; i <= (distanceY/this.currentTile.height); i++) {
-				this.editTile(this.anchor.x, this.anchor.y + (this.currentTile.height * i));
+			for (let i = 1; i <= (absDistanceY / this.currentTile.height); i++) {
+				if (distanceY < 0) {
+					this.editTile(this.anchor.x, this.anchor.y + (this.currentTile.height * i));
+				} else {
+					this.editTile(this.anchor.x, this.anchor.y - (this.currentTile.height * i));
+				}
 			}
 		}
-
-		
-		
-
 	}
 
 	private getAccurateTile(x: number, y: number) {
@@ -326,7 +334,9 @@ export class Editor {
 	}
 
 	private setCurrentTile(x: number, y: number) {
-		this.currentTile = this.getAccurateTile(x, y);
+		let newTile = this.getAccurateTile(x, y);
+		this.currentTile = newTile;
+		return newTile;
 	}
 
 	private initMouseEventListener(canvas: HTMLCanvasElement) {
@@ -364,6 +374,8 @@ export class Editor {
 				} else {
 					this.setCurrentTile(mousePos.x, mousePos.y);
 				}
+			} else {
+				this.setCurrentEnemy(mousePos.x, mousePos.y);
 			}
 
 		}, false);

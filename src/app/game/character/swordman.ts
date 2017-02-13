@@ -15,6 +15,9 @@ export class Swordman extends Enemy {
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;
     private hitOffset = 40;
+    private searchAreaOffset = 150;
+    private hitAreaOffset = 40;
+    private tracking = false;
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
         super(position, width, height);
@@ -33,7 +36,7 @@ export class Swordman extends Enemy {
         this.setHitAnimation();
         this.checkHitCollisionAreas(player);
 
-        this.npcAction(delta);
+        this.npcAction(delta, player);
     }
 
     private checkHitCollisionAreas(player: Player) {
@@ -45,19 +48,19 @@ export class Swordman extends Enemy {
                         this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset, this.position.y, 5, 5));
                         this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 15, this.position.y + 10, 5, 5));
                         this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 25, this.position.y + 20, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 35, this.position.y + 30, 5, 5));                        
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 35, this.position.y + 30, 5, 5));
                         this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 40, this.position.y + 40, 5, 5));
                     } else {
                         this.hitCollisionAreas.push(new Rectangle(this.position.x, this.position.y, 5, 5));
                         this.hitCollisionAreas.push(new Rectangle(this.position.x - 15, this.position.y + 10, 5, 5));
                         this.hitCollisionAreas.push(new Rectangle(this.position.x - 25, this.position.y + 20, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 35, this.position.y + 30, 5, 5));                        
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 35, this.position.y + 30, 5, 5));
                         this.hitCollisionAreas.push(new Rectangle(this.position.x - 40, this.position.y + 40, 5, 5));
                     }
                 }
 
-                if(this.collisionDetection.aabbCheckS(player.getCollisionArea(), this.hitCollisionAreas)) {
-                    player.dead = true;
+                if (this.collisionDetection.aabbCheckS(player.getCollisionArea(), this.hitCollisionAreas)) {
+                    //player.dead = true;
                 }
 
             } else {
@@ -66,20 +69,65 @@ export class Swordman extends Enemy {
         }
     }
 
-    private npcAction(delta: number) {
+    private npcAction(delta: number, player: Player) {
+
+        if (this.tracking) {
+            if (this.inRange(player, this.hitAreaOffset)) {
+                this.hit();
+            }
+
+            this.track(player, delta);
+
+        } else {
+            if (this.inRange(player, this.searchAreaOffset)) {
+                this.tracking = true;
+            } else {
+                this.patrol(delta);
+            }
+        }
+    }
+
+    private track(player: Player, delta: number) {
+        if (player.position.x < this.position.x) {
+            this.moveLeft(delta);
+
+            this.checkStop(player);
+        } else if (player.position.x > this.position.x) {
+            this.moveRight(delta);
+
+            this.checkStop(player);
+        }
+    }
+
+    private checkStop(player: Player) {
+        if (this.nextToEdge || this.inRange(player, 5)) {
+            this.stop();
+        }
+    }
+
+    private patrol(delta: number) {
         if (this.oldDirection != this.direction) {
             this.oldDirection = this.direction;
         }
 
-        this.hit();
-
         if (this.oldDirection) {
             this.moveLeft(delta);
-
         } else {
             this.moveRight(delta);
         }
+    }
 
+    private inRange(player: Player, offset: number) {
+
+        let area: Rectangle;
+
+        if (this.inverse) {
+            area = new Rectangle(this.position.x - offset, this.position.y, offset, this.height);
+        } else {
+            area = new Rectangle(this.position.x, this.position.y, offset + this.width, this.height);
+        }
+
+        return this.collisionDetection.aabbCheck(area, player.getCollisionArea());
 
     }
 
@@ -91,6 +139,10 @@ export class Swordman extends Enemy {
         } else {
             this.createHit();
         }
+    }
+
+    private stop() {
+        this.velocity.x = 0;
     }
 
     private createHit() {

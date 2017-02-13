@@ -20,7 +20,7 @@ export class Game {
 	private fps = 60;
 	private context: Context;
 	private tileMap: TileMap;
-	private render: Render = new Render();
+	private renderer: Render = new Render();
 	private renderCalls: RenderCall[] = [];
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
@@ -75,7 +75,7 @@ export class Game {
 
 	private run() {
 		let loops = 0, skipTicks = 1000 / this.fps,
-			maxFrameSkip = 10,
+			maxFrameSkip = 3,
 			nextGameTick = (new Date).getTime();
 
 		return () => {
@@ -105,39 +105,40 @@ export class Game {
 
 				}
 
+				this.render();
+
 				nextGameTick += skipTicks;
-				loops++;
-			}
-
-			if (loops) {
-				this.context.clear();
-
-				//EDITOR
-				if (!this.started) {
-					if(this.editor.currentTile != null) {
-						this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
-					}
-					this.renderCalls.push(this.editor.currentEnemyRenderCall(this.context));
-					this.renderCalls.push(this.editor.preview.createRenderCall());
-					this.renderCalls.push(this.editor.createEnemyRenderCall());
-				}
-
-				//Game
-				this.renderCalls.push(this.enemyHandler.createRenderCall());
-				this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
-
-				if (this.player.dead) {
-					this.renderCalls.push(this.textRenderer.createTextRenderCall(400, 64, 50));
-					//clearInterval(this.intevalTimer);
-				} else {
-					this.renderCalls.push(this.player.createRenderCall());
-				}
-
-				this.renderCalls.push(this.animationHandler.createRenderCall());
-
-				this.render.render(this.renderCalls);
 			}
 		};
+	}
+
+	private render() {
+		this.context.clear();
+
+		//EDITOR
+		if (!this.started) {
+			if (this.editor.currentTile != null) {
+				this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
+			}
+			this.renderCalls.push(this.editor.currentEnemyRenderCall(this.context));
+			this.renderCalls.push(this.editor.preview.createRenderCall());
+			this.renderCalls.push(this.editor.createEnemyRenderCall());
+		}
+
+		//Game
+		this.renderCalls.push(this.enemyHandler.createRenderCall());
+		this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
+
+		if (this.player.dead) {
+			this.renderCalls.push(this.textRenderer.createTextRenderCall(400, 64, 50));
+			//clearInterval(this.intevalTimer);
+		} else {
+			this.renderCalls.push(this.player.createRenderCall());
+		}
+
+		this.renderCalls.push(this.animationHandler.createRenderCall());
+
+		this.renderer.render(this.renderCalls);
 	}
 
 	private checkKeys(delta: number) {
@@ -239,13 +240,13 @@ export class Game {
 		let tiles: Tile[] = JSON.parse(JSON.stringify(levelData.tiles));
 		this.level.tiles = tiles;
 		this.level.playerPosition = new Vector(levelData.playerPosition.x, levelData.playerPosition.y);
-		
+
 		let enemies: Enemy[] = [];
 
-		for(let enemyData of levelData.enemies) {
-			if(enemyData.type == EnemyType.swordman) {
+		for (let enemyData of levelData.enemies) {
+			if (enemyData.type == EnemyType.swordman) {
 				enemies.push(new Swordman(new Vector(enemyData.area.x, enemyData.area.y), enemyData.area.width, enemyData.area.height, this.projectileHandler, this.animationHandler));
-			}	
+			}
 		}
 
 		this.enemyHandler.enemies = enemies;

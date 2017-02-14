@@ -107,6 +107,37 @@ export class AnimationHandler {
         return animation;
     }
 
+    public player_sword_death_corpse(position: Vector, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(236);
+
+        animation.delay = 4;
+
+        animation.areaToRender = new Rectangle(position.x, position.y, 45, 45);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public player_sword_death_animation(position: Vector, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(233);
+        animation.textureNumber.push(234);
+        animation.textureNumber.push(235);
+        animation.textureNumber.push(236);
+        animation.inverse = inverse;
+        animation.areaToRender = new Rectangle(position.x, position.y, 45, 45);
+
+        this.animations.push(animation);
+
+        animation.repetitions = 4;
+
+        return animation;
+    }
+
     public swordman_corpse(position: Vector, inverse: boolean) {
         let animation = new Animation();
         animation.textureNumber.push(219);

@@ -9,7 +9,7 @@ export abstract class Character {
 	public inverse: boolean = false;
 	public width: number;
 	public height: number;
-    public runningAnimation: Animation = new Animation();
+    public currentAnimation: Animation = new Animation();
     protected maxSpeed: number = 0.3;
     protected acceleration: number = 0.009;
 	protected moving: boolean = false;

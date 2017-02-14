@@ -5,6 +5,7 @@ import { Vector, Rectangle, Tile, Meele, Animation } from '../model';
 import { TextureMapper } from '../render/textureMapper';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
+import { DeathType } from './deathType';
 
 export class Swordman extends Enemy {
 
@@ -14,6 +15,8 @@ export class Swordman extends Enemy {
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;
+    private trackingAnimation = new Animation();
+    private hitAnimation = new Animation();
     private hitOffset = 40;
     private searchAreaOffset = 150;
     private hitAreaOffset = 40;
@@ -25,14 +28,41 @@ export class Swordman extends Enemy {
         this.animationHandler = animationHandler;
         this.maxSpeed = 0.1;
 
-        this.runningAnimation.textureNumber.push(209);
-        this.runningAnimation.textureNumber.push(211);
-        this.runningAnimation.textureNumber.push(210);
-        this.runningAnimation.textureNumber.push(211);
+        this.runningAnimation.textureNumber.push(228);
+        this.runningAnimation.textureNumber.push(227);
+        this.runningAnimation.textureNumber.push(229);
+        this.runningAnimation.textureNumber.push(227);
+
+        this.runningAnimation.timeToChange = 150;
+
+        
+        this.hitAnimation.textureNumber.push(231);
+        this.hitAnimation.textureNumber.push(231);
+        this.hitAnimation.textureNumber.push(232);
+        this.hitAnimation.textureNumber.push(230);
+        this.hitAnimation.textureNumber.push(212);
+
+        this.trackingAnimation.textureNumber.push(211);
+        this.trackingAnimation.textureNumber.push(209);
+        this.trackingAnimation.textureNumber.push(211);
+        this.trackingAnimation.textureNumber.push(210);
+
+        this.currentAnimation = this.runningAnimation;
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
         super.update(delta, tiles, player);
+
+        if (this.meeleAnimation) {
+            if (this.meeleAnimation.repetitions > 0) {
+                this.currentAnimation.next(delta);
+            }
+        } else {
+            if (this.velocity.x != 0 || this.collisionData.wallCollision) {
+                this.currentAnimation.next(delta);
+            }
+        }
+
         this.setHitAnimation();
         this.checkHitCollisionAreas(player);
 
@@ -60,7 +90,7 @@ export class Swordman extends Enemy {
                 }
 
                 if (this.collisionDetection.aabbCheckS(player.getCollisionArea(), this.hitCollisionAreas)) {
-                    //player.dead = true;
+                    player.deathType = DeathType.swordDeath;
                 }
 
             } else {
@@ -74,6 +104,9 @@ export class Swordman extends Enemy {
         if (this.tracking) {
             if (this.inRange(player, this.hitAreaOffset)) {
                 this.hit();
+                this.currentAnimation = this.hitAnimation;
+            } else {
+                this.currentAnimation = this.trackingAnimation;
             }
 
             this.track(player, delta);
@@ -81,6 +114,8 @@ export class Swordman extends Enemy {
         } else {
             if (this.inRange(player, this.searchAreaOffset)) {
                 this.tracking = true;
+                this.currentAnimation = this.trackingAnimation;
+                this.maxSpeed = 0.2;
             } else {
                 this.patrol(delta);
             }
@@ -146,6 +181,7 @@ export class Swordman extends Enemy {
     }
 
     private createHit() {
+        this.hitAnimation.reset();
         if (!this.inverse) {
             this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x + this.hitOffset, this.position.y), 50, !this.inverse);
         } else {

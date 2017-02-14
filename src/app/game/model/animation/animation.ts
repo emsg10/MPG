@@ -37,4 +37,9 @@ export class Animation {
 	public getCurrentFrame() {
 		return this.textureNumber[this.frameIndex];
 	}
+
+	public reset() {
+		this.frameIndex = 0;
+		this.lastChange = 0;
+	}
 }

@@ -1,7 +1,8 @@
-import { Vector, Tile, Rectangle } from '../model'
+import { Vector, Tile, Rectangle, Animation } from '../model'
 import { Character } from './character';
 import { Player } from './player';
 import { CollisionDetection } from '../collision/collisionDetection';
+import { CollisionData } from '../collision/collisionData';
 import { AnimationHandler } from '../handler/animationHandler';
 
 export class Enemy extends Character {
@@ -10,6 +11,8 @@ export class Enemy extends Character {
     protected oldDirection = false;
     protected collisionDetection = CollisionDetection.getInstance();
     protected nextToEdge: boolean;
+    protected runningAnimation = new Animation();
+    protected collisionData: CollisionData;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -20,7 +23,7 @@ export class Enemy extends Character {
         this.toMove.y = this.velocity.y * delta;
         this.nextToEdge = false;
 
-        let collisionData = this.collisionDetection.collisionDetection(tiles, this);
+        this.collisionData = this.collisionDetection.collisionDetection(tiles, this);
 
         this.fall(delta);
 
@@ -43,23 +46,17 @@ export class Enemy extends Character {
             }
         }
 
-
-
-        if (collisionData.groundCollision) {
+        if (this.collisionData.groundCollision) {
             this.velocity.y = 0;
         }
 
-        if (collisionData.wallCollision) {
-            if (collisionData.normalX == 1) {
+        if (this.collisionData.wallCollision) {
+            if (this.collisionData.normalX == 1) {
                 this.direction = true;
             } else {
                 this.direction = false;
             }
             this.velocity.x = 0;
-        }
-
-        if (this.velocity.x != 0 || collisionData.wallCollision) {
-            this.runningAnimation.next(delta);
         }
     }
 

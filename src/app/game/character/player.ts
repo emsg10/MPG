@@ -7,11 +7,13 @@ import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
 import { Drag } from '../forces/drag';
 import { Character } from './character';
+import { DeathType } from './deathType';
 
 export class Player extends Character{
 
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
+	public deathType: DeathType;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private drag: number = 0.0015;
@@ -24,6 +26,7 @@ export class Player extends Character{
 	private spellCast: SpellCast;
 	private spellType: SpellType;
 	private context: Context;
+	private runningAnimation = new Animation();
 
 	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, width: number, height: number) {
 		super(position, width, height);
@@ -99,6 +102,14 @@ export class Player extends Character{
 	}
 
 	public update(collisionData: CollisionData, delta: number, type: SpellType) {
+
+		if(this.deathType) {
+			if(this.deathType == DeathType.swordDeath) {
+				this.dead = true;
+				this.animationHandler.player_sword_death_animation(this.position, this.inverse);
+				this.animationHandler.player_sword_death_corpse(this.position, this.inverse);
+			}
+		}
 
 		if (collisionData.fallDeath) {
 			this.dead = true;

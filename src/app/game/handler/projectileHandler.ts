@@ -19,6 +19,11 @@ export class ProjectileHandler {
         this.enemyHandler = enemyHandler;
     }
 
+    public clear() {
+        this.projectiles = [];
+        this.enemyProjectiles = [];
+    }
+
     public createBolt(position: Vector, size: number, inverse: boolean, type: SpellType) {
         let spell: Spell;
 
@@ -42,6 +47,24 @@ export class ProjectileHandler {
         this.animationHandler.swordman_corpse(position, inverse);
 
         this.projectiles.push(projectile);
+    }
+
+    public createPlayerSword_death(position: Vector, inverse: boolean, velocity: Vector) {
+
+        let projectile: Projectile;
+        let projectileCorpse: Projectile;
+
+        projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_animation(position, inverse), 1)
+        projectileCorpse = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_corpse(position, inverse), 1)
+        if(inverse) {
+            this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
+        } else {
+            this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
+        }
+        
+
+        this.projectiles.push(projectile);
+        this.projectiles.push(projectileCorpse);
     }
 
     public update(delta: number, collidables: Rectangle[], player: Player) {
@@ -173,9 +196,20 @@ export class ProjectileHandler {
                     let collisionData = this.collisionDetection.checkProjectileCollisionX([new Rectangle(enemy.position.x + (enemy.width / 2) - ((enemy.width * 0.5) / 2), enemy.position.y, enemy.width * 0.5, enemy.height)], projectile, velocityDelta);
 
                     if (collisionData.wallCollision) {
+
+                        enemy.takeDamage(projectile.area.width)
+                        if(enemy.inverse) {     
+                            this.animationHandler.bloodAnimation_B_Right(new Vector(enemy.position.x + 10, enemy.position.y - 20), 75);
+                        } else {
+                            this.animationHandler.bloodAnimation_B_Left(new Vector(enemy.position.x - 10, enemy.position.y - 20), 75);
+                        }
+                        
                         this.destroyProjectile(projectile, this.projectiles);
-                        this.createSwordman_death(enemy.position, enemy.inverse, this.calculateDirection(projectile, enemy));
-                        removeEnemy.push(enemy);
+
+                        if(enemy.dead) {
+                            this.createSwordman_death(enemy.position, enemy.inverse, this.calculateDirection(projectile, enemy));
+                            removeEnemy.push(enemy);
+                        }
                     }
                 }
 

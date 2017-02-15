@@ -41,6 +41,7 @@ export class Editor {
 	private canvas: HTMLCanvasElement;
 	private editorContext: Context;
 	private collisionDetection: CollisionDetection = CollisionDetection.getInstance();
+	private mousePos: Vector;
 
 	private anchor: Vector;
 	private endPoint: Vector;
@@ -322,6 +323,25 @@ export class Editor {
 		}
 	}
 
+	private removeTile(position: Vector) {
+		let rect = new Rectangle(position.x, position.y, 1, 1);
+		let colTile: Tile;
+		for(let tile of this.levelData.tiles) {
+			if(this.collisionDetection.aabbCheck(rect, tile)) {
+				colTile = tile;
+			}
+		}
+
+		if(colTile) {
+			let index = this.levelData.tiles.indexOf(colTile);
+			if(index != -1) {
+				this.levelData.tiles.splice(index, 1);
+				this.levelChanged.emit(true);
+			}
+		}
+		
+	}
+
 	private getAccurateTile(x: number, y: number) {
 		let modX = x % this.accuracy;
 		let modY = y % this.accuracy;
@@ -356,6 +376,16 @@ export class Editor {
 
 		}, false);
 
+		document.body.addEventListener('keydown', (event: KeyboardEvent) => {
+			var keyCode = event.code;
+
+			switch (keyCode) {
+				case 'Delete':
+					this.removeTile(this.mousePos);
+					break;
+			}
+		}, false);
+
 		canvas.addEventListener('mousedown', (event: MouseEvent) => {
 			var mousePos = this.getMousePos(canvas, event);
 			if (this.currentTile) {
@@ -367,15 +397,15 @@ export class Editor {
 
 		}, false);
 		canvas.addEventListener('mousemove', (event: MouseEvent) => {
-			let mousePos = this.getMousePos(canvas, event);
+			this.mousePos = this.getMousePos(canvas, event);
 			if (this.currentTile != null) {
 				if (this.mouseDown) {
-					this.setEndPoint(mousePos.x, mousePos.y);
+					this.setEndPoint(this.mousePos.x, this.mousePos.y);
 				} else {
-					this.setCurrentTile(mousePos.x, mousePos.y);
+					this.setCurrentTile(this.mousePos.x, this.mousePos.y);
 				}
 			} else {
-				this.setCurrentEnemy(mousePos.x, mousePos.y);
+				this.setCurrentEnemy(this.mousePos.x, this.mousePos.y);
 			}
 
 		}, false);
@@ -383,9 +413,6 @@ export class Editor {
 
 	private getMousePos(canvas: HTMLCanvasElement, event: MouseEvent) {
 		var rect = canvas.getBoundingClientRect();
-		return {
-			x: event.clientX - rect.left,
-			y: event.clientY - rect.top
-		};
+		return new Vector(event.clientX - rect.left, event.clientY - rect.top);
 	}
 }

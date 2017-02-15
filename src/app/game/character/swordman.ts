@@ -76,16 +76,16 @@ export class Swordman extends Enemy {
                 if (this.meeleAnimation.repetitions == 5 || this.meeleAnimation.repetitions == 4) {
                     if (!this.inverse) {
                         this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset, this.position.y, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 15, this.position.y + 10, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 25, this.position.y + 20, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 35, this.position.y + 30, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 40, this.position.y + 40, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 10, this.position.y + 10, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 20, this.position.y + 20, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 30, this.position.y + 30, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 35, this.position.y + 40, 5, 5));
                     } else {
                         this.hitCollisionAreas.push(new Rectangle(this.position.x, this.position.y, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 15, this.position.y + 10, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 25, this.position.y + 20, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 35, this.position.y + 30, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 40, this.position.y + 40, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 10, this.position.y + 10, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 20, this.position.y + 20, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 30, this.position.y + 30, 5, 5));
+                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 35, this.position.y + 40, 5, 5));
                     }
                 }
 

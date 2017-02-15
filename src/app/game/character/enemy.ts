@@ -13,9 +13,17 @@ export class Enemy extends Character {
     protected nextToEdge: boolean;
     protected runningAnimation = new Animation();
     protected collisionData: CollisionData;
+    protected hp: number = 100;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
+    }
+
+    public takeDamage(damage: number) {
+        this.hp = this.hp - damage;
+        if(this.hp <= 0) {
+            this.dead = true;
+        }
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
@@ -52,9 +60,11 @@ export class Enemy extends Character {
 
         if (this.collisionData.wallCollision) {
             if (this.collisionData.normalX == 1) {
-                this.direction = true;
+                this.nextToEdge = true;
+                this.direction = !this.direction;
             } else {
-                this.direction = false;
+                this.nextToEdge = true;
+                this.direction = !this.direction;
             }
             this.velocity.x = 0;
         }

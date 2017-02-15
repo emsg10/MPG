@@ -106,8 +106,7 @@ export class Player extends Character{
 		if(this.deathType) {
 			if(this.deathType == DeathType.swordDeath) {
 				this.dead = true;
-				this.animationHandler.player_sword_death_animation(this.position, this.inverse);
-				this.animationHandler.player_sword_death_corpse(this.position, this.inverse);
+				this.projectileHandler.createPlayerSword_death(this.position, this.inverse, this.velocity);
 			}
 		}
 

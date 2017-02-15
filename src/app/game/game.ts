@@ -86,21 +86,23 @@ export class Game {
 				this.lastUpdate = nextGameTick;
 				this.renderCalls = [];
 
+
 				if (!this.started) {
 					if (this.editor) {
 						this.renderCalls.push(this.editor.createRenderCall());
 					}
 				} else {
 					if (!this.player.dead) {
+						this.checkKeys(delta);
 						this.collision.checkCoutOfBounds(this.player, this.gameArea);
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
-						this.checkKeys(delta);
 						this.player.update(collisionData, delta, this.spellType);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					} else {
 						this.animationHandler.update(delta);
+						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					}
 
 				}
@@ -240,6 +242,8 @@ export class Game {
 		let tiles: Tile[] = JSON.parse(JSON.stringify(levelData.tiles));
 		this.level.tiles = tiles;
 		this.level.playerPosition = new Vector(levelData.playerPosition.x, levelData.playerPosition.y);
+		this.animationHandler.animations = [];
+		this.projectileHandler.clear();
 
 		let enemies: Enemy[] = [];
 

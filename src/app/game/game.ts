@@ -116,11 +116,16 @@ export class Game {
 
 	private render() {
 		this.context.clear();
+		let renderCall = new RenderCall();
+		renderCall.context = this.context;
+		renderCall.vertecies = [];
+		renderCall.textureCoords = [];
+		renderCall.indecies = [];
 
 		//EDITOR
 		if (!this.started) {
 			if (this.editor.currentTile != null) {
-				this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile]));
+				this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile], renderCall));
 			}
 			this.renderCalls.push(this.editor.currentEnemyRenderCall(this.context));
 			this.renderCalls.push(this.editor.preview.createRenderCall());
@@ -128,18 +133,19 @@ export class Game {
 		}
 
 		//Game
-		this.renderCalls.push(this.enemyHandler.createRenderCall());
-		this.renderCalls.push(this.tileMap.createRenderCall(this.level.tiles));
+		this.enemyHandler.createRenderCall(renderCall)
+		this.tileMap.createRenderCall(this.level.tiles, renderCall)
 
 		if (this.player.dead) {
-			this.renderCalls.push(this.textRenderer.createTextRenderCall(400, 64, 50));
+			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
 			//clearInterval(this.intevalTimer);
 		} else {
-			this.renderCalls.push(this.player.createRenderCall());
+			renderCall = this.player.createRenderCall(renderCall)
 		}
 
-		this.renderCalls.push(this.animationHandler.createRenderCall());
+		this.animationHandler.createRenderCall(renderCall)
 
+		this.renderCalls.push(renderCall);
 		this.renderer.render(this.renderCalls);
 	}
 

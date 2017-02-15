@@ -280,29 +280,19 @@ export class AnimationHandler {
         }
     }
 
-    public createRenderCall() {
-        let renderCall = new RenderCall();
-
-        var vertecies: number[] = [];
-        var textureCoords: number[] = [];
-        var indecies: number[] = [];
+    public createRenderCall(renderCall: RenderCall) {
 
         for (let animation of this.animations) {
             if (animation.delay <= 0) {
                 if (animation.inverse) {
-                    vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, vertecies);
+                    renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
                 } else {
-                    vertecies = this.renderHelper.getVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, vertecies);
+                    renderCall.vertecies = this.renderHelper.getVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
                 }
-                textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, animation.getCurrentFrame());
-                indecies = this.renderHelper.getIndecies(indecies);
+                renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
+                renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             }
         }
-
-        renderCall.vertecies = vertecies;
-        renderCall.textureCoords = textureCoords;
-        renderCall.indecies = indecies;
-        renderCall.context = this.context;
 
         return renderCall;
     }

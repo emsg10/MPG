@@ -11,26 +11,15 @@ export class TileMap {
 		this.context = context;
 	}
 
-	public createRenderCall(tiles: Tile[]) {
-
-		let renderCall = new RenderCall();
-
-		var vertecies: number[] = [];
-		var textureCoords: number[] = [];
-		var indecies: number[] = [];
+	public createRenderCall(tiles: Tile[], renderCall: RenderCall) {
 
 		for(var i = 0; i < tiles.length; i++) {
 			if(tiles[i].tileTextureType != 0) {
-				vertecies = this.renderHelper.getVertecies(tiles[i].x, tiles[i].y, tiles[i].width, tiles[i].height, vertecies);
-				textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, tiles[i].tileTextureType);
-				indecies = this.renderHelper.getIndecies(indecies);
+				renderCall.vertecies = this.renderHelper.getVertecies(tiles[i].x, tiles[i].y, tiles[i].width, tiles[i].height, renderCall.vertecies);
+				renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, tiles[i].tileTextureType);
+				renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 			}
 		}
-
-		renderCall.vertecies = vertecies;
-		renderCall.textureCoords = textureCoords;
-		renderCall.indecies = indecies;
-		renderCall.context = this.context;
 
 		return renderCall;
 	}

@@ -53,7 +53,7 @@ export class Player extends Character{
 		this.runningAnimation.textureNumber.push(202);
 	}
 
-	public createRenderCall() {
+	public createRenderCall(renderCall: RenderCall) {
 
 		let call = new RenderCall();
 		let x: number = this.position.x;
@@ -94,10 +94,11 @@ export class Player extends Character{
 			textureNumber = this.runningAnimation.getCurrentFrame();
 		}
 
-		call.textureCoords = this.renderHelper.getTextureCoordinates([], textureNumber);
-		call.indecies = [0, 1, 2, 3, 4, 5];
+		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
+		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
 
-		return call;
+		return renderCall;
 
 	}
 

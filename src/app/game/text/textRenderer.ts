@@ -11,21 +11,11 @@ export class TextRenderer {
 		this.context = context;
 	}
 
-	public createTextRenderCall(sizeX: number, sizeY: number, type: number) {
-		let renderCall = new RenderCall();
+	public createTextRenderCall(sizeX: number, sizeY: number, type: number, renderCall: RenderCall) {
 
-		var vertecies: number[] = [];
-		var textureCoords: number[] = [];
-		var indecies: number[] = [];
-
-		vertecies = this.renderHelper.getVertecies(((this.context.gl.canvas.width/2) - (sizeX/2)), ((this.context.gl.canvas.height/2) - (sizeY/2)), sizeX, sizeY, vertecies);
-		textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, type);
-		indecies = this.renderHelper.getIndecies(indecies);
-
-		renderCall.vertecies = vertecies;
-		renderCall.textureCoords = textureCoords;
-		renderCall.indecies = indecies;
-		renderCall.context = this.context;
+		renderCall.vertecies = this.renderHelper.getVertecies(((this.context.gl.canvas.width/2) - (sizeX/2)), ((this.context.gl.canvas.height/2) - (sizeY/2)), sizeX, sizeY, renderCall.vertecies);
+		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, type);
+		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 
 		return renderCall;
 	}

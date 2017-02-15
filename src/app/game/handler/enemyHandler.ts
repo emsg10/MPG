@@ -22,27 +22,17 @@ export class EnemyHandler {
         }
     }
 
-    createRenderCall() {
-        let renderCall = new RenderCall();
-
-		var vertecies: number[] = [];
-		var textureCoords: number[] = [];
-		var indecies: number[] = [];
+    createRenderCall(renderCall: RenderCall) {
 
 		for(let enemy of this.enemies) {
             if(enemy.inverse) {
-                vertecies = this.renderHelper.getInverseVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, vertecies);
+                renderCall.vertecies = this.renderHelper.getInverseVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, renderCall.vertecies);
             } else {
-                vertecies = this.renderHelper.getVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, vertecies);
+                renderCall.vertecies = this.renderHelper.getVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, renderCall.vertecies);
             }
-            textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, enemy.currentAnimation.getCurrentFrame());
-			indecies = this.renderHelper.getIndecies(indecies);
+            renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, enemy.currentAnimation.getCurrentFrame());
+			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		}
-
-		renderCall.vertecies = vertecies;
-		renderCall.textureCoords = textureCoords;
-		renderCall.indecies = indecies;
-		renderCall.context = this.context;
 
 		return renderCall;
     }

@@ -7,6 +7,7 @@ import { LoadHelper } from './loadHelper';
 export class AssetsLoader {
   private shaderUrl = 'src/assets/shader';
   private textureUrl = "src/assets/texture/tiles.png";
+  private particleTextureUrl = "src/assets/texture/particleSprites.png";
   private levelUrl = "src/app/game/map";
 
   constructor(private http: Http) { }
@@ -23,10 +24,33 @@ export class AssetsLoader {
       .catch(this.handleError);
   }
 
+  getParticleVertexShader() {
+    return this.http.get(this.shaderUrl + "/particleVertexShader.c")
+      .map(this.extractTextData)
+      .catch(this.handleError);
+  }
+
+  getParticleFragmentShader() {
+    return this.http.get(this.shaderUrl + "/particleFragmentShader.c")
+      .map(this.extractTextData)
+      .catch(this.handleError);
+  }
+
   getTexture() {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();
       texture.src = this.textureUrl;
+      texture.onload = function () {
+        observer.next(texture);
+        observer.complete();
+      }
+    });
+  }
+
+  getParticleTexture() {
+    return Observable.create((observer: Observer<any>) => {
+      var texture = new Image();
+      texture.src = this.particleTextureUrl;
       texture.onload = function () {
         observer.next(texture);
         observer.complete();

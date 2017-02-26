@@ -4,8 +4,10 @@ import { ShaderType, Asset } from './model';
 export class Context
 {
 	public shaderProgram: WebGLProgram;
+	public particleProgram: WebGLProgram;
 	public gl: WebGLRenderingContext;
 	public glTexture: WebGLTexture;
+	public particleTexture: WebGLTexture;
 
 	constructor(asset: Asset, width: number, height: number, canvas: HTMLCanvasElement){
 		this.initContext(width, height, canvas);
@@ -29,6 +31,17 @@ export class Context
 		let vertexShader = this.compileShader(asset.vertexShader, ShaderType.Vertex);
 		let fragmentShader = this.compileShader(asset.fragmentShader, ShaderType.Fragment);
 
+		let particleVertexShader = this.compileShader(asset.particleVertexShader, ShaderType.Vertex);
+		let particleFragmentShader = this.compileShader(asset.particleFragmentShader, ShaderType.Fragment);
+
+		this.particleProgram = this.gl.createProgram();
+		this.gl.attachShader(this.particleProgram, particleVertexShader);
+		this.gl.attachShader(this.particleProgram, particleFragmentShader);
+		this.gl.linkProgram(this.particleProgram);
+		if (!this.gl.getProgramParameter(this.particleProgram, this.gl.LINK_STATUS)) {
+			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.particleProgram));
+		}
+
 		this.shaderProgram = this.gl.createProgram();
 		this.gl.attachShader(this.shaderProgram, vertexShader);
 		this.gl.attachShader(this.shaderProgram, fragmentShader);
@@ -36,18 +49,25 @@ export class Context
 		if (!this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
 			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.shaderProgram));
 		}
-		this.gl.useProgram(this.shaderProgram);
 
-		this.initTextures(this.gl, asset.texture);
+		this.initTextures(this.gl, asset.texture, asset.particleTexture);
 	}
 
-	private initTextures(gl: WebGLRenderingContext, texture: HTMLImageElement) {
+	private initTextures(gl: WebGLRenderingContext, texture: HTMLImageElement, particleTexture: HTMLImageElement) {
+
 		this.glTexture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, this.glTexture);
   		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture);
   		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   		gl.generateMipmap(gl.TEXTURE_2D);
-  		gl.bindTexture(gl.TEXTURE_2D, null);
+
+		this.particleTexture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, particleTexture);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
   		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		gl.enable(gl.BLEND);

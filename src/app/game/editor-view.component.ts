@@ -28,16 +28,23 @@ export class EditorViewComponent implements AfterViewInit {
         Observable.forkJoin(
             this.assetsLoader.getVertexShader(),
             this.assetsLoader.getFragmentShader(),
+            this.assetsLoader.getParticleVertexShader(),
+            this.assetsLoader.getParticleFragmentShader(),
             this.assetsLoader.getTexture(),
+            this.assetsLoader.getParticleTexture(),
             this.assetsLoader.getLevel("1")
         ).subscribe(data => {
             this.asset.vertexShader = data[0] as string;
             this.asset.fragmentShader = data[1] as string;
-            this.asset.texture = data[2] as HTMLImageElement;
+            this.asset.particleVertexShader = data[2] as string;
+            this.asset.particleFragmentShader = data[3] as string;
+            
+            this.asset.texture = data[4] as HTMLImageElement;
+            this.asset.particleTexture = data[5] as HTMLImageElement;
 
             this.editor.init(this.asset, this.gameCanvas.nativeElement);
 
-            this.editor.levelData = data[3];
+            this.editor.levelData = data[6];
 
             this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.levelData, this.editor);
         });

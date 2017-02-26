@@ -35,8 +35,8 @@ export class Enemy extends Character {
 
         this.fall(delta);
 
-        let leftEdge = this.collisionDetection.checkEdge(new Rectangle(this.position.x, this.position.y + this.height + 5, 1, 1), tiles);
-        let rightEdge = this.collisionDetection.checkEdge(new Rectangle(this.position.x + this.width, this.position.y + this.height + 5, 1, 1), tiles);
+        let leftEdge = this.collisionDetection.checkEdge(new Rectangle(this.position.x, this.position.y + this.height, 1, 30), tiles);
+        let rightEdge = this.collisionDetection.checkEdge(new Rectangle(this.position.x + this.width, this.position.y + this.height, 1, 30), tiles);
 
         if (leftEdge && rightEdge) {
             this.nextToEdge = true;

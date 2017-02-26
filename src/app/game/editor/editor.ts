@@ -35,11 +35,12 @@ export class Editor {
 	public currentTileHeight: number = 25;
 	public currentEnemy: EnemyData;
 	public levelData: LevelData;
+	public context: Context;
 
 	private renderHelper = RenderHelper.getInstance();
 	private textureMapper = TextureMapper.getInstance();
 	private canvas: HTMLCanvasElement;
-	private editorContext: Context;
+	
 	private collisionDetection: CollisionDetection = CollisionDetection.getInstance();
 	private mousePos: Vector;
 
@@ -60,7 +61,7 @@ export class Editor {
 		this.initMouseEventListener(this.canvas);
 		this.initImportChangeListener();
 
-		this.editorContext = new Context(asset, 256, 512, this.editorCanvas.nativeElement);
+		this.context = new Context(asset, 256, 512, this.editorCanvas.nativeElement);
 		this.initEditorEventListener(this.editorCanvas.nativeElement);
 	}
 
@@ -84,7 +85,6 @@ export class Editor {
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;
 		renderCall.indecies = indecies;
-		renderCall.context = context;
 
 		return renderCall;
 	}
@@ -103,7 +103,6 @@ export class Editor {
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;
 		renderCall.indecies = indecies;
-		renderCall.context = this.editorContext;
 
 		return renderCall;
 	}
@@ -134,7 +133,6 @@ export class Editor {
 			0, 1, 2, 3, 4, 5
 		];
 
-		rendercall.context = this.editorContext;
 		rendercall.textureCoords = textureCoordinates;
 		rendercall.vertecies = vertecies;
 		rendercall.indecies = vertexIndices;

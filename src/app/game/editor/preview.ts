@@ -21,7 +21,7 @@ export class Preview {
 	public tileSizeYTextElement: HTMLSpanElement;
 	public xValue = 25;
 	public yValue = 25;
-	private previewContext: Context;
+	public context: Context;
 	private renderHelper: RenderHelper = RenderHelper.getInstance();
 
 
@@ -29,7 +29,7 @@ export class Preview {
 	}
 
 	public init(asset: Asset) {
-		this.previewContext = new Context(asset, 150, 150, this.previewCanvas.nativeElement);
+		this.context = new Context(asset, 150, 150, this.previewCanvas.nativeElement);
 	}
 
 	public createRenderCall() {
@@ -48,7 +48,6 @@ export class Preview {
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;
 		renderCall.indecies = indecies;
-		renderCall.context = this.previewContext;
 
 		return renderCall;
 	}

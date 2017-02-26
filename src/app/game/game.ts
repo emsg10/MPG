@@ -1,5 +1,5 @@
-import { Context, TileMap, Render } from './';
-import { RenderCall } from './render/renderCall';
+import { Context, TileMap, Renderer } from './';
+import { RenderCall, ParticleRenderer } from './render';
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 import { Editor } from './editor/editor';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
+import { ParticleHandler } from './handler/particleHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
 
@@ -20,8 +21,10 @@ export class Game {
 	private fps = 60;
 	private context: Context;
 	private tileMap: TileMap;
-	private renderer: Render = new Render();
-	private renderCalls: RenderCall[] = [];
+	private renderer: Renderer;
+	private editorRenderer: Renderer;
+	private previewRenderer: Renderer;
+	private particelRenderer: ParticleRenderer;
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
 	private leftKeyPress: boolean;
@@ -42,6 +45,7 @@ export class Game {
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
 	private enemyHandler: EnemyHandler;
+	private particleHandler: ParticleHandler;
 
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData, editor?: Editor) {
@@ -51,7 +55,13 @@ export class Game {
 		this.editor = editor;
 
 		this.context = new Context(asset, 1200, 800, canvas);
+		this.renderer = new Renderer(this.context);
+		this.particleHandler = new ParticleHandler();
+		this.particleHandler.createFrostBlast();
+		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 
+		this.editorRenderer = new Renderer(this.editor.context);
+		this.previewRenderer = new Renderer(this.editor.preview.context);
 		this.animationHandler = new AnimationHandler(this.context);
 		this.enemyHandler = new EnemyHandler(this.context);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.enemyHandler);
@@ -84,14 +94,8 @@ export class Game {
 			while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
 				let delta = nextGameTick - this.lastUpdate;
 				this.lastUpdate = nextGameTick;
-				this.renderCalls = [];
-
-
-				if (!this.started) {
-					if (this.editor) {
-						this.renderCalls.push(this.editor.createRenderCall());
-					}
-				} else {
+				
+				if (this.started) {
 					if (!this.player.dead) {
 						this.checkKeys(delta);
 						this.collision.checkCoutOfBounds(this.player, this.gameArea);
@@ -100,12 +104,12 @@ export class Game {
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
+						this.particelRenderer.update(delta);
 					} else {
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					}
-
-				}
+				} 
 
 				this.render();
 
@@ -117,19 +121,29 @@ export class Game {
 	private render() {
 		this.context.clear();
 		let renderCall = new RenderCall();
-		renderCall.context = this.context;
 		renderCall.vertecies = [];
 		renderCall.textureCoords = [];
 		renderCall.indecies = [];
 
+		let editorRenderCall = new RenderCall();
+		editorRenderCall.vertecies = [];
+		editorRenderCall.textureCoords = [];
+		editorRenderCall.indecies = [];
+
+		let renderCalls: RenderCall[] = [];
+		let editorRenderCalls: RenderCall[] = [];
+		let previewRenderCalls: RenderCall[] = [];
+		
+
 		//EDITOR
 		if (!this.started) {
+			editorRenderCalls.push(this.editor.createRenderCall());
 			if (this.editor.currentTile != null) {
-				this.renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile], renderCall));
+				renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile], editorRenderCall));
 			}
-			this.renderCalls.push(this.editor.currentEnemyRenderCall(this.context));
-			this.renderCalls.push(this.editor.preview.createRenderCall());
-			this.renderCalls.push(this.editor.createEnemyRenderCall());
+			editorRenderCalls.push(this.editor.currentEnemyRenderCall(this.context));
+			previewRenderCalls.push(this.editor.preview.createRenderCall());
+			editorRenderCalls.push(this.editor.createEnemyRenderCall());
 		}
 
 		//Game
@@ -145,8 +159,12 @@ export class Game {
 
 		this.animationHandler.createRenderCall(renderCall)
 
-		this.renderCalls.push(renderCall);
-		this.renderer.render(this.renderCalls);
+		renderCalls.push(renderCall);
+
+		this.renderer.render(renderCalls);
+		this.previewRenderer.render(previewRenderCalls);
+		this.editorRenderer.render(editorRenderCalls);
+		this.particelRenderer.render();
 	}
 
 	private checkKeys(delta: number) {

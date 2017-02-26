@@ -72,8 +72,6 @@ export class Player extends Character{
 		let y1 = this.position.y;
 		let y2 = this.position.y + (this.height);
 
-		call.context = this.context;
-
 		call.vertecies = [
 			x1, y1,
 			x2, y2,

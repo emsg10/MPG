@@ -1,6 +1,7 @@
-import { Render } from './render';
+import { Renderer } from './renderer';
 import { RenderCall } from './renderCall';
 import { RenderHelper } from './renderHelper';
 import { TextureMapper } from './textureMapper';
+import { ParticleRenderer } from './particleRenderer';
 
-export { Render, RenderCall, RenderHelper, TextureMapper };
+export { Renderer, RenderCall, RenderHelper, TextureMapper, ParticleRenderer };

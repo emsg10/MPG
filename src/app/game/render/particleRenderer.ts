@@ -2,13 +2,18 @@ import { Context } from '../context';
 import { RenderCall } from './renderCall';
 import { ParticleHandler } from '../handler/particleHandler';
 import { Particle } from '../particle/particle';
+import { Enemy } from '../character/enemy';
+import { CollisionDetection } from '../collision/collisionDetection';
+import { Rectangle } from '../model/rectangle';
 
 export class ParticleRenderer {
 
 	private context: Context;
 	private gl: WebGLRenderingContext;
 	private shaderProgram: WebGLShader;
+	private collisionDetection = CollisionDetection.getInstance();
 
+	private pointRelativeTimeBuffer: any;
 	private pointLifetimesBuffer: any;
 	private pointStartPositionsBuffer: any;
 	private pointEndPositionsBuffer: any;
@@ -16,13 +21,12 @@ export class ParticleRenderer {
 	private startPositionLocation: number;
 	private endPositionLocation: number;
 	private lifeTimeAttribute: number;
+	private relativeTimeAttribute: number;
 
-	private timeUniform: WebGLUniformLocation;
 	private uniformCenterLocation: WebGLUniformLocation;
 	private samplerUniform: WebGLUniformLocation;
 	private colorLocation: WebGLUniformLocation;
 
-	private time: number;
 	private elapsed: number;
 	private centerPos: number[];
 	private color: number[];
@@ -37,27 +41,24 @@ export class ParticleRenderer {
 		this.shaderProgram = this.context.particleProgram;
 		this.gl.useProgram(this.shaderProgram);
 
+		this.relativeTimeAttribute = this.gl.getAttribLocation(this.shaderProgram, "aRelativeTime");
 		this.lifeTimeAttribute = this.gl.getAttribLocation(this.shaderProgram, "aLifetime");
-
 		this.startPositionLocation = this.gl.getAttribLocation(this.shaderProgram, "aStartPosition");
-
 		this.endPositionLocation = this.gl.getAttribLocation(this.shaderProgram, "aEndPosition");
 
 		this.samplerUniform = this.gl.getUniformLocation(this.shaderProgram, "sTexture");
 		this.uniformCenterLocation = this.gl.getUniformLocation(this.shaderProgram, "uCenterPosition");
 		this.colorLocation = this.gl.getUniformLocation(this.shaderProgram, "uColor");
-		this.timeUniform = this.gl.getUniformLocation(this.shaderProgram, "uTime");
 
 		this.pointEndPositionsBuffer = this.gl.createBuffer() as any;
 		this.pointStartPositionsBuffer = this.gl.createBuffer() as any;
 		this.pointLifetimesBuffer = this.gl.createBuffer() as any;
+		this.pointRelativeTimeBuffer = this.gl.createBuffer() as any;
 
-		this.time = 0;
-		this.elapsed = 0;
-		this.color = [0.8, 0.8, 1, 1];
+		this.color = [0.7, 0.7, 1, 1];
 	}
 
-	public initBuffers() {
+	public updateParticleBuffers(delta: number, enemys: Enemy[]) {
 
 		this.gl.useProgram(this.shaderProgram);
 		var numParticles = this.particleHandler.particles.length;
@@ -65,17 +66,37 @@ export class ParticleRenderer {
 		let lifetimes: number[] = [];
 		let startPositions: number[] = [];
 		let endPositions: number[] = [];
+		let relativeTime: number[] = [];
 
 		let deadParticles: Particle[] = [];
 
 		for (let particle of this.particleHandler.particles) {
-			lifetimes.push(particle.lifetime);
-			startPositions.push.apply(startPositions, particle.startPos);
-			endPositions.push.apply(endPositions, particle.endPos);
+			
+			particle.elapsedMs += delta;
+			particle.relativeTime = particle.elapsedMs/1500;
 
-			if (particle.lifetime >= 1) {
+			let area = this.getParticleCollArea(particle);
+
+			let areas: Rectangle[] = [];
+
+			for(let enemy of enemys) {
+				areas.push(enemy.getCollisionArea());
+			}
+
+			if(!particle.dead && this.collisionDetection.aabbCheckS(area, areas)) {
+				particle.startPos[0] = particle.relativeTime * particle.startPos[0]; 
+				particle.endPos[0] = (particle.relativeTime * particle.endPos[0]);
+				particle.dead = true;
+			}
+
+			if (particle.relativeTime >= particle.lifetime) {
 				deadParticles.push(particle);
 			}
+
+			lifetimes.push(particle.lifetime);
+			relativeTime.push(particle.relativeTime);
+			startPositions.push.apply(startPositions, particle.startPos);
+			endPositions.push.apply(endPositions, particle.endPos);
 		}
 
 		for (let particle of deadParticles) {
@@ -89,6 +110,12 @@ export class ParticleRenderer {
 		}
 
 		this.centerPos = [0, 0, 0];
+
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.pointRelativeTimeBuffer);
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(relativeTime), this.gl.STATIC_DRAW);
+		this.pointRelativeTimeBuffer.itemSize = 1;
+		this.pointRelativeTimeBuffer.numItems = numParticles;
+
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.pointLifetimesBuffer);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(lifetimes), this.gl.STATIC_DRAW);
 		this.pointLifetimesBuffer.itemSize = 1;
@@ -105,26 +132,25 @@ export class ParticleRenderer {
 		this.pointEndPositionsBuffer.numItems = numParticles;
 	}
 
-	public update(delta: number) {
-
-		this.elapsed += delta;
-		if (this.elapsed > 3000) {
-			this.time = 0;
-			this.elapsed = 0;
-			this.particleHandler.particles = [];
-		} else {
-			this.time = this.elapsed / 3000;
-			this.particleHandler.createFrostBlast();
-		}
+	private getParticleCollArea(particle: Particle) {
+		let x = (particle.startPos[0] + (particle.relativeTime * particle.endPos[0]) + 1) * (1200/2);
+		let y = 800 - (particle.startPos[1] + (particle.relativeTime * particle.endPos[1]) + 1) * (800/2);
+		
+		return new Rectangle(x, y, 1, 1);
 	}
 
 	public render() {
 
 		if (this.particleHandler.particles.length > 0) {
-			this.initBuffers();
+			this.gl.useProgram(this.shaderProgram);
+
 			this.gl.enableVertexAttribArray(this.lifeTimeAttribute);
+			this.gl.enableVertexAttribArray(this.relativeTimeAttribute);
 			this.gl.enableVertexAttribArray(this.startPositionLocation);
 			this.gl.enableVertexAttribArray(this.endPositionLocation);
+			
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.pointRelativeTimeBuffer);
+			this.gl.vertexAttribPointer(this.relativeTimeAttribute, this.pointRelativeTimeBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.pointLifetimesBuffer);
 			this.gl.vertexAttribPointer(this.lifeTimeAttribute, this.pointLifetimesBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
@@ -141,11 +167,11 @@ export class ParticleRenderer {
 
 			this.gl.uniform3f(this.uniformCenterLocation, this.centerPos[0], this.centerPos[1], this.centerPos[2]);
 			this.gl.uniform4f(this.colorLocation, this.color[0], this.color[1], this.color[2], this.color[3]);
-			this.gl.uniform1f(this.timeUniform, this.time);
 
 			this.gl.drawArrays(this.gl.POINTS, 0, this.pointLifetimesBuffer.numItems);
 
 			this.gl.disableVertexAttribArray(this.lifeTimeAttribute);
+			this.gl.disableVertexAttribArray(this.relativeTimeAttribute);
 			this.gl.disableVertexAttribArray(this.startPositionLocation);
 			this.gl.disableVertexAttribArray(this.endPositionLocation);
 		}

@@ -31,6 +31,7 @@ export class Game {
 	private rightKeyPress: boolean;
 	private jumpKeyPress: boolean;
 	private channelingKeyPress: boolean;
+	private frostKeyPress: boolean;
 	private spellType: SpellType;
 	private started: boolean = false;
 	private lastUpdate: number;
@@ -57,7 +58,6 @@ export class Game {
 		this.context = new Context(asset, 1200, 800, canvas);
 		this.renderer = new Renderer(this.context);
 		this.particleHandler = new ParticleHandler();
-		this.particleHandler.createFrostBlast();
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 
 		this.editorRenderer = new Renderer(this.editor.context);
@@ -84,6 +84,7 @@ export class Game {
 	}
 
 	private run() {
+		this.lastUpdate = (new Date).getTime();
 		let loops = 0, skipTicks = 1000 / this.fps,
 			maxFrameSkip = 3,
 			nextGameTick = (new Date).getTime();
@@ -104,12 +105,12 @@ export class Game {
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
-						this.particelRenderer.update(delta);
 					} else {
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					}
-				} 
+				}
+				this.particelRenderer.updateParticleBuffers(delta, this.enemyHandler.enemies);
 
 				this.render();
 
@@ -170,9 +171,7 @@ export class Game {
 	private checkKeys(delta: number) {
 		if (this.leftKeyPress) {
 			this.player.moveLeft(delta);
-		}
-
-		if (this.rightKeyPress) {
+		} else if (this.rightKeyPress) {
 			this.player.moveRight(delta);
 		}
 
@@ -180,7 +179,12 @@ export class Game {
 			this.player.jump();
 		}
 
+		if(this.frostKeyPress) {
+			this.player.cast();
+		} 
+
 		this.player.channel(this.channelingKeyPress, delta, this.spellType);
+
 	}
 
 	private initKeyBindings() {
@@ -206,6 +210,9 @@ export class Game {
 				case 'Numpad2':
 					this.channelingKeyPress = true;
 					this.spellType = SpellType.electricbolt;
+					break;
+				case 'Numpad3':
+					this.frostKeyPress = true;
 					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = true;
@@ -239,6 +246,9 @@ export class Game {
 					break;
 				case 'Numpad2':
 					this.channelingKeyPress = false;
+					break;
+				case 'Numpad3':
+					this.frostKeyPress = false;
 					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = false;
@@ -278,7 +288,7 @@ export class Game {
 		}
 
 		this.enemyHandler.enemies = enemies;
-		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, 45, 45);
+		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
 
 	}
 }

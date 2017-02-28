@@ -5,6 +5,7 @@ import { Context } from '../';
 import { CollisionData } from '../collision';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
+import { ParticleHandler } from '../handler/particleHandler';
 import { Drag } from '../forces/drag';
 import { Character } from './character';
 import { DeathType } from './deathType';
@@ -16,6 +17,7 @@ export class Player extends Character{
 	public deathType: DeathType;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
+	private particleHandler: ParticleHandler;
 	private drag: number = 0.0015;
 	private dragForce: Drag = new Drag(this.drag);
 	private idleAnimation: Animation = new Animation();
@@ -28,11 +30,12 @@ export class Player extends Character{
 	private context: Context;
 	private runningAnimation = new Animation();
 
-	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, width: number, height: number) {
+	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number) {
 		super(position, width, height);
 		this.context = context;
 		this.projectileHandler = projectileHandler;
 		this.animationHandler = animationHandler;
+		this.particleHandler = particleHandler;
 		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
 
 		this.spellCast.defaultValue = 20;
@@ -183,6 +186,10 @@ export class Player extends Character{
 
 	public channel(channeling: boolean, delta: number, type: SpellType) {
 		this.spellCast.update(channeling, delta, this.inverse, this.position, type);
+	}
+
+	public cast() {
+		this.particleHandler.createFrostBlast(this.position, this.inverse);
 	}
 
 }

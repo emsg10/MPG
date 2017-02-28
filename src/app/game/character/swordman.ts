@@ -201,4 +201,10 @@ export class Swordman extends Enemy {
         }
     }
 
+    public getCollisionArea() {
+        let collisionArea = new Rectangle(this.position.x + 10, this.position.y, this.width - 20, 55);
+
+        return collisionArea;
+    }
+
 }

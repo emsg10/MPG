@@ -77,16 +77,12 @@ export class ParticleRenderer {
 
 			let area = this.getParticleCollArea(particle);
 
-			let areas: Rectangle[] = [];
-
 			for(let enemy of enemys) {
-				areas.push(enemy.getCollisionArea());
-			}
-
-			if(!particle.dead && this.collisionDetection.aabbCheckS(area, areas)) {
-				particle.startPos[0] = particle.relativeTime * particle.startPos[0]; 
-				particle.endPos[0] = (particle.relativeTime * particle.endPos[0]);
-				particle.dead = true;
+				if(!particle.dead && this.collisionDetection.aabbCheck(area, enemy.getCollisionArea())) {
+					particle.lifetime = particle.relativeTime + 0.05;
+					particle.dead = true;
+					enemy.freeze();
+				}
 			}
 
 			if (particle.relativeTime >= particle.lifetime) {

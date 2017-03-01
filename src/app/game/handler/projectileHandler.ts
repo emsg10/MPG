@@ -8,15 +8,13 @@ import { Enemy } from '../character/enemy';
 
 export class ProjectileHandler {
 
-    private projectiles: Projectile[] = [];
+    public projectiles: Projectile[] = [];
     private enemyProjectiles: Projectile[] = [];
     private animationHandler: AnimationHandler;
-    private enemyHandler: EnemyHandler;
     private collisionDetection = CollisionDetection.getInstance();
 
-    constructor(animationHandler: AnimationHandler, enemyHandler: EnemyHandler) {
+    constructor(animationHandler: AnimationHandler, ) {
         this.animationHandler = animationHandler;
-        this.enemyHandler = enemyHandler;
     }
 
     public clear() {
@@ -81,9 +79,23 @@ export class ProjectileHandler {
         for(let projectile of removeEnemyProjectile) {
             this.destroyProjectile(projectile, this.enemyProjectiles);
         }
+    }
 
-        this.enemyCollisionCheck(delta);
-        
+     public destroyProjectile(projectile: Projectile, projectiles: Projectile[]) {
+        this.destroyAnimation(projectile);
+        this.animationHandler.animations.splice(this.animationHandler.animations.indexOf(projectile.animation), 1);
+        let index = projectiles.indexOf(projectile);
+        if(index != -1) {
+            projectiles.splice(index, 1);
+        }
+    }
+
+    public calculateDirection(area: Rectangle, enemy: Enemy) {
+        let velocity = new Vector((enemy.position.x + enemy.width/2) - (area.x + (area.width/2)), enemy.position.y - (area.y + (area.height/2)))
+        velocity.normalize();
+        velocity.multiply((area.width/90));
+
+        return velocity;
     }
 
     private updateEnemyProjectiles(delta: number, player: Player) {
@@ -164,15 +176,6 @@ export class ProjectileHandler {
         return removeProjectiles;
     }
 
-    private destroyProjectile(projectile: Projectile, projectiles: Projectile[]) {
-        this.destroyAnimation(projectile);
-        this.animationHandler.animations.splice(this.animationHandler.animations.indexOf(projectile.animation), 1);
-        let index = projectiles.indexOf(projectile);
-        if(index != -1) {
-            projectiles.splice(index, 1);
-        }
-    }
-
     private destroyAnimation(projectile: Projectile) {
         if (projectile instanceof Spell) {
             if (projectile.type == SpellType.electricbolt) {
@@ -182,49 +185,5 @@ export class ProjectileHandler {
             }
         }
     }
-
-    private enemyCollisionCheck(delta: number) {
-        for (let projectile of this.projectiles) {
-
-            if (projectile instanceof Spell) {
-
-                let removeEnemy: Enemy[] = [];
-
-                for (let enemy of this.enemyHandler.enemies) {
-                    let velocityDelta = new Vector((projectile.velocity.x * delta) - (enemy.toMove.x), (projectile.velocity.y * delta) - (enemy.toMove.y));
-
-                    let collisionData = this.collisionDetection.checkProjectileCollisionX([new Rectangle(enemy.position.x + (enemy.width / 2) - ((enemy.width * 0.5) / 2), enemy.position.y, enemy.width * 0.5, enemy.height)], projectile, velocityDelta);
-
-                    if (collisionData.wallCollision) {
-
-                        enemy.takeDamage(projectile.area.width)
-                        if(enemy.inverse) {     
-                            this.animationHandler.bloodAnimation_B_Right(new Vector(enemy.position.x + 10, enemy.position.y - 20), 75);
-                        } else {
-                            this.animationHandler.bloodAnimation_B_Left(new Vector(enemy.position.x - 10, enemy.position.y - 20), 75);
-                        }
-                        
-                        this.destroyProjectile(projectile, this.projectiles);
-
-                        if(enemy.dead) {
-                            this.createSwordman_death(enemy.position, enemy.inverse, this.calculateDirection(projectile, enemy));
-                            removeEnemy.push(enemy);
-                        }
-                    }
-                }
-
-                for(let enemy of removeEnemy) {
-                    this.enemyHandler.remove(enemy);
-                }
-            }
-        }
-    }
-
-    private calculateDirection(projectile: Projectile, enemy: Enemy) {
-        let velocity = new Vector((enemy.position.x + enemy.width/2) - (projectile.area.x + (projectile.area.width/2)), enemy.position.y - (projectile.area.y + (projectile.area.height/2)))
-        velocity.normalize();
-        velocity.multiply((projectile.area.width/90));
-
-        return velocity;
-    }
+    
 }

@@ -1,9 +1,10 @@
-import { Vector, Tile, Rectangle, Animation } from '../model'
+import { Vector, Tile, Rectangle, Animation, SpellType } from '../model'
 import { Character } from './character';
 import { Player } from './player';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { CollisionData } from '../collision/collisionData';
 import { AnimationHandler } from '../handler/animationHandler';
+import { DeathType } from './deathType';
 
 export class Enemy extends Character {
 
@@ -19,17 +20,35 @@ export class Enemy extends Character {
         super(position, width, height);
     }
 
-    public takeDamage(damage: number) {
+    public takeDamage(damage: number, type: SpellType) {
         this.hp = this.hp - damage;
         if(this.hp <= 0) {
+            if(type == SpellType.frostBlast) {
+                this.deathType = DeathType.freezeDeath;
+            } else {
+                this.deathType = DeathType.swordDeath;
+            }
+            
             this.dead = true;
         }
+    }
+
+    public freeze() {
+        if(this.actualSpeed > this.maxSpeed * 0.3) {
+            this.actualSpeed = this.actualSpeed * 0.999;
+        }
+
+        this.takeDamage(1, SpellType.frostBlast);
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
         this.toMove.x = this.velocity.x * delta;
         this.toMove.y = this.velocity.y * delta;
         this.nextToEdge = false;
+
+        if(this.actualSpeed < this.maxSpeed) {
+            this.actualSpeed = this.actualSpeed * 1.005;
+        }
 
         this.collisionData = this.collisionDetection.collisionDetection(tiles, this);
 

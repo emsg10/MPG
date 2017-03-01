@@ -63,8 +63,8 @@ export class Game {
 		this.editorRenderer = new Renderer(this.editor.context);
 		this.previewRenderer = new Renderer(this.editor.preview.context);
 		this.animationHandler = new AnimationHandler(this.context);
-		this.enemyHandler = new EnemyHandler(this.context);
-		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.enemyHandler);
+		this.projectileHandler = new ProjectileHandler(this.animationHandler);
+		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler);
 
 		this.tileMap = new TileMap(this.context);
 

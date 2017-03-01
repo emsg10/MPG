@@ -1,7 +1,7 @@
 import { Enemy } from './enemy';
 import { Player } from './player';
 import { Context } from '../context';
-import { Vector, Rectangle, Tile, Meele, Animation } from '../model';
+import { Vector, Rectangle, Tile, Meele, Animation, SpellType } from '../model';
 import { TextureMapper } from '../render/textureMapper';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
@@ -27,6 +27,7 @@ export class Swordman extends Enemy {
         this.projectileHandler = projectileHandler;
         this.animationHandler = animationHandler;
         this.maxSpeed = 0.1;
+        this.actualSpeed = this.maxSpeed;
 
         this.runningAnimation.textureNumber.push(228);
         this.runningAnimation.textureNumber.push(227);
@@ -35,7 +36,7 @@ export class Swordman extends Enemy {
 
         this.runningAnimation.timeToChange = 150;
 
-        
+
         this.hitAnimation.textureNumber.push(231);
         this.hitAnimation.textureNumber.push(231);
         this.hitAnimation.textureNumber.push(232);
@@ -48,6 +49,13 @@ export class Swordman extends Enemy {
         this.trackingAnimation.textureNumber.push(210);
 
         this.currentAnimation = this.runningAnimation;
+    }
+
+    public takeDamage(damage: number, type: SpellType) {
+        super.takeDamage(damage, type);
+        if(!this.tracking) {
+            this.startTracking();
+        }
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
@@ -90,7 +98,7 @@ export class Swordman extends Enemy {
                 }
 
                 if (this.collisionDetection.aabbCheckS(player.getCollisionArea(), this.hitCollisionAreas)) {
-                    player.deathType = DeathType.swordDeath;
+                    //player.deathType = DeathType.swordDeath;
                 }
 
             } else {
@@ -113,13 +121,18 @@ export class Swordman extends Enemy {
 
         } else {
             if (this.inRange(player, this.searchAreaOffset)) {
-                this.tracking = true;
-                this.currentAnimation = this.trackingAnimation;
-                this.maxSpeed = 0.2;
+                this.startTracking();
             } else {
                 this.patrol(delta);
             }
         }
+    }
+
+    private startTracking() {
+        this.tracking = true;
+        this.currentAnimation = this.trackingAnimation;
+        this.maxSpeed = 0.2;
+        this.actualSpeed = this.maxSpeed;
     }
 
     private track(player: Player, delta: number) {

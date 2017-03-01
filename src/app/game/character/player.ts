@@ -14,7 +14,6 @@ export class Player extends Character{
 
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
-	public deathType: DeathType;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private particleHandler: ParticleHandler;

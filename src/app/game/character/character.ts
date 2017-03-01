@@ -1,16 +1,19 @@
 import { Vector, Animation, Rectangle } from '../model';
 import { Gravity } from '../forces/gravity';
+import { DeathType } from './deathType';
 
 export abstract class Character {
     public position: Vector;
 	public velocity: Vector = new Vector(0, 0);
 	public toMove: Vector = new Vector(0, 0);
     public dead: boolean = false;
+	public deathType: DeathType;
 	public inverse: boolean = false;
 	public width: number;
 	public height: number;
     public currentAnimation: Animation = new Animation();
     protected maxSpeed: number = 0.3;
+	protected actualSpeed: number = 0.3;
     protected acceleration: number = 0.009;
 	protected moving: boolean = false;
     protected gravityStrength: number = 0.0025;
@@ -24,12 +27,12 @@ export abstract class Character {
 
     public moveRight(delta: number) {
 
-		if (this.velocity.x < this.maxSpeed) {
+		if (this.velocity.x < this.actualSpeed) {
 			this.velocity.x += this.acceleration * delta;
 		}
 
-		if (this.velocity.x > this.maxSpeed) {
-			this.velocity.x = this.maxSpeed;
+		if (this.velocity.x > this.actualSpeed) {
+			this.velocity.x = this.actualSpeed;
 		}
 
 		this.inverse = false;
@@ -37,12 +40,12 @@ export abstract class Character {
 	}
 
     public moveLeft(delta: number) {
-        if (this.velocity.x > -this.maxSpeed) {
+        if (this.velocity.x > -this.actualSpeed) {
 			this.velocity.x -= this.acceleration * delta;
 		}
 
-		if (this.velocity.x < this.maxSpeed) {
-			this.velocity.x = -this.maxSpeed;
+		if (this.velocity.x < this.actualSpeed) {
+			this.velocity.x = -this.actualSpeed;
 		}
 
 		this.inverse = true;

@@ -97,6 +97,7 @@ export class Player extends Character{
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
+		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
 
 		return renderCall;
 

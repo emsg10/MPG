@@ -125,11 +125,13 @@ export class Game {
 		renderCall.vertecies = [];
 		renderCall.textureCoords = [];
 		renderCall.indecies = [];
+		renderCall.color = [];
 
 		let editorRenderCall = new RenderCall();
 		editorRenderCall.vertecies = [];
 		editorRenderCall.textureCoords = [];
 		editorRenderCall.indecies = [];
+		editorRenderCall.color = [];
 
 		let renderCalls: RenderCall[] = [];
 		let editorRenderCalls: RenderCall[] = [];

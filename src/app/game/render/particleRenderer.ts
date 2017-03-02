@@ -55,7 +55,7 @@ export class ParticleRenderer {
 		this.pointLifetimesBuffer = this.gl.createBuffer() as any;
 		this.pointRelativeTimeBuffer = this.gl.createBuffer() as any;
 
-		this.color = [0.7, 0.7, 1, 1];
+		this.color = [0.6, 1, 1, 1];
 	}
 
 	public updateParticleBuffers(delta: number, enemys: Enemy[]) {

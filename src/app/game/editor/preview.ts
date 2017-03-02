@@ -38,16 +38,19 @@ export class Preview {
 		var vertecies: number[] = [];
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
+		let color: number[] = [];
 
 		if(this.currentTile) {
 			vertecies = this.renderHelper.getVertecies((75 - (this.currentTile.width / 2)), 75 - (this.currentTile.height / 2), this.currentTile.width, this.currentTile.height, vertecies);
 			textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, this.currentTile.tileTextureType);
 			indecies = this.renderHelper.getIndecies(indecies);
+			color = this.renderHelper.getColor(color, null);
 		}
 
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;
 		renderCall.indecies = indecies;
+		renderCall.color = color;
 
 		return renderCall;
 	}

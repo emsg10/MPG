@@ -71,6 +71,7 @@ export class Editor {
 		var vertecies: number[] = [];
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
+		let color: number[] = [];
 		let textureNumber = 0;
 
 		if (this.currentEnemy != null) {
@@ -80,11 +81,13 @@ export class Editor {
 			}
 			textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, textureNumber);
 			indecies = this.renderHelper.getIndecies(indecies);
+			color = this.renderHelper.getColor(color, null);
 		}
 
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;
 		renderCall.indecies = indecies;
+		renderCall.color = color;
 
 		return renderCall;
 	}
@@ -95,23 +98,26 @@ export class Editor {
 		var vertecies: number[] = [];
 		var textureCoords: number[] = [];
 		var indecies: number[] = [];
+		var colors: number[] = [];
 
 		vertecies = this.renderHelper.getVertecies(0, 256, 56, 58, vertecies);
 		textureCoords = this.renderHelper.getTextureCoordinates(textureCoords, 211);
 		indecies = this.renderHelper.getIndecies(indecies);
+		colors = this.renderHelper.getColor(colors, null);
 
 		renderCall.vertecies = vertecies;
 		renderCall.textureCoords = textureCoords;
 		renderCall.indecies = indecies;
+		renderCall.color = colors;
 
 		return renderCall;
 	}
 
 	public createRenderCall() {
 
-		var rendercall = new RenderCall();
+		let rendercall = new RenderCall();
 
-		var textureCoordinates = [
+		let textureCoordinates = [
 			0.0, 0.0,
 			0.125, 0.125,
 			0.125, 0.0,
@@ -120,7 +126,7 @@ export class Editor {
 			0.0, 0.125
 		];
 
-		var vertecies = [
+		let vertecies = [
 			0, 0,
 			256, 256,
 			256, 0,
@@ -129,13 +135,14 @@ export class Editor {
 			0, 256
 		];
 
-		var vertexIndices = [
+		let vertexIndices = [
 			0, 1, 2, 3, 4, 5
 		];
 
 		rendercall.textureCoords = textureCoordinates;
 		rendercall.vertecies = vertecies;
 		rendercall.indecies = vertexIndices;
+		rendercall.color = RenderHelper.getInstance().getColor([], null);
 
 		return rendercall;
 	}

@@ -10,12 +10,13 @@ export class Renderer {
 	private vertexBuffer: WebGLBuffer;
 	private textureCoordBuffer: WebGLBuffer;
 	private indeciesBuffer: WebGLBuffer;
+	private colorBuffer: WebGLBuffer;
 
+	private colorAttributeLocation: number;
 	private positionLocation: number;
 	private textureCoordAttribute: number;
 	private rotationLocation: WebGLUniformLocation;
 	private resolutionLocation: WebGLUniformLocation;
-	private colorLocation: WebGLUniformLocation;
 
 	constructor(context: Context) {
 		this.context = context;
@@ -23,11 +24,12 @@ export class Renderer {
 		this.shaderProgram = this.context.shaderProgram;
 		this.gl.useProgram(this.shaderProgram);
 		this.positionLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
+		this.colorAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, "a_color");
+		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
 		this.rotationLocation = this.gl.getUniformLocation(this.shaderProgram, "u_rotation");
 		this.resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
-		this.colorLocation = this.gl.getUniformLocation(this.shaderProgram, "u_color");
-		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
-		
+
+		this.colorBuffer = this.gl.createBuffer();
 		this.vertexBuffer = this.gl.createBuffer();
 		this.textureCoordBuffer = this.gl.createBuffer();
 		this.indeciesBuffer = this.gl.createBuffer();
@@ -40,6 +42,7 @@ export class Renderer {
 			
 			this.gl.enableVertexAttribArray(this.positionLocation);
 			this.gl.enableVertexAttribArray(this.textureCoordAttribute);
+			this.gl.enableVertexAttribArray(this.colorAttributeLocation);
 
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 			this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(renderCall.vertecies), this.gl.STATIC_DRAW);
@@ -47,6 +50,9 @@ export class Renderer {
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
 			this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(renderCall.textureCoords), this.gl.STATIC_DRAW);
 			
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+			this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(renderCall.color), this.gl.STATIC_DRAW);
+
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(renderCall.indecies), this.gl.STATIC_DRAW);
 
@@ -59,6 +65,9 @@ export class Renderer {
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
 			this.gl.vertexAttribPointer(this.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+			this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
+
 			this.gl.activeTexture(this.gl.TEXTURE0);
 			this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
 			
@@ -67,6 +76,7 @@ export class Renderer {
 
 			this.gl.disableVertexAttribArray(this.positionLocation);
 			this.gl.disableVertexAttribArray(this.textureCoordAttribute);
+			this.gl.disableVertexAttribArray(this.colorAttributeLocation);
 		}
 
 		

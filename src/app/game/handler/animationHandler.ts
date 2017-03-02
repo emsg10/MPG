@@ -291,6 +291,7 @@ export class AnimationHandler {
                 }
                 renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+                renderCall.color = this.renderHelper.getColor(renderCall.color, null);
             }
         }
 

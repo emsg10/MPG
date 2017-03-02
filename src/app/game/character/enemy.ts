@@ -8,6 +8,7 @@ import { DeathType } from './deathType';
 
 export class Enemy extends Character {
 
+    public color = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     protected direction = false;
     protected oldDirection = false;
     protected collisionDetection = CollisionDetection.getInstance();
@@ -15,6 +16,9 @@ export class Enemy extends Character {
     protected runningAnimation = new Animation();
     protected collisionData: CollisionData;
     protected hp: number = 100;
+    protected freezeDamage: number = 0.04;
+    protected maxFreeze = this.hp/this.freezeDamage;
+    protected freezeValue = 0;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -35,10 +39,11 @@ export class Enemy extends Character {
 
     public freeze() {
         if(this.actualSpeed > this.maxSpeed * 0.3) {
-            this.actualSpeed = this.actualSpeed * 0.999;
+            this.actualSpeed = this.actualSpeed * 0.997;
         }
 
-        this.takeDamage(1, SpellType.frostBlast);
+        this.takeDamage(this.freezeDamage, SpellType.frostBlast);
+        this.freezeValue++;
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
@@ -87,12 +92,25 @@ export class Enemy extends Character {
             }
             this.velocity.x = 0;
         }
+
+        let freezePercent = this.freezeValue/this.maxFreeze;
+        this.updateColor([1.0 + (freezePercent * 3.0), 1.0 + (freezePercent * 3.0), 1.0 + (freezePercent * 3.0), 1.0]);
     }
 
     public getCollisionArea() {
         let collisionArea = new Rectangle(this.position.x, this.position.y, this.width, 55);
 
         return collisionArea;
+    }
+
+    private updateColor(color: number[]) {
+        let colorColl: number[] = [];
+
+        for(let i = 0; i < 6; i++) {
+            colorColl.push(...color);
+        }
+
+        this.color = colorColl;
     }
 
 }

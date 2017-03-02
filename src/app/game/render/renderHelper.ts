@@ -71,6 +71,21 @@ export class RenderHelper {
 		return currentVertecies;
 	}
 
+	getColor(currentColors: number[], color?: number[]) {
+		
+		let col: number[] = [];
+
+		if(color) {
+			col = color;
+		} else {
+			col = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+		}
+
+		currentColors.push.apply(currentColors, col);
+
+		return currentColors;
+	}
+
 	public getIndecies(currentIndecies: number[]) {
 
 		var vertexIndices = [

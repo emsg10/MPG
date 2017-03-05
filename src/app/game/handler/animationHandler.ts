@@ -11,10 +11,8 @@ export class AnimationHandler {
     public animations: Animation[] = [];
     private textureMapper = TextureMapper.getInstance();
     private renderHelper = RenderHelper.getInstance();
-    private context: Context;
 
-    constructor(context: Context) {
-        this.context = context;
+    constructor() {
     }
 
     public bloodAnimation_A(position: Vector, size: number) {
@@ -260,6 +258,45 @@ export class AnimationHandler {
         this.bloodAnimation_B_Left(new Vector(position.x - 55, position.y - 15), 100);
     }
 
+    public frozenSwordMan(area: Rectangle, inverse: boolean, color: number[], onCompletion: () => void) {
+        let animation = new Animation();
+        animation.textureNumber.push(237);
+        animation.textureNumber.push(238);
+        animation.textureNumber.push(239);
+        animation.textureNumber.push(240);
+        animation.textureNumber.push(241);
+        animation.textureNumber.push(242);
+        animation.inverse = inverse;
+        animation.color = color;
+        animation.timeToChange = 250;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.onCompletion = onCompletion;
+
+        this.animations.push(animation);
+
+        animation.repetitions = 6;
+
+        return animation;
+    }
+
+    public frozenPart(area: Rectangle, inverse: boolean, color: number[], partIndex: number) {
+        let animation = new Animation();
+        animation.textureNumber.push(243 + partIndex);
+        animation.inverse = inverse;
+        animation.color = color;
+        animation.timeToChange = 2000;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.animations.push(animation);
+
+        animation.repetitions = 1;
+
+        return animation;
+    }
+
+    
+
     public update(delta: number) {
 
         let completedAnimations: Animation[] = [];
@@ -268,6 +305,9 @@ export class AnimationHandler {
             animation.next(delta);
             if (animation.repetitions <= 0) {
                 completedAnimations.push(animation);
+                if(animation.onCompletion) {
+                    animation.onCompletion();
+                }
             }
         }
 
@@ -291,7 +331,11 @@ export class AnimationHandler {
                 }
                 renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-                renderCall.color = this.renderHelper.getColor(renderCall.color, null);
+                if(animation.color) {
+                    renderCall.color = this.renderHelper.getColor(renderCall.color, animation.color);
+                } else {
+                    renderCall.color = this.renderHelper.getColor(renderCall.color, null);
+                }
             }
         }
 

@@ -28,6 +28,8 @@ export class Player extends Character{
 	private spellType: SpellType;
 	private context: Context;
 	private runningAnimation = new Animation();
+	private castAnimation = new Animation();
+	private casting = false;
 
 	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number) {
 		super(position, width, height);
@@ -36,7 +38,8 @@ export class Player extends Character{
 		this.animationHandler = animationHandler;
 		this.particleHandler = particleHandler;
 		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
-
+		this.currentAnimation = this.idleAnimation;
+		
 		this.spellCast.defaultValue = 20;
 		this.spellCast.maxValue = 100;
 		this.spellCast.speed = 0.03;
@@ -53,6 +56,8 @@ export class Player extends Character{
 		this.runningAnimation.textureNumber.push(200);
 		this.runningAnimation.textureNumber.push(201);
 		this.runningAnimation.textureNumber.push(202);
+
+		this.castAnimation.textureNumber.push(249);
 	}
 
 	public createRenderCall(renderCall: RenderCall) {
@@ -83,16 +88,7 @@ export class Player extends Character{
 			x1, y2
 		];
 
-		if (this.spellCast.casting) {
-			textureNumber = this.spellCast.castAnimation.getCurrentFrame();
-		} else if (this.spellCast.channeling && this.velocity.x == 0) {
-			textureNumber = this.spellCast.channelAnimation.getCurrentFrame();
-			this.idleTime = this.idleTimeChange;
-		} else if (this.idleTime >= this.idleTimeChange) {
-			textureNumber = this.idleAnimation.getCurrentFrame();
-		} else {
-			textureNumber = this.runningAnimation.getCurrentFrame();
-		}
+		textureNumber = this.currentAnimation.getCurrentFrame();
 
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
@@ -143,6 +139,19 @@ export class Player extends Character{
 			this.dragForce.apply(this.velocity, delta);
 		}
 
+		if(this.casting) {
+			this.currentAnimation = this.castAnimation;
+		} else  if (this.spellCast.casting) {
+			this.currentAnimation = this.spellCast.castAnimation;
+		} else if (this.spellCast.channeling && this.velocity.x == 0) {
+			this.currentAnimation =  this.spellCast.channelAnimation;
+			this.idleTime = this.idleTimeChange;
+		} else if (this.idleTime >= this.idleTimeChange) {
+			this.currentAnimation = this.idleAnimation;
+		} else {
+			this.currentAnimation = this.runningAnimation;
+		}
+
 		this.spellType = type;
 		this.fall(delta);
 		this.jumping = false;
@@ -189,7 +198,12 @@ export class Player extends Character{
 	}
 
 	public cast() {
+		this.casting = true;
 		this.particleHandler.createFrostBlast(this.position, this.inverse);
+	}
+
+	public cancelCast() {
+		this.casting = false;
 	}
 
 }

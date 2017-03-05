@@ -59,7 +59,7 @@ export class EnemyHandler {
     private checkEnemyDeath(enemy: Enemy) {
         if(enemy.dead) {
             if(enemy.deathType == DeathType.freezeDeath) {
-                this.projectileHandler.createSwordman_death(enemy.position, enemy.inverse, this.projectileHandler.calculateDirection(enemy.getCollisionArea(), enemy));
+                this.projectileHandler.createFrozenSwordManDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
                 this.remove(enemy);
             }
         }

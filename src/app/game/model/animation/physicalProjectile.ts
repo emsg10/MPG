@@ -9,17 +9,16 @@ export class PhysicalProjectile extends Projectile {
     private dragStrength = 0.0005;
     private drag: Drag = new Drag(this.dragStrength);
 
-    constructor(velocity: Vector, area: Rectangle, animation: Animation, collisionRatio: number) {
-        super(velocity, area, animation, collisionRatio);
+    constructor(velocity: Vector, area: Rectangle, animation: Animation, collisionRatio: number, collisionArea?: Rectangle) {
+        super(velocity, area, animation, collisionRatio, collisionArea);
     }
 
     public update(travelDistanceX: number, travelDistanceY: number, delta: number) {
+        super.update(travelDistanceX, travelDistanceY, delta); 
+    }
 
+    public updateForces(delta: number) {
         this.gravity.apply(this.velocity, delta);
         this.drag.apply(this.velocity, delta);
-
-        super.update(travelDistanceX, travelDistanceY, delta);
-
-        
     }
 }

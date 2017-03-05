@@ -9,6 +9,8 @@ export class Animation {
 	public inverse = false;
 	public delay = 0;
 	public frameIndex: number = 0;
+	public color: number[];
+	public onCompletion: () => void;
 	private lastChange: number = 0;
 	
 

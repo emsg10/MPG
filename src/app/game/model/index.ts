@@ -12,5 +12,6 @@ import { SpellType } from './enum/spellType';
 import { Spell } from './animation/spell';
 import { PhysicalProjectile } from './animation/physicalProjectile';
 import { Meele } from './animation/meele';
+import { DebugElement } from './debug';
 
-export { ShaderType, Tile, Vector, Rectangle, Sprite, Level, Asset, Projectile, Animation, SpellCast, SpellType, Spell, PhysicalProjectile, Meele };
+export { ShaderType, Tile, Vector, Rectangle, Sprite, Level, Asset, Projectile, Animation, SpellCast, SpellType, Spell, PhysicalProjectile, Meele, DebugElement };

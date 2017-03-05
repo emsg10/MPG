@@ -12,6 +12,7 @@ import { Editor } from './editor/editor';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
 import { ParticleHandler } from './handler/particleHandler';
+import { DebuggHandler } from './handler/debugHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
 
@@ -47,6 +48,7 @@ export class Game {
 	private projectileHandler: ProjectileHandler;
 	private enemyHandler: EnemyHandler;
 	private particleHandler: ParticleHandler;
+	private debugHandler = DebuggHandler.getInstance();
 
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData, editor?: Editor) {
@@ -57,15 +59,14 @@ export class Game {
 
 		this.context = new Context(asset, 1200, 800, canvas);
 		this.renderer = new Renderer(this.context);
-		this.particleHandler = new ParticleHandler();
+		this.particleHandler = new ParticleHandler(this.levelData.tiles);
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 
 		this.editorRenderer = new Renderer(this.editor.context);
 		this.previewRenderer = new Renderer(this.editor.preview.context);
-		this.animationHandler = new AnimationHandler(this.context);
+		this.animationHandler = new AnimationHandler();
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler);
-
 		this.tileMap = new TileMap(this.context);
 
 		this.textRenderer = new TextRenderer(this.context);
@@ -164,6 +165,7 @@ export class Game {
 
 		renderCalls.push(renderCall);
 
+		this.debugHandler.createRenderCall(renderCall);
 		this.renderer.render(renderCalls);
 		this.previewRenderer.render(previewRenderCalls);
 		this.editorRenderer.render(editorRenderCalls);
@@ -183,7 +185,9 @@ export class Game {
 
 		if(this.frostKeyPress) {
 			this.player.cast();
-		} 
+		} else {
+			this.player.cancelCast();
+		}
 
 		this.player.channel(this.channelingKeyPress, delta, this.spellType);
 

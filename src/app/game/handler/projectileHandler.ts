@@ -65,6 +65,36 @@ export class ProjectileHandler {
         this.projectiles.push(projectileCorpse);
     }
 
+    public createFrozenSwordManDeath(area: Rectangle, inverse: boolean, color: number[]) {
+        
+        let onComplete = () => {
+
+            let velocotyies = [
+                new Vector((Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((-Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((-Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((-Math.random() * 0.15), (-Math.random() * 0.3)),
+            ];
+
+            let collisionAreas = [
+                new Rectangle(area.x + 7, area.y + 22, 11, 8),
+                new Rectangle(area.x + 12, area.y + 5, 12, 12),
+                new Rectangle(area.x + 15, area.y + 24, 14, 6),
+                new Rectangle(area.x + 13, area.y + 38, 6, 8),
+                new Rectangle(area.x + 6, area.y + 38, 8, 10),
+                new Rectangle(area.x + 4, area.y + 11, 13, 16)
+            ];
+
+            for(let i = 0; i < 6; i++) {
+                this.createFrozenPart(velocotyies[i], area, inverse, color, i, collisionAreas[i]);
+            }
+        };
+        
+        this.animationHandler.frozenSwordMan(area, inverse, color, onComplete);
+    }
+
     public update(delta: number, collidables: Rectangle[], player: Player) {
         let removeProjectile: Projectile[] = [];
         let removeEnemyProjectile: Projectile[] = [];
@@ -133,6 +163,9 @@ export class ProjectileHandler {
 
     private updateAndCollCheck(projectile: Projectile, delta: number, collidables: Rectangle[], removeProjectiles: Projectile[]) {
             let collisionData: CollisionData;
+
+            projectile.updateForces(delta);
+
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
             collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity);
             projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
@@ -185,5 +218,15 @@ export class ProjectileHandler {
             }
         }
     }
+
+    private createFrozenPart(velocity: Vector, rect: Rectangle, inverse: boolean, color: number[], partIndex: number, collisionArea: Rectangle) {
+        let projectile: Projectile;
+
+        projectile = new PhysicalProjectile(velocity, new Rectangle(rect.x, rect.y, rect.width, rect.width), this.animationHandler.frozenPart(rect, inverse, color, partIndex), 1, collisionArea)
+
+        this.projectiles.push(projectile);
+    }
+
+    
     
 }

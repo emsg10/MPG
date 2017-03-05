@@ -151,8 +151,21 @@ export class TextureMapper {
 			case 235: return new Rectangle(96, 1152, 32, 32);
 			case 236: return new Rectangle(128, 1152, 32, 32);
 
+			case 237: return new Rectangle(160, 1152, 32, 32);
+			case 238: return new Rectangle(192, 1152, 32, 32);
+			case 239: return new Rectangle(224, 1152, 32, 32);
+			case 240: return new Rectangle(256, 1152, 32, 32);
+			case 241: return new Rectangle(288, 1152, 32, 32);
+			case 242: return new Rectangle(320, 1152, 32, 32);
 
-			
+			case 243: return new Rectangle(32, 1216, 32, 32);
+			case 244: return new Rectangle(64, 1216, 32, 32);
+			case 245: return new Rectangle(96, 1216, 32, 32);
+			case 246: return new Rectangle(128, 1216, 32, 32);
+			case 247: return new Rectangle(160, 1216, 32, 32);
+			case 248: return new Rectangle(192, 1216, 32, 32);
+
+			case 249: return new Rectangle(0, 320, 28, 32);
 
 		}
 	}

@@ -94,7 +94,7 @@ export class Enemy extends Character {
         }
 
         let freezePercent = this.freezeValue/this.maxFreeze;
-        this.updateColor([1.0 + (freezePercent * 3.0), 1.0 + (freezePercent * 3.0), 1.0 + (freezePercent * 3.0), 1.0]);
+        this.updateColor([1.0 + (freezePercent * 1.0), 1.0 + (freezePercent * 2.0), 1.0 + (freezePercent * 2.0), 1.0]);
     }
 
     public getCollisionArea() {

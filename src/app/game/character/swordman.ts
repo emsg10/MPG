@@ -98,7 +98,7 @@ export class Swordman extends Enemy {
                 }
 
                 if (this.collisionDetection.aabbCheckS(player.getCollisionArea(), this.hitCollisionAreas)) {
-                    //player.deathType = DeathType.swordDeath;
+                    player.deathType = DeathType.swordDeath;
                 }
 
             } else {

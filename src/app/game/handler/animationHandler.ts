@@ -320,14 +320,14 @@ export class AnimationHandler {
         }
     }
 
-    public createRenderCall(renderCall: RenderCall) {
+    public createRenderCall(renderCall: RenderCall, camera: Vector) {
 
         for (let animation of this.animations) {
             if (animation.delay <= 0) {
                 if (animation.inverse) {
-                    renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+                    renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y  - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
                 } else {
-                    renderCall.vertecies = this.renderHelper.getVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+                    renderCall.vertecies = this.renderHelper.getVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
                 }
                 renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);

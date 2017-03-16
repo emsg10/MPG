@@ -23,6 +23,11 @@ export class Renderer {
 		this.gl = this.context.gl;
 		this.shaderProgram = this.context.shaderProgram;
 		this.gl.useProgram(this.shaderProgram);
+
+		this.gl.bindAttribLocation(this.shaderProgram, 0, "a_position");
+		this.gl.bindAttribLocation(this.shaderProgram, 1, "a_color");
+		this.gl.bindAttribLocation(this.shaderProgram, 2, "a_texture_coord");
+
 		this.positionLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
 		this.colorAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, "a_color");
 		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");

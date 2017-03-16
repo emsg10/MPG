@@ -15,6 +15,7 @@ import { ParticleHandler } from './handler/particleHandler';
 import { DebuggHandler } from './handler/debugHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
+import { Camera } from './camera';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -25,6 +26,8 @@ export class Game {
 	private renderer: Renderer;
 	private editorRenderer: Renderer;
 	private previewRenderer: Renderer;
+	private editorCameraRenderer: Renderer;
+	private editorCameraContext: Context;
 	private particelRenderer: ParticleRenderer;
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
@@ -33,6 +36,7 @@ export class Game {
 	private jumpKeyPress: boolean;
 	private channelingKeyPress: boolean;
 	private frostKeyPress: boolean;
+	private fireKeyPress: boolean;
 	private spellType: SpellType;
 	private started: boolean = false;
 	private lastUpdate: number;
@@ -49,24 +53,31 @@ export class Game {
 	private enemyHandler: EnemyHandler;
 	private particleHandler: ParticleHandler;
 	private debugHandler = DebuggHandler.getInstance();
-
+	private camera: Camera;
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData, editor?: Editor) {
+		
+		//EDITOR
+		this.editor = editor;
+		this.editorCameraContext = this.editor.editorCamera.context;
+		this.editorRenderer = new Renderer(this.editor.context);
+		this.previewRenderer = new Renderer(this.editor.preview.context);
+		this.editorCameraRenderer = new Renderer(this.editor.editorCamera.context);
+
+		//GAME
 		this.startElement = startElement;
 		this.restartElement = restartElement;
 		this.levelData = levelData;
-		this.editor = editor;
 
-		this.context = new Context(asset, 1200, 800, canvas);
+		this.context = new Context(asset, this.canvasWidth, this.canvasHeight, canvas);
+		this.camera = new Camera(new Vector(0, 0), new Vector(this.canvasWidth, this.canvasHeight));
 		this.renderer = new Renderer(this.context);
-		this.particleHandler = new ParticleHandler(this.levelData.tiles);
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 
-		this.editorRenderer = new Renderer(this.editor.context);
-		this.previewRenderer = new Renderer(this.editor.preview.context);
 		this.animationHandler = new AnimationHandler();
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler);
+		this.particleHandler = new ParticleHandler(this.levelData.tiles, this.enemyHandler);
 		this.tileMap = new TileMap(this.context);
 
 		this.textRenderer = new TextRenderer(this.context);
@@ -96,7 +107,7 @@ export class Game {
 			while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
 				let delta = nextGameTick - this.lastUpdate;
 				this.lastUpdate = nextGameTick;
-				
+
 				if (this.started) {
 					if (!this.player.dead) {
 						this.checkKeys(delta);
@@ -106,12 +117,13 @@ export class Game {
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
+						this.camera.update(this.player.position);
 					} else {
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					}
 				}
-				this.particelRenderer.updateParticleBuffers(delta, this.enemyHandler.enemies);
+				this.particleHandler.update(delta);
 
 				this.render();
 
@@ -128,48 +140,50 @@ export class Game {
 		renderCall.indecies = [];
 		renderCall.color = [];
 
-		let editorRenderCall = new RenderCall();
-		editorRenderCall.vertecies = [];
-		editorRenderCall.textureCoords = [];
-		editorRenderCall.indecies = [];
-		editorRenderCall.color = [];
-
 		let renderCalls: RenderCall[] = [];
-		let editorRenderCalls: RenderCall[] = [];
-		let previewRenderCalls: RenderCall[] = [];
-		
+
+
 
 		//EDITOR
 		if (!this.started) {
+			let editorRenderCall = new RenderCall();
+			editorRenderCall.vertecies = [];
+			editorRenderCall.textureCoords = [];
+			editorRenderCall.indecies = [];
+			editorRenderCall.color = [];
+			let editorRenderCalls: RenderCall[] = [];
+			let previewRenderCalls: RenderCall[] = [];
+
+			this.editorCameraContext.clear();
 			editorRenderCalls.push(this.editor.createRenderCall());
 			if (this.editor.currentTile != null) {
-				renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile], editorRenderCall));
+				renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile], editorRenderCall, this.camera.position));
 			}
 			editorRenderCalls.push(this.editor.currentEnemyRenderCall(this.context));
 			previewRenderCalls.push(this.editor.preview.createRenderCall());
 			editorRenderCalls.push(this.editor.createEnemyRenderCall());
+
+			this.previewRenderer.render(previewRenderCalls);
+			this.editorRenderer.render(editorRenderCalls);
 		}
 
-		//Game
-		this.enemyHandler.createRenderCall(renderCall)
-		this.tileMap.createRenderCall(this.level.tiles, renderCall)
+		//GAME
+		this.enemyHandler.createRenderCall(renderCall, this.camera.position)
+		this.tileMap.createRenderCall(this.level.tiles, renderCall, this.camera.position)
 
 		if (this.player.dead) {
 			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
-			//clearInterval(this.intevalTimer);
 		} else {
-			renderCall = this.player.createRenderCall(renderCall)
+			renderCall = this.player.createRenderCall(renderCall, this.camera.position)
 		}
 
-		this.animationHandler.createRenderCall(renderCall)
+		this.animationHandler.createRenderCall(renderCall, this.camera.position)
 
 		renderCalls.push(renderCall);
 
-		this.debugHandler.createRenderCall(renderCall);
+		this.debugHandler.createRenderCall(renderCall, this.camera.position);
 		this.renderer.render(renderCalls);
-		this.previewRenderer.render(previewRenderCalls);
-		this.editorRenderer.render(editorRenderCalls);
-		this.particelRenderer.render();
+		this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
 	}
 
 	private checkKeys(delta: number) {
@@ -183,8 +197,10 @@ export class Game {
 			this.player.jump();
 		}
 
-		if(this.frostKeyPress) {
-			this.player.cast();
+		if (this.frostKeyPress) {
+			this.player.cast(SpellType.frostBlast);
+		} else if (this.fireKeyPress) {
+			this.player.cast(SpellType.fireBlast);
 		} else {
 			this.player.cancelCast();
 		}
@@ -219,6 +235,9 @@ export class Game {
 					break;
 				case 'Numpad3':
 					this.frostKeyPress = true;
+					break;
+				case 'Numpad4':
+					this.fireKeyPress = true;
 					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = true;
@@ -255,6 +274,9 @@ export class Game {
 					break;
 				case 'Numpad3':
 					this.frostKeyPress = false;
+					break;
+				case 'Numpad4':
+					this.fireKeyPress = false;
 					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = false;
@@ -295,6 +317,6 @@ export class Game {
 
 		this.enemyHandler.enemies = enemies;
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
-
+		this.collision.createGrid(this.canvasWidth, this.canvasHeight, this.level.tiles);
 	}
 }

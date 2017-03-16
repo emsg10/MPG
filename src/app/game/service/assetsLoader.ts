@@ -8,6 +8,7 @@ export class AssetsLoader {
   private shaderUrl = 'src/assets/shader';
   private textureUrl = "src/assets/texture/tiles.png";
   private particleTextureUrl = "src/assets/texture/particleSprites.png";
+  private genericParticleTextureUrl = "src/assets/texture/genericParticle.png";
   private levelUrl = "src/app/game/map";
 
   constructor(private http: Http) { }
@@ -36,10 +37,10 @@ export class AssetsLoader {
       .catch(this.handleError);
   }
 
-  getTexture() {
+  getTexture(url: string) {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();
-      texture.src = this.textureUrl;
+      texture.src = url;
       texture.onload = function () {
         observer.next(texture);
         observer.complete();
@@ -48,14 +49,15 @@ export class AssetsLoader {
   }
 
   getParticleTexture() {
-    return Observable.create((observer: Observer<any>) => {
-      var texture = new Image();
-      texture.src = this.particleTextureUrl;
-      texture.onload = function () {
-        observer.next(texture);
-        observer.complete();
-      }
-    });
+    return this.getTexture(this.particleTextureUrl);
+  }
+
+  getGenericParticleTexture() {
+    return this.getTexture(this.genericParticleTextureUrl);
+  }
+
+  getTileTexture() {
+    return this.getTexture(this.textureUrl);
   }
 
   getLevel(level: string) {

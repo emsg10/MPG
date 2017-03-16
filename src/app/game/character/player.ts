@@ -60,10 +60,10 @@ export class Player extends Character{
 		this.castAnimation.textureNumber.push(249);
 	}
 
-	public createRenderCall(renderCall: RenderCall) {
+	public createRenderCall(renderCall: RenderCall, camera: Vector) {
 
 		let call = new RenderCall();
-		let x: number = this.position.x;
+		let x: number = this.position.x - camera.x;
 		let x1: number;
 		let x2: number;
 		let textureNumber: number;
@@ -76,8 +76,8 @@ export class Player extends Character{
 			x1 = x;
 		}
 
-		let y1 = this.position.y;
-		let y2 = this.position.y + (this.height);
+		let y1 = this.position.y - camera.y;
+		let y2 = this.position.y + (this.height) - camera.y;
 
 		call.vertecies = [
 			x1, y1,
@@ -197,9 +197,14 @@ export class Player extends Character{
 		this.spellCast.update(channeling, delta, this.inverse, this.position, type);
 	}
 
-	public cast() {
+	public cast(type: SpellType) {
 		this.casting = true;
-		this.particleHandler.createFrostBlast(this.position, this.inverse);
+		if(type == SpellType.frostBlast) {
+			this.particleHandler.createFrostBlast(this.position, this.inverse);
+		} else {
+			this.particleHandler.createFireBlast(this.position, this.inverse);
+		}
+		
 	}
 
 	public cancelCast() {

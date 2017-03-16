@@ -1,29 +1,41 @@
-<div>
-    <button class="start-button" #start>Start</button>
-    <button class="start-button" #restart>Restart</button>
-</div>
+<table style="border: 1px solid">
+    <tr>
+        <td>
+            <button class="start-button" #start>Start</button>
+            <button class="start-button" #restart>Restart</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <button (click)="export()" class="start-button">Export</button>
+            <button (click)="import()" class="start-button">Import</button>
+            <button (click)="clear()" class="start-button">Clear</button>
+            <input hidden type="file" #importElement>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div>Startposition</div>
+            <input #playerXValueInput (input)="playerXValueChanged(playerXValueInput.value)" type="range" min="0" max="1200" step="5"
+                [value]="level?.playerPosition?.x">
+            <span style="display: block; margin-left: 5px">{{level?.playerPosition?.x}}</span><br>
+            <input #playerYValueInput (input)="playerYValueChanged(playerYValueInput.value)" type="range" min="0" max="800" step="5"
+                [value]="level?.playerPosition?.y">
+            <span style="display: block; margin-left: 5px">{{level?.playerPosition?.y}}</span><br>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <preview #preview [currentTile]="currentTile" (onXvalueChange)="xValueChanged($event)" (onYvalueChange)="yValueChanged($event)"></preview>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <canvas #editorCanvas></canvas>
+        </td>
+        <td style="vertical-align: top;">
+            <editorCamera #editorCamera></editorCamera>
+        </td>
+    </tr>
 
-<div style="padding-top: 10px;">
-    <button (click)="export()" class="start-button">Export</button>
-    <button (click)="import()" class="start-button">Import</button>
-    <button (click)="clear()" class="start-button">Clear</button>
-    <input hidden type="file" #importElement>
-</div>
-
-<div style="padding-top: 10px;">
-    <div>Startposition</div>
-    <input #playerXValueInput (input)="playerXValueChanged(playerXValueInput.value)" type="range" min="0" max="1200" step="5" [value]="level?.playerPosition?.x">
-    <span style="display: block; margin-left: 5px">{{level?.playerPosition?.x}}</span><br>
-    <input #playerYValueInput (input)="playerYValueChanged(playerYValueInput.value)" type="range" min="0" max="800" step="5" [value]="level?.playerPosition?.y">
-    <span style="display: block; margin-left: 5px">{{level?.playerPosition?.y}}</span><br>
-</div>
-
-<preview #preview [currentTile]="currentTile" (onXvalueChange)="xValueChanged($event)" (onYvalueChange)="yValueChanged($event)"></preview>
-
-<div>
-    <canvas #editorCanvas></canvas>
-</div>
-
-
-
-
+</table>

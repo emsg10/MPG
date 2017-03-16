@@ -1,11 +1,15 @@
 import { Vector, Tile, Rectangle, Projectile } from '../model';
-import { CollisionData } from './';
+import { CollisionData, Grid } from './';
 import { Character } from '../character/character';
 import { Enemy } from '../character/enemy';
 
 export class CollisionDetection {
 
 	private static instance: CollisionDetection = new CollisionDetection();
+	private grid: Grid;
+	private canvasSize: Vector;
+	private gridItemSize: number;
+	
 
 	constructor() {
 		if(CollisionDetection.instance) {
@@ -17,6 +21,15 @@ export class CollisionDetection {
 
 	public static getInstance() {
 		return CollisionDetection.instance;
+	}
+
+	public createGrid(width: number, height: number, collidables: Rectangle[]) {
+		this.canvasSize = new Vector(width, height);
+		this.grid = new Grid(25, this.canvasSize);
+
+		for(let collidable of collidables) {
+			this.grid.insert(collidable);
+		}
 	}
 
 	public collisionDetection(tiles: Tile[], character: Character) {
@@ -37,8 +50,10 @@ export class CollisionDetection {
 
 	public checkEdge(rect: Rectangle, tiles: Tile[]) {
 		let edge = true;
-		
-		for(let tile of tiles) {
+
+		let possibleColls = this.grid.get(rect);
+
+		for(let tile of possibleColls) {
 			if(this.aabbCheck(rect, tile)) {
 				edge = false;
 			}
@@ -82,7 +97,10 @@ export class CollisionDetection {
 		let collisionData: CollisionData = new CollisionData();
 		let rect1 = character.getCollisionArea();
 		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, frameVelocity);
-		for(let tile of tilesToCheck) {
+
+		let possibleColls = this.grid.get(broadphasebox) as Tile[];
+
+		for(let tile of possibleColls) {
 			if(this.aabbCheck(broadphasebox, tile)) {
 				collisionData = this.aabbCollisionY(character.getCollisionArea(), tile, frameVelocity, collisionData, tile.tileTextureType);
 			}
@@ -112,7 +130,9 @@ export class CollisionDetection {
 		let coliidables: Rectangle[] = []
 		let closestX: number = inverse ? 0 : 1200;
 
-		for(let tile of tiles) {
+		let possibleColls = this.grid.get(rect);
+
+		for(let tile of possibleColls) {
 			if(this.aabbCheck(rect, tile)) {
 				if(inverse) {
 					let tileVal = tile.x + tile.width;

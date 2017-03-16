@@ -33,13 +33,13 @@ export class EnemyHandler {
         }
     }
 
-    createRenderCall(renderCall: RenderCall) {
+    createRenderCall(renderCall: RenderCall, camera: Vector) {
 
 		for(let enemy of this.enemies) {
             if(enemy.inverse) {
-                renderCall.vertecies = this.renderHelper.getInverseVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, renderCall.vertecies);
+                renderCall.vertecies = this.renderHelper.getInverseVertecies(enemy.position.x - camera.x, enemy.position.y - camera.y, enemy.width, enemy.height, renderCall.vertecies);
             } else {
-                renderCall.vertecies = this.renderHelper.getVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, renderCall.vertecies);
+                renderCall.vertecies = this.renderHelper.getVertecies(enemy.position.x - camera.x, enemy.position.y - camera.y, enemy.width, enemy.height, renderCall.vertecies);
             }
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, enemy.currentAnimation.getCurrentFrame());
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);

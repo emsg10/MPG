@@ -5,6 +5,7 @@ import { Context } from '../';
 import { RenderCall } from '../render/renderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { Preview } from './preview';
+import { EditorCamera } from './editorCamera';
 import { LoadHelper } from '../service/loadHelper';
 import { RenderHelper } from '../render/renderHelper';
 import { TextureMapper } from '../render/textureMapper';
@@ -20,6 +21,7 @@ import { LevelData, EnemyData, EnemyType } from '../map/model';
 export class Editor {
 	@ViewChild('editorCanvas') editorCanvas: ElementRef;
 	@ViewChild('preview') preview: Preview;
+	@ViewChild('editorCamera') editorCamera: EditorCamera;
 	@ViewChild('start') startElement: ElementRef;
 	@ViewChild('restart') restartElement: ElementRef;
 	@ViewChild('importElement') importElement: ElementRef;
@@ -36,6 +38,7 @@ export class Editor {
 	public currentEnemy: EnemyData;
 	public levelData: LevelData;
 	public context: Context;
+	public asset: Asset;
 
 	private renderHelper = RenderHelper.getInstance();
 	private textureMapper = TextureMapper.getInstance();
@@ -56,7 +59,9 @@ export class Editor {
 
 	public init(asset: Asset, canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
+		this.asset = asset;
 		this.preview.init(asset);
+		this.editorCamera.init(asset);
 
 		this.initMouseEventListener(this.canvas);
 		this.initImportChangeListener();

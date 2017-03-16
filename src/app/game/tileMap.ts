@@ -11,11 +11,11 @@ export class TileMap {
 		this.context = context;
 	}
 
-	public createRenderCall(tiles: Tile[], renderCall: RenderCall) {
+	public createRenderCall(tiles: Tile[], renderCall: RenderCall, camera: Vector) {
 
 		for(var i = 0; i < tiles.length; i++) {
 			if(tiles[i].tileTextureType != 0) {
-				renderCall.vertecies = this.renderHelper.getVertecies(tiles[i].x, tiles[i].y, tiles[i].width, tiles[i].height, renderCall.vertecies);
+				renderCall.vertecies = this.renderHelper.getVertecies(tiles[i].x - camera.x, tiles[i].y - camera.y, tiles[i].width, tiles[i].height, renderCall.vertecies);
 				renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, tiles[i].tileTextureType);
 				renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 				renderCall.color = this.renderHelper.getColor(renderCall.color, null);

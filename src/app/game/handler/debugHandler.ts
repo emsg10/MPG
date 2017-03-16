@@ -22,13 +22,13 @@ export class DebuggHandler {
 		return DebuggHandler.instance;
 	}
 
-    createRenderCall(renderCall: RenderCall) {
+    createRenderCall(renderCall: RenderCall, camera: Vector) {
 
         for(let rect of this.debugRects) {
             if(rect.inverse) {
-                renderCall.vertecies = this.renderHelper.getInverseVertecies(rect.area.x, rect.area.y, rect.area.width, rect.area.height, renderCall.vertecies);
+                renderCall.vertecies = this.renderHelper.getInverseVertecies(rect.area.x - camera.x, rect.area.y - camera.y, rect.area.width, rect.area.height, renderCall.vertecies);
             } else {
-                renderCall.vertecies = this.renderHelper.getVertecies(rect.area.x, rect.area.y, rect.area.width, rect.area.height, renderCall.vertecies);
+                renderCall.vertecies = this.renderHelper.getVertecies(rect.area.x - camera.x, rect.area.y - camera.y, rect.area.width, rect.area.height, renderCall.vertecies);
             }
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 1);
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);

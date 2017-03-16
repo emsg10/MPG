@@ -30,8 +30,9 @@ export class EditorViewComponent implements AfterViewInit {
             this.assetsLoader.getFragmentShader(),
             this.assetsLoader.getParticleVertexShader(),
             this.assetsLoader.getParticleFragmentShader(),
-            this.assetsLoader.getTexture(),
+            this.assetsLoader.getTileTexture(),
             this.assetsLoader.getParticleTexture(),
+            this.assetsLoader.getGenericParticleTexture(),
             this.assetsLoader.getLevel("1")
         ).subscribe(data => {
             this.asset.vertexShader = data[0] as string;
@@ -41,10 +42,10 @@ export class EditorViewComponent implements AfterViewInit {
             
             this.asset.texture = data[4] as HTMLImageElement;
             this.asset.particleTexture = data[5] as HTMLImageElement;
-
+            this.asset.genericParticleTexture = data[6] as HTMLImageElement;
             this.editor.init(this.asset, this.gameCanvas.nativeElement);
 
-            this.editor.levelData = data[6];
+            this.editor.levelData = data[7];
 
             this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.levelData, this.editor);
         });

@@ -5,4 +5,5 @@ export class Asset {
 	public particleFragmentShader: string;
 	public texture: HTMLImageElement;
 	public particleTexture: HTMLImageElement;
+	public genericParticleTexture: HTMLImageElement;
 }

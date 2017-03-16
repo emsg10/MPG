@@ -8,6 +8,7 @@ export class Context
 	public gl: WebGLRenderingContext;
 	public glTexture: WebGLTexture;
 	public particleTexture: WebGLTexture;
+	public genericParticleTexture: WebGLTexture;
 
 	constructor(asset: Asset, width: number, height: number, canvas: HTMLCanvasElement){
 		this.initContext(width, height, canvas);
@@ -50,20 +51,28 @@ export class Context
 			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.shaderProgram));
 		}
 
-		this.initTextures(this.gl, asset.texture, asset.particleTexture);
+		this.initTextures(this.gl, asset);
 	}
 
-	private initTextures(gl: WebGLRenderingContext, texture: HTMLImageElement, particleTexture: HTMLImageElement) {
+	private initTextures(gl: WebGLRenderingContext, asset: Asset) {
 
 		this.glTexture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, this.glTexture);
-  		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture);
+  		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, asset.texture);
   		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   		gl.generateMipmap(gl.TEXTURE_2D);
 
 		this.particleTexture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, particleTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, asset.particleTexture);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+		this.genericParticleTexture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, this.genericParticleTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, asset.genericParticleTexture);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

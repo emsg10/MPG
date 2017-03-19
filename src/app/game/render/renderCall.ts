@@ -5,4 +5,11 @@ export class RenderCall {
 	public textureCoords: number[];
 	public indecies: number[];
 	public color: number[];
+
+	constructor() {
+		this.vertecies = [];
+		this.indecies = [];
+		this.textureCoords = [];
+		this.color = [];
+	}
 }

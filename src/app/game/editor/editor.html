@@ -16,12 +16,10 @@
     <tr>
         <td>
             <div>Startposition</div>
-            <input #playerXValueInput (input)="playerXValueChanged(playerXValueInput.value)" type="range" min="0" max="1200" step="5"
-                [value]="level?.playerPosition?.x">
-            <span style="display: block; margin-left: 5px">{{level?.playerPosition?.x}}</span><br>
-            <input #playerYValueInput (input)="playerYValueChanged(playerYValueInput.value)" type="range" min="0" max="800" step="5"
-                [value]="level?.playerPosition?.y">
-            <span style="display: block; margin-left: 5px">{{level?.playerPosition?.y}}</span><br>
+            <input #playerXValueInput (input)="playerXValueChanged(playerXValueInput.value)" type="text" min="0" max="1200" step="5"
+                [value]="levelData?.playerPosition?.x">
+            <input #playerYValueInput (input)="playerYValueChanged(playerYValueInput.value)" type="text" min="0" max="800" step="5"
+                [value]="levelData?.playerPosition?.y">
         </td>
     </tr>
     <tr>
@@ -34,7 +32,7 @@
             <canvas #editorCanvas></canvas>
         </td>
         <td style="vertical-align: top;">
-            <editorCamera #editorCamera></editorCamera>
+            <editorCamera (cameraChanged)="cameraChanged($event)" (gameSizeChanged)="gameSizeChanged($event)" #editorCamera></editorCamera>
         </td>
     </tr>
 

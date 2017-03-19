@@ -20,14 +20,11 @@ import { Camera } from './camera';
 export class Game {
 	public canvasWidth = 1200;
 	public canvasHeight = 800;
+	public context: Context;
+
 	private fps = 60;
-	private context: Context;
 	private tileMap: TileMap;
 	private renderer: Renderer;
-	private editorRenderer: Renderer;
-	private previewRenderer: Renderer;
-	private editorCameraRenderer: Renderer;
-	private editorCameraContext: Context;
 	private particelRenderer: ParticleRenderer;
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
@@ -47,24 +44,17 @@ export class Game {
 	private restartElement: HTMLElement;
 	private level: Level = new Level();
 	private levelData: LevelData;
-	private editor: Editor;
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
 	private enemyHandler: EnemyHandler;
 	private particleHandler: ParticleHandler;
 	private debugHandler = DebuggHandler.getInstance();
 	private camera: Camera;
+	private mouseRenderCall: RenderCall;
+	private levelCompleted = false;
 
-	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData, editor?: Editor) {
-		
-		//EDITOR
-		this.editor = editor;
-		this.editorCameraContext = this.editor.editorCamera.context;
-		this.editorRenderer = new Renderer(this.editor.context);
-		this.previewRenderer = new Renderer(this.editor.preview.context);
-		this.editorCameraRenderer = new Renderer(this.editor.editorCamera.context);
+	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData) {
 
-		//GAME
 		this.startElement = startElement;
 		this.restartElement = restartElement;
 		this.levelData = levelData;
@@ -83,12 +73,16 @@ export class Game {
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
 		this.initLoop();
-		this.reset(this.levelData);
+		this.reset(this.levelData, null);
 	}
 
-	public reset(levelData: LevelData) {
-		this.loadLevel(levelData);
-		this.started = false;
+	public reset(levelData: LevelData, mouseRenderCall: RenderCall) {
+		if (!(mouseRenderCall && this.started)) {
+			this.loadLevel(levelData);
+			this.started = false;
+		} 
+
+		this.mouseRenderCall = mouseRenderCall;
 	}
 
 	private initLoop() {
@@ -109,9 +103,10 @@ export class Game {
 				this.lastUpdate = nextGameTick;
 
 				if (this.started) {
-					if (!this.player.dead) {
+					if (!this.player.dead && !this.levelCompleted) {
+						this.checkGoal();
 						this.checkKeys(delta);
-						this.collision.checkCoutOfBounds(this.player, this.gameArea);
+						this.collision.checkCoutOfBounds(this.player, this.levelData.gameSize);
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
 						this.player.update(collisionData, delta, this.spellType);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
@@ -133,46 +128,26 @@ export class Game {
 	}
 
 	private render() {
-		this.context.clear();
+		this.context.clear([0, 0, 0, 0.95]);
 		let renderCall = new RenderCall();
-		renderCall.vertecies = [];
-		renderCall.textureCoords = [];
-		renderCall.indecies = [];
-		renderCall.color = [];
-
 		let renderCalls: RenderCall[] = [];
-
-
 
 		//EDITOR
 		if (!this.started) {
-			let editorRenderCall = new RenderCall();
-			editorRenderCall.vertecies = [];
-			editorRenderCall.textureCoords = [];
-			editorRenderCall.indecies = [];
-			editorRenderCall.color = [];
-			let editorRenderCalls: RenderCall[] = [];
-			let previewRenderCalls: RenderCall[] = [];
-
-			this.editorCameraContext.clear();
-			editorRenderCalls.push(this.editor.createRenderCall());
-			if (this.editor.currentTile != null) {
-				renderCalls.push(this.tileMap.createRenderCall([this.editor.currentTile], editorRenderCall, this.camera.position));
+			if (this.mouseRenderCall) {
+				renderCalls.push(this.mouseRenderCall);
 			}
-			editorRenderCalls.push(this.editor.currentEnemyRenderCall(this.context));
-			previewRenderCalls.push(this.editor.preview.createRenderCall());
-			editorRenderCalls.push(this.editor.createEnemyRenderCall());
-
-			this.previewRenderer.render(previewRenderCalls);
-			this.editorRenderer.render(editorRenderCalls);
 		}
 
 		//GAME
-		this.enemyHandler.createRenderCall(renderCall, this.camera.position)
-		this.tileMap.createRenderCall(this.level.tiles, renderCall, this.camera.position)
+		this.enemyHandler.createRenderCall(renderCall, this.camera.position);
+		this.tileMap.createRenderCall(this.level.tiles, renderCall, this.camera.position);
+		this.tileMap.createGoalRenderCall(this.level.goal, renderCall, this.camera.position);
 
 		if (this.player.dead) {
 			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
+		} else if(this.levelCompleted) {
+			this.textRenderer.createTextRenderCall(800, 96, 51, renderCall);
 		} else {
 			renderCall = this.player.createRenderCall(renderCall, this.camera.position)
 		}
@@ -184,6 +159,10 @@ export class Game {
 		this.debugHandler.createRenderCall(renderCall, this.camera.position);
 		this.renderer.render(renderCalls);
 		this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
+	}
+
+	private checkGoal() {
+		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.level.goal);
 	}
 
 	private checkKeys(delta: number) {
@@ -295,17 +274,24 @@ export class Game {
 		});
 
 		this.restartElement.addEventListener("click", (event: MouseEvent) => {
-			this.reset(this.levelData);
+			this.reset(this.levelData, null);
 		});
 
 	}
 
 	private loadLevel(levelData: LevelData) {
+
 		let tiles: Tile[] = JSON.parse(JSON.stringify(levelData.tiles));
+
+		this.camera.position = new Vector(levelData.cameraPosition.x, levelData.cameraPosition.y);
 		this.level.tiles = tiles;
+		this.level.gameSize = levelData.gameSize;
 		this.level.playerPosition = new Vector(levelData.playerPosition.x, levelData.playerPosition.y);
+		this.level.goal = new Rectangle(levelData.goal.x, levelData.goal.y, levelData.goal.width, levelData.goal.height);
+
 		this.animationHandler.animations = [];
 		this.projectileHandler.clear();
+		this.levelCompleted = false;
 
 		let enemies: Enemy[] = [];
 
@@ -317,6 +303,7 @@ export class Game {
 
 		this.enemyHandler.enemies = enemies;
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
-		this.collision.createGrid(this.canvasWidth, this.canvasHeight, this.level.tiles);
+		this.collision.createGrid(this.level.gameSize, this.level.tiles);
+
 	}
 }

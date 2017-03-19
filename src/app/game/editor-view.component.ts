@@ -33,7 +33,7 @@ export class EditorViewComponent implements AfterViewInit {
             this.assetsLoader.getTileTexture(),
             this.assetsLoader.getParticleTexture(),
             this.assetsLoader.getGenericParticleTexture(),
-            this.assetsLoader.getLevel("1")
+            this.assetsLoader.getLevel("2")
         ).subscribe(data => {
             this.asset.vertexShader = data[0] as string;
             this.asset.fragmentShader = data[1] as string;
@@ -43,16 +43,16 @@ export class EditorViewComponent implements AfterViewInit {
             this.asset.texture = data[4] as HTMLImageElement;
             this.asset.particleTexture = data[5] as HTMLImageElement;
             this.asset.genericParticleTexture = data[6] as HTMLImageElement;
-            this.editor.init(this.asset, this.gameCanvas.nativeElement);
-
             this.editor.levelData = data[7];
 
-            this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.levelData, this.editor);
+            this.editor.init(this.asset, this.gameCanvas.nativeElement);
+
+            this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.levelData);
         });
     }
 
     public levelLoaded() {
-        this.game.reset(this.editor.levelData);
+        this.game.reset(this.editor.levelData, this.editor.mouseRenderCall);
     }
 
 }

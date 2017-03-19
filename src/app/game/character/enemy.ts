@@ -9,8 +9,8 @@ import { DeathType } from './deathType';
 export class Enemy extends Character {
 
     public color = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-    protected direction = false;
-    protected oldDirection = false;
+    protected direction = true;
+    protected oldDirection = true;
     protected collisionDetection = CollisionDetection.getInstance();
     protected nextToEdge: boolean;
     protected runningAnimation = new Animation();

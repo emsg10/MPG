@@ -7,7 +7,7 @@ export class CollisionDetection {
 
 	private static instance: CollisionDetection = new CollisionDetection();
 	private grid: Grid;
-	private canvasSize: Vector;
+	private gameSize: Vector;
 	private gridItemSize: number;
 	
 
@@ -23,9 +23,9 @@ export class CollisionDetection {
 		return CollisionDetection.instance;
 	}
 
-	public createGrid(width: number, height: number, collidables: Rectangle[]) {
-		this.canvasSize = new Vector(width, height);
-		this.grid = new Grid(25, this.canvasSize);
+	public createGrid(gameSize: Vector, collidables: Rectangle[]) {
+		this.gameSize = gameSize;
+		this.grid = new Grid(25, this.gameSize);
 
 		for(let collidable of collidables) {
 			this.grid.insert(collidable);
@@ -151,8 +151,9 @@ export class CollisionDetection {
 		return closestX;
 	}
 
-	public checkCoutOfBounds(character: Character, area: Rectangle) {
-		if(!this.aabbCheck(character.getCollisionArea(), area)) {
+	public checkCoutOfBounds(character: Character, area: Vector) {
+		let rect = new Rectangle(0, 0, area.x, area.y);
+		if(!this.aabbCheck(character.getCollisionArea(), rect)) {
 			character.dead = true;
 		}
 	}

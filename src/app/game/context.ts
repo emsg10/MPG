@@ -15,9 +15,9 @@ export class Context
 		this.initShaders(asset);
 	}
 
-	public clear() {
+	public clear(color: number[]) {
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
-		this.gl.clearColor(0, 0, 0, 0.95);
+		this.gl.clearColor(color[0], color[1], color[2], color[3]);
 	}
 
 	private initContext(width: number, height: number, canvas: HTMLCanvasElement) {

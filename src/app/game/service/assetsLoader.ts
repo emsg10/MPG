@@ -37,6 +37,18 @@ export class AssetsLoader {
       .catch(this.handleError);
   }
 
+  getSimpleParticleVertexShader() {
+    return this.http.get(this.shaderUrl + "/simpleParticleVertexShader.c")
+      .map(this.extractTextData)
+      .catch(this.handleError);
+  }
+
+  getSimpleParticleFragmentShader() {
+    return this.http.get(this.shaderUrl + "/simpleParticleFragmentShader.c")
+      .map(this.extractTextData)
+      .catch(this.handleError);
+  }
+
   getTexture(url: string) {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();

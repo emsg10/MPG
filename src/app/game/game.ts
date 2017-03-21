@@ -12,6 +12,8 @@ import { Editor } from './editor/editor';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
 import { ParticleHandler } from './handler/particleHandler';
+import { SimpleParticleRenderer } from './render/simpleParticleRenderer';
+import { SimpleParticleRenderCall } from './render/simpleParticleRenderCall';
 import { DebuggHandler } from './handler/debugHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
@@ -26,6 +28,7 @@ export class Game {
 	private tileMap: TileMap;
 	private renderer: Renderer;
 	private particelRenderer: ParticleRenderer;
+	private simpleParticleRenderer: SimpleParticleRenderer;
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
 	private leftKeyPress: boolean;
@@ -63,6 +66,7 @@ export class Game {
 		this.camera = new Camera(new Vector(0, 0), new Vector(this.canvasWidth, this.canvasHeight));
 		this.renderer = new Renderer(this.context);
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
+		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 
 		this.animationHandler = new AnimationHandler();
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
@@ -130,7 +134,10 @@ export class Game {
 	private render() {
 		this.context.clear([0, 0, 0, 0.95]);
 		let renderCall = new RenderCall();
+		let particleRenderCall = new SimpleParticleRenderCall();
 		let renderCalls: RenderCall[] = [];
+
+		let simpleRenderCalls: SimpleParticleRenderCall[] = [];
 
 		//EDITOR
 		if (!this.started) {
@@ -153,12 +160,15 @@ export class Game {
 		}
 
 		this.animationHandler.createRenderCall(renderCall, this.camera.position)
+		this.particleHandler.createRenderCall(particleRenderCall, this.camera.position);
 
 		renderCalls.push(renderCall);
+		simpleRenderCalls.push(particleRenderCall);
 
 		this.debugHandler.createRenderCall(renderCall, this.camera.position);
 		this.renderer.render(renderCalls);
-		this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
+		this.simpleParticleRenderer.render(simpleRenderCalls);
+		//this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
 	}
 
 	private checkGoal() {

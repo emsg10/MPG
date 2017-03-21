@@ -1,19 +1,19 @@
+import { Rectangle, Vector } from '../model';
+
 export class Particle {
 
-    public startPos: number[];
-    public endPos: number[];
-    public lifetime: number;
-    public relativeTime: number;
-    public elapsedMs: number;
-    public dead: boolean;
+    public position: Vector;
+    public size: number;
+    public lifeTime: number;
+    public velocity: Vector;
+    public growth: number;
 
-    constructor(startPos: number[], endPos:  number[], lifeTime: number) {
-        this.startPos = startPos;
-        this.endPos = endPos;
-        this.lifetime = lifeTime;
-        this.relativeTime = 0;
-        this.elapsedMs = 0;
-        this.dead = false;
+    constructor(position: Vector, size: number, lifeTime: number, velocity: Vector, growth: number) {
+        this.position = position;
+        this.size = size;
+        this.lifeTime = lifeTime;
+        this.velocity = velocity;
+        this.growth = growth;
     }
 
 }

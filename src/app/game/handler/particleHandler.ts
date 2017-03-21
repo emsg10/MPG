@@ -1,6 +1,8 @@
 import { Particle } from '../particle/particle'
-import { Vector, Tile, Rectangle, DebugElement, SpellType } from '../model';
+import { Vector, Tile, Rectangle, DebugElement, SpellType, TextureType } from '../model';
 import { RenderHelper } from '../render/renderHelper';
+import { RenderCall } from '../render/renderCall';
+import { SimpleParticleRenderCall } from '../render/simpleParticleRenderCall';
 import { ParticleRenderCall } from '../render/particleRenderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { DebuggHandler } from './debugHandler';
@@ -9,15 +11,30 @@ import { EnemyHandler } from './enemyHandler';
 export class ParticleHandler {
 
     public frostParticles: Particle[] = [];
+
     public fireParticles: Particle[] = [];
+    public fireEffectParticles: Particle[] = [];
+
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
     private tiles: Tile[];
     private enemyHandler: EnemyHandler;
-    private relativeParticleEndValue = 0.6;
-    private maxLife = 0.8;
-    private canvasWidth = 1200;
-    private pixelParticleEndValue = (this.canvasWidth / 2) * this.relativeParticleEndValue;
+
+    private flameParticleSettings: number[] = [
+        2, 5,
+        800, 1000,
+        0.3, 0.4,
+        -0.01, 0.01,
+        0.1
+    ];
+
+    private flameEffectSettings: number[] = [
+        1, 3,
+        100, 600,
+        0.3, 0.4,
+        -0.2, 0.2,
+        0.0
+    ];
 
     private latestRenderCalls: ParticleRenderCall[] = [];
 
@@ -27,133 +44,88 @@ export class ParticleHandler {
     }
 
     public createFrostBlast(position: Vector, inverse: boolean) {
-        let particles = this.createParticles(position, inverse);
+        let particles = this.createParticles(position, inverse, this.flameParticleSettings);
 
         this.frostParticles.push(...particles);
     }
 
     public createFireBlast(position: Vector, inverse: boolean) {
-        let particles = this.createParticles(position, inverse);
+        let particles = this.createParticles(position, inverse, this.flameParticleSettings);
+        let effectParticles = this.createParticles(position, inverse, this.flameEffectSettings);
 
         this.fireParticles.push(...particles);
+        this.fireEffectParticles.push(...effectParticles);
     }
 
-    private createParticles(position: Vector, inverse: boolean) {
-        let particles: Particle[] = [];
-        let relativePos: Vector;
-        let maxLifetime = this.calculateMaximumLifetime(position, inverse);
+    public update(delta: number) {
 
-        if (inverse) {
-            relativePos = this.renderHelper.getRelativeValue(position.x + 5, position.y + 27);
-        } else {
-            relativePos = this.renderHelper.getRelativeValue(position.x + 40, position.y + 27);
-        }
+        let particleCollections: Particle[][] = [];
+        particleCollections.push(this.fireParticles);
+        particleCollections.push(this.fireEffectParticles);
 
-        for (let i = 0; i < 30; i++) {
+        for (let particleCollection of particleCollections) {
+            let removeCollection: Particle[] = [];
 
-            let lifeTime = Math.random() * maxLifetime;
-            let startPositions: number[] = [];
-            let endPositions: number[] = [];
-            startPositions.push((relativePos.x));
-            startPositions.push((relativePos.y) + (Math.random() * 0.01));
-            startPositions.push(0);
+            for (let fireParticle of particleCollection) {
+                fireParticle.position.x += fireParticle.velocity.x * delta;
+                fireParticle.position.y += fireParticle.velocity.y * delta;
+                fireParticle.lifeTime -= delta;
+                fireParticle.size += fireParticle.growth;
+                fireParticle.size += fireParticle.growth;
 
-            if (inverse) {
-                endPositions.push(-this.relativeParticleEndValue + (Math.random() * 0.1));
-            } else {
-                endPositions.push(this.relativeParticleEndValue - (Math.random() * 0.1));
-            }
-
-            endPositions.push(0 - ((Math.random() * 2 - 1) * 0.04));
-            endPositions.push(0);
-
-            particles.push(new Particle(startPositions, endPositions, lifeTime));
-        }
-
-        return particles;
-    }
-
-    private calculateMaximumLifetime(position: Vector, inverse: boolean) {
-        let closestX = 0;
-        let deltaX = 0;
-        let maxLifetime = this.maxLife;
-
-        if (inverse) {
-            closestX = this.collisionDetection.getClosestX(new Rectangle(position.x - this.pixelParticleEndValue, position.y, this.pixelParticleEndValue, 40), this.tiles, inverse)
-            deltaX = position.x - closestX;
-            if (deltaX < this.pixelParticleEndValue) {
-                maxLifetime = deltaX / this.pixelParticleEndValue + 0.07;
-            }
-        } else {
-            closestX = this.collisionDetection.getClosestX(new Rectangle(position.x, position.y, this.pixelParticleEndValue, 40), this.tiles, inverse)
-            deltaX = closestX - position.x;
-            if (deltaX < this.pixelParticleEndValue) {
-                maxLifetime = deltaX / this.pixelParticleEndValue - 0.07;
-            }
-        }
-
-        return maxLifetime = maxLifetime > this.maxLife ? this.maxLife : maxLifetime;
-    }
-
-    update(delta: number) {
-        this.latestRenderCalls = [];
-        
-        this.latestRenderCalls.push(this.updateParticles(delta, this.frostParticles, [0.6, 1, 1, 1], SpellType.frostBlast));
-        this.latestRenderCalls.push(this.updateParticles(delta, this.fireParticles, [0, 1, 1, 1], SpellType.fireBlast));
-    }
-
-    private updateParticles(delta: number, particles: Particle[], color: number[], type: SpellType) {
-        let renderCall = new ParticleRenderCall();
-        let deadParticles: Particle[] = [];
-
-        renderCall.type = type;
-        renderCall.length = particles.length;
-        renderCall.color = color;
-        
-        for (let particle of particles) {
-
-            particle.elapsedMs += delta;
-            particle.relativeTime = particle.elapsedMs / 1000;
-
-            let area = this.getParticleCollArea(particle);
-
-            for (let enemy of this.enemyHandler.enemies) {
-                if (!particle.dead && this.collisionDetection.aabbCheck(area, enemy.getCollisionArea())) {
-                    particle.lifetime = particle.relativeTime + 0.05;
-                    particle.dead = true;
-                    enemy.freeze();
+                if (fireParticle.lifeTime <= 0 || fireParticle.size < 0) {
+                    removeCollection.push(fireParticle);
                 }
             }
 
-            if (particle.relativeTime >= particle.lifetime) {
-                deadParticles.push(particle);
-            }
-            
-            renderCall.lifetimes.push(particle.lifetime);
-            renderCall.relativeTime.push(particle.relativeTime);
-            renderCall.startPositions.push.apply(renderCall.startPositions, particle.startPos);
-            renderCall.endPositions.push.apply(renderCall.endPositions, particle.endPos);
-        }
+            for (let particle of removeCollection) {
+                let index = particleCollection.indexOf(particle);
 
-        for (let particle of deadParticles) {
-            let index = particles.indexOf(particle);
-            if (index != -1) {
-                particles.splice(index, 1);
+                if (index != -1) {
+                    particleCollection.splice(index, 1);
+                }
             }
+        }
+    }
+
+    public createRenderCall(renderCall: SimpleParticleRenderCall, camera: Vector) {
+
+        var temp: number[] = [];
+
+        let totalParticles = this.fireParticles.concat(this.fireEffectParticles);
+
+        for (let particle of totalParticles) {
+            renderCall.vertecies.push(...[particle.position.x - camera.x, particle.position.y - camera.y]);
+            renderCall.pointSize.push(particle.size);
+            renderCall.color = [0.9, 0.4, 0.1, 0.9];
+            renderCall.itemCount = totalParticles.length;
         }
 
         return renderCall;
     }
 
-    public getParticleRenderCalls() {
-        return this.latestRenderCalls;
+    private createParticles(position: Vector, inverse: boolean, settings: number[]) {
+
+        let newParticles: Particle[] = []
+
+        for (let i = 0; i < 10; i++) {
+
+            let particleSize = this.rand(settings[0], settings[1]);
+            let lifeTime = this.rand(settings[2], settings[3]);
+            let velocity = new Vector(this.rand(settings[4], settings[5]), this.rand(settings[6], settings[7]));
+            let growth = settings[8];
+
+            let pPosition = new Vector(position.x + 25, position.y + 25);
+            let particle = new Particle(pPosition, particleSize, lifeTime, velocity, growth);
+
+            newParticles.push(particle);
+        }
+
+        return newParticles;
     }
 
-    private getParticleCollArea(particle: Particle) {
-        let x = (particle.startPos[0] + (particle.relativeTime * particle.endPos[0]) + 1) * (1200 / 2);
-        let y = 800 - (particle.startPos[1] + (particle.relativeTime * particle.endPos[1]) + 1) * (800 / 2);
-
-        return new Rectangle(x, y, 1, 1);
+    private rand(min: number, max: number) {
+        return min + (Math.random() * (max - min))
     }
 
 }

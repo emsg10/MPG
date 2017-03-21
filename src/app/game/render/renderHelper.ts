@@ -1,5 +1,5 @@
 import { TextureMapper } from './textureMapper';
-import { Vector } from '../model';
+import { Vector, Rectangle } from '../model';
 
 export class RenderHelper {
 
@@ -71,7 +71,7 @@ export class RenderHelper {
 		return currentVertecies;
 	}
 
-	getColor(currentColors: number[], color?: number[]) {
+	public getColor(currentColors: number[], color?: number[]) {
 		
 		let col: number[] = [];
 
@@ -86,6 +86,15 @@ export class RenderHelper {
 		return currentColors;
 	}
 
+	public getIndeciecColor(color: number[]) {
+		
+		for(let i = 0; i < 6; i++) {
+			color.push(...color);
+		}
+
+		return color;
+	}
+
 	public getIndecies(currentIndecies: number[]) {
 
 		var vertexIndices = [
@@ -97,14 +106,28 @@ export class RenderHelper {
 		return currentIndecies;
 	}
 
+	public addTextureCoordinates(currentTextureCoordinates: number[], textureCoords: number[]) {
+		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoords);
+
+		return currentTextureCoordinates;
+	}
+
 	public getTextureCoordinates(currentTextureCoordinates: number[], textureType: number) {
 
 		var rect = this.textureMapper.mapTexture(textureType);
 
-		let x1: number = rect.x / RenderHelper.textureSize;
-		let y1: number = rect.y / RenderHelper.textureSize;
-		let x2 = (rect.x + rect.width) / RenderHelper.textureSize;
-		let y2 = (rect.y + rect.height) / RenderHelper.textureSize;
+		let textureCoordinates = this.getCoords(rect, RenderHelper.textureSize);
+
+		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoordinates);
+
+		return currentTextureCoordinates;
+	}
+
+	private getCoords(rect: Rectangle, size: number) {
+		let x1 = rect.x / size;
+		let y1 = rect.y / size;
+		let x2 = (rect.x + rect.width) / size;
+		let y2 = (rect.y + rect.height) / size;
 
 		var textureCoordinates = [
 			x1, y1,
@@ -115,9 +138,7 @@ export class RenderHelper {
 			x1, y2
 		];
 
-		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoordinates);
-
-		return currentTextureCoordinates;
+		return textureCoordinates;
 	}
 
 }

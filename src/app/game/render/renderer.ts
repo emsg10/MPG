@@ -1,5 +1,6 @@
 import { Context } from '../context';
 import { RenderCall } from './renderCall';
+import { TextureType } from '../model';
 
 export class Renderer {
 
@@ -74,7 +75,11 @@ export class Renderer {
 			this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.activeTexture(this.gl.TEXTURE0);
-			this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
+			if(renderCall.textureType == TextureType.particleTexture) {
+				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.genericParticleTexture);
+			} else {
+				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
+			}
 			
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.drawElements(this.gl.TRIANGLES, renderCall.indecies.length, this.gl.UNSIGNED_SHORT, 0)

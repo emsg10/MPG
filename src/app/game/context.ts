@@ -5,6 +5,7 @@ export class Context
 {
 	public shaderProgram: WebGLProgram;
 	public particleProgram: WebGLProgram;
+	public simpleParticleProgram: WebGLProgram;
 	public gl: WebGLRenderingContext;
 	public glTexture: WebGLTexture;
 	public particleTexture: WebGLTexture;
@@ -34,6 +35,17 @@ export class Context
 
 		let particleVertexShader = this.compileShader(asset.particleVertexShader, ShaderType.Vertex);
 		let particleFragmentShader = this.compileShader(asset.particleFragmentShader, ShaderType.Fragment);
+
+		let simpleParticleVertexShader = this.compileShader(asset.simpleParticleVertexShader, ShaderType.Vertex);
+		let simpleParticleFragmentShader = this.compileShader(asset.simpleParticleFragmentShader, ShaderType.Fragment);
+
+		this.simpleParticleProgram = this.gl.createProgram();
+		this.gl.attachShader(this.simpleParticleProgram, simpleParticleVertexShader);
+		this.gl.attachShader(this.simpleParticleProgram, simpleParticleFragmentShader);
+		this.gl.linkProgram(this.simpleParticleProgram);
+		if (!this.gl.getProgramParameter(this.simpleParticleProgram, this.gl.LINK_STATUS)) {
+			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.simpleParticleProgram));
+		}
 
 		this.particleProgram = this.gl.createProgram();
 		this.gl.attachShader(this.particleProgram, particleVertexShader);

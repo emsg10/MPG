@@ -29,6 +29,8 @@ export class Enemy extends Character {
         if(this.hp <= 0) {
             if(type == SpellType.frostBlast) {
                 this.deathType = DeathType.freezeDeath;
+            } if(type == SpellType.fireBlast) {
+                this.deathType = DeathType.fireDeath;
             } else {
                 this.deathType = DeathType.swordDeath;
             }
@@ -59,8 +61,8 @@ export class Enemy extends Character {
 
         this.fall(delta);
 
-        let leftEdge = this.collisionDetection.checkEdge(new Rectangle(this.position.x, this.position.y + this.height, 1, 30), tiles);
-        let rightEdge = this.collisionDetection.checkEdge(new Rectangle(this.position.x + this.width, this.position.y + this.height, 1, 30), tiles);
+        let leftEdge = this.collisionDetection.fastCheckEnviroment(new Rectangle(this.position.x, this.position.y + this.height, 1, 30), tiles);
+        let rightEdge = this.collisionDetection.fastCheckEnviroment(new Rectangle(this.position.x + this.width, this.position.y + this.height, 1, 30), tiles);
 
         if (leftEdge && rightEdge) {
             this.nextToEdge = true;

@@ -61,6 +61,9 @@ export class EnemyHandler {
             if(enemy.deathType == DeathType.freezeDeath) {
                 this.projectileHandler.createFrozenSwordManDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
                 this.remove(enemy);
+            } else if(enemy.deathType == DeathType.fireDeath) {
+                this.projectileHandler.createFrozenSwordManDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
+                this.remove(enemy);
             }
         }
     }

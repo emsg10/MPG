@@ -48,18 +48,18 @@ export class CollisionDetection {
 		return collisionData;
 	}
 
-	public checkEdge(rect: Rectangle, tiles: Tile[]) {
-		let edge = true;
+	public fastCheckEnviroment(rect: Rectangle, tiles: Tile[]) {
+		let clear = true;
 
 		let possibleColls = this.grid.get(rect);
 
 		for(let tile of possibleColls) {
 			if(this.aabbCheck(rect, tile)) {
-				edge = false;
+				clear = false;
 			}
 		}
 
-		return edge;
+		return clear;
 	}
 
 	public checkProjectileCollisionX(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
@@ -128,7 +128,7 @@ export class CollisionDetection {
 
 	public getClosestX(rect: Rectangle, tiles: Rectangle[], inverse: boolean) {
 		let coliidables: Rectangle[] = []
-		let closestX: number = inverse ? 0 : 1200;
+		let closestX: number = inverse ? 0 : this.gameSize.x;
 
 		let possibleColls = this.grid.get(rect);
 

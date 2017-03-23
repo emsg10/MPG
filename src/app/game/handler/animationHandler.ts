@@ -1,18 +1,21 @@
-import { Vector, Sprite, Rectangle, Animation, SpellType } from '../model'
+import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation } from '../model'
 import { TextureMapper } from '../render/textureMapper';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
 import { Player } from '../character/player';
+import { ParticleHandler } from '../handler/particleHandler';
 
 export class AnimationHandler {
 
     public animations: Animation[] = [];
+    private particleHandler: ParticleHandler;
     private textureMapper = TextureMapper.getInstance();
     private renderHelper = RenderHelper.getInstance();
 
-    constructor() {
+    constructor(particleHandler: ParticleHandler) {
+        this.particleHandler = particleHandler;
     }
 
     public bloodAnimation_A(position: Vector, size: number) {
@@ -256,6 +259,37 @@ export class AnimationHandler {
         this.bloodAnimation_A(new Vector(position.x, position.y), 50);
         this.bloodAnimation_B_Right(new Vector(position.x + 5, position.y - 15), 100);
         this.bloodAnimation_B_Left(new Vector(position.x - 55, position.y - 15), 100);
+    }
+
+    public fireDeathSwordman(area: Rectangle, inverse: boolean) {
+
+        let onUpdate = (position: Vector) => {
+            this.particleHandler.createFireDeath(position);
+        }
+
+        let animation = new FrameAnimation(0, 6, 5, 10, onUpdate);
+        animation.textureNumber.push(250);
+        animation.textureNumber.push(251);
+        animation.textureNumber.push(252);
+        animation.textureNumber.push(253);
+        animation.textureNumber.push(254);
+        animation.textureNumber.push(255);
+        animation.textureNumber.push(256);
+        animation.textureNumber.push(257);
+        animation.textureNumber.push(258);
+        animation.textureNumber.push(259);
+        animation.textureNumber.push(260);
+        animation.textureNumber.push(261);        
+
+        animation.inverse = inverse;
+        animation.timeToChange = 100;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.repetitions = 12;
+
+        this.animations.push(animation);
+
+        return animation;
     }
 
     public frozenSwordMan(area: Rectangle, inverse: boolean, color: number[], onCompletion: () => void) {

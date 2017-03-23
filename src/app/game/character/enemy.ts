@@ -9,6 +9,7 @@ import { DeathType } from './deathType';
 export class Enemy extends Character {
 
     public color = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    public burnValue = 0;
     protected direction = true;
     protected oldDirection = true;
     protected collisionDetection = CollisionDetection.getInstance();
@@ -19,6 +20,9 @@ export class Enemy extends Character {
     protected freezeDamage: number = 0.04;
     protected maxFreeze = this.hp/this.freezeDamage;
     protected freezeValue = 0;
+    protected burnDamage = 0.2;
+    protected cinderValue = 0;
+    protected burnDurationFactor = 3;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -36,6 +40,16 @@ export class Enemy extends Character {
             }
             
             this.dead = true;
+        }
+    }
+
+    public burn(damage: number) {
+        
+        this.cinderValue += this.burnDurationFactor;
+        this.takeDamage(damage, SpellType.fireBlast);
+
+        if(this.cinderValue > 300) {    
+            this.burnValue += this.burnDurationFactor;
         }
     }
 
@@ -97,12 +111,21 @@ export class Enemy extends Character {
 
         let freezePercent = this.freezeValue/this.maxFreeze;
         this.updateColor([1.0 + (freezePercent * 1.0), 1.0 + (freezePercent * 2.0), 1.0 + (freezePercent * 2.0), 1.0]);
+
+        this.updateBurnDamage();
     }
 
     public getCollisionArea() {
         let collisionArea = new Rectangle(this.position.x, this.position.y, this.width, 55);
 
         return collisionArea;
+    }
+
+    private updateBurnDamage() {
+        if(this.burnValue > 0) {
+            this.takeDamage(this.burnDamage, SpellType.fireBlast);
+            this.burnValue--;
+        }
     }
 
     private updateColor(color: number[]) {

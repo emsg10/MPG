@@ -68,10 +68,11 @@ export class Game {
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 
-		this.animationHandler = new AnimationHandler();
+		this.particleHandler = new ParticleHandler(this.levelData.tiles);
+		this.animationHandler = new AnimationHandler(this.particleHandler);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
-		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler);
-		this.particleHandler = new ParticleHandler(this.levelData.tiles, this.enemyHandler);
+		
+		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.tileMap = new TileMap(this.context);
 
 		this.textRenderer = new TextRenderer(this.context);
@@ -122,7 +123,7 @@ export class Game {
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
 					}
 				}
-				this.particleHandler.update(delta);
+				this.particleHandler.update(delta, this.enemyHandler.enemies);
 
 				this.render();
 

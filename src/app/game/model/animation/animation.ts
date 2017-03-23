@@ -11,8 +11,7 @@ export class Animation {
 	public frameIndex: number = 0;
 	public color: number[];
 	public onCompletion: () => void;
-	private lastChange: number = 0;
-	
+	private lastChange: number = 0;	
 
 	constructor() {
 	}

@@ -7,6 +7,7 @@ import { Level } from './level';
 import { Asset } from './assets';
 import { Projectile } from './animation/projectile';
 import { Animation } from './animation/animation';
+import { FrameAnimation } from './animation/frameAnimation';
 import { SpellCast } from './spellCast'
 import { SpellType } from './enum/spellType';
 import { Spell } from './animation/spell';
@@ -15,4 +16,22 @@ import { Meele } from './animation/meele';
 import { DebugElement } from './debug';
 import { TextureType } from './enum/textureType';
 
-export { ShaderType, Tile, Vector, Rectangle, Sprite, Level, Asset, Projectile, Animation, SpellCast, SpellType, Spell, PhysicalProjectile, Meele, DebugElement, TextureType };
+export {
+    ShaderType,
+    Tile,
+    Vector,
+    Rectangle,
+    Sprite,
+    Level,
+    Asset,
+    Projectile,
+    Animation,
+    SpellCast,
+    SpellType,
+    Spell,
+    PhysicalProjectile,
+    Meele,
+    DebugElement,
+    TextureType,
+    FrameAnimation
+};

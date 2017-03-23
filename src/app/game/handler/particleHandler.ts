@@ -7,6 +7,7 @@ import { ParticleRenderCall } from '../render/particleRenderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { DebuggHandler } from './debugHandler';
 import { EnemyHandler } from './enemyHandler';
+import { Enemy } from '../character/enemy';
 import { Gravity } from '../forces/gravity';
 
 export class ParticleHandler {
@@ -19,7 +20,6 @@ export class ParticleHandler {
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
     private tiles: Tile[];
-    private enemyHandler: EnemyHandler;
     private gravity: Gravity = new Gravity(0.0001);
 
     private flameParticleSettings: number[] = [
@@ -38,11 +38,18 @@ export class ParticleHandler {
         0.0
     ];
 
+    private burnEffectSettings: number[] = [
+        10, 15,
+        100, 400,
+        0.05, -0.05,
+        -0.1, -0.1,
+        0.0
+    ];
+
     private latestRenderCalls: ParticleRenderCall[] = [];
 
-    constructor(tiles: Tile[], enemyHandler: EnemyHandler) {
+    constructor(tiles: Tile[]) {
         this.tiles = tiles;
-        this.enemyHandler = enemyHandler;
     }
 
     public createFrostBlast(position: Vector, inverse: boolean) {
@@ -59,7 +66,21 @@ export class ParticleHandler {
         this.fireEffectParticles.push(...effectParticles);
     }
 
-    public update(delta: number) {
+    public createBurn(position: Vector) {
+        let positionCopy = new Vector(position.x, position.y);
+        positionCopy.x += this.rand(-10, 15);
+        positionCopy.y += this.rand(-10, 10);
+        let effectParticles = this.createParticles(positionCopy, false, this.burnEffectSettings, 1);
+        this.fireEffectParticles.push(...effectParticles);
+    }
+
+    public createFireDeath(position: Vector) {
+        position.x += this.rand(-15, 15);
+        let effectParticles = this.createParticles(position, false, this.burnEffectSettings, 5);
+        this.fireEffectParticles.push(...effectParticles);
+    }
+
+    public update(delta: number, enemies: Enemy[]) {
 
         let effectParticleCollections: Particle[][] = [];
         effectParticleCollections.push(this.fireEffectParticles);
@@ -69,7 +90,7 @@ export class ParticleHandler {
 
         this.updateEffectParticles(effectParticleCollections, delta);
 
-        this.updateParticles(particleCollections, delta);
+        this.updateParticles(particleCollections, delta, enemies);
     }
 
     public createRenderCall(renderCall: SimpleParticleRenderCall, camera: Vector) {
@@ -106,7 +127,7 @@ export class ParticleHandler {
         }
     }
 
-    private updateParticles(particleCollections: Particle[][], delta: number) {
+    private updateParticles(particleCollections: Particle[][], delta: number, enemies: Enemy[]) {
         for (let particleCollection of particleCollections) {
             let removeCollection: Particle[] = [];
 
@@ -116,9 +137,9 @@ export class ParticleHandler {
                 let collisionRectangle = new Rectangle(particle.area.x, particle.area.y, collisionSize, collisionSize);
 
                 if (!particle.dead) {
-                    for (let enemy of this.enemyHandler.enemies) {
+                    for (let enemy of enemies) {
                         if (this.collisionDetection.aabbCheck(collisionRectangle, enemy.getCollisionArea())) {
-                            enemy.takeDamage(0.15, SpellType.fireBlast);
+                            enemy.burn(0.15);
                             particle.dead = true;
                             particle.lifeTime = particle.lifeTime > 10 ? 10 : particle.lifeTime;
                         }

@@ -8,9 +8,9 @@ Use destructive magic you destroy everything that stand in your way.
 
 If you want to try it out:
 
--Clone this repository
--run "npm install" in root
--run "npm start" in root
+-Clone this repository  
+-run "npm install" in root  
+-run "npm start" in root  
 
 Make sure you have nodejs installed.
 

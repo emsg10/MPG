@@ -1,7 +1,10 @@
-import { Projectile, Vector, Rectangle, SpellType, Spell, PhysicalProjectile, Meele, Animation } from '../model';
+import { Projectile, Vector, Rectangle, SpellType, Spell, PhysicalProjectile, Meele, Animation, DebugElement, StickyAnimation } from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
 import { EnemyHandler } from './enemyHandler';
+import { DebugHandler } from './debugHandler';
+import { Gravity } from '../forces/gravity';
+import { Drag } from '../forces/drag';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { CollisionData } from '../collision/collisionData';
 import { Enemy } from '../character/enemy';
@@ -12,6 +15,7 @@ export class ProjectileHandler {
     private enemyProjectiles: Projectile[] = [];
     private animationHandler: AnimationHandler;
     private collisionDetection = CollisionDetection.getInstance();
+    private debuggHandler = DebugHandler.getInstance();
 
     constructor(animationHandler: AnimationHandler, ) {
         this.animationHandler = animationHandler;
@@ -34,6 +38,20 @@ export class ProjectileHandler {
         this.projectiles.push(spell);
     }
 
+    public createArrow(position: Vector, inverse: boolean, velocity: Vector) {
+        let arrow: PhysicalProjectile;
+        let rectangle = new Rectangle(position.x, position.y, 40, 10);
+        let collRect = new Rectangle(position.x + 10, position.y, 5, 5);
+
+        arrow = new PhysicalProjectile(velocity, rectangle, this.animationHandler.createArrow(rectangle, inverse), 1, collRect);
+        arrow.gravity = new Gravity(0.0003);
+        arrow.drag = new Drag(0);
+
+        this.enemyProjectiles.push(arrow);
+
+        return arrow;
+    }
+
     public createSwordman_death(position: Vector, inverse: boolean, velocity: Vector) {
         let projectile: Projectile;
 
@@ -54,19 +72,19 @@ export class ProjectileHandler {
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_animation(position, inverse), 1)
         projectileCorpse = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_corpse(position, inverse), 1)
-        if(inverse) {
+        if (inverse) {
             this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
         } else {
             this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
         }
-        
+
 
         this.projectiles.push(projectile);
         this.projectiles.push(projectileCorpse);
     }
 
     public createFrozenSwordManDeath(area: Rectangle, inverse: boolean, color: number[]) {
-        
+
         let onComplete = () => {
 
             let velocotyies = [
@@ -87,11 +105,11 @@ export class ProjectileHandler {
                 new Rectangle(area.x + 4, area.y + 11, 13, 16)
             ];
 
-            for(let i = 0; i < 6; i++) {
+            for (let i = 0; i < 6; i++) {
                 this.createFrozenPart(velocotyies[i], area, inverse, color, i, collisionAreas[i]);
             }
         };
-        
+
         this.animationHandler.frozenSwordMan(area, inverse, color, onComplete);
     }
 
@@ -100,102 +118,137 @@ export class ProjectileHandler {
         let removeEnemyProjectile: Projectile[] = [];
 
         removeProjectile = this.updateFriendslyProjectiles(delta, collidables);
-        removeEnemyProjectile = this.updateEnemyProjectiles(delta, player);
+        removeEnemyProjectile = this.updateEnemyProjectiles(delta, player, collidables);
 
         for (let projectile of removeProjectile) {
             this.destroyProjectile(projectile, this.projectiles);
         }
 
-        for(let projectile of removeEnemyProjectile) {
+        for (let projectile of removeEnemyProjectile) {
             this.destroyProjectile(projectile, this.enemyProjectiles);
         }
     }
 
-     public destroyProjectile(projectile: Projectile, projectiles: Projectile[]) {
+    public destroyProjectile(projectile: Projectile, projectiles: Projectile[]) {
         this.destroyAnimation(projectile);
         this.animationHandler.animations.splice(this.animationHandler.animations.indexOf(projectile.animation), 1);
         let index = projectiles.indexOf(projectile);
-        if(index != -1) {
+        if (index != -1) {
             projectiles.splice(index, 1);
         }
     }
 
     public calculateDirection(area: Rectangle, enemy: Enemy) {
-        let velocity = new Vector((enemy.position.x + enemy.width/2) - (area.x + (area.width/2)), enemy.position.y - (area.y + (area.height/2)))
+        let velocity = new Vector((enemy.position.x + enemy.width / 2) - (area.x + (area.width / 2)), enemy.position.y - (area.y + (area.height / 2)))
         velocity.normalize();
-        velocity.multiply((area.width/90));
+        velocity.multiply((area.width / 90));
 
         return velocity;
     }
 
-    private updateEnemyProjectiles(delta: number, player: Player) {
+    private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[]) {
         let removeProjectiles: Projectile[] = [];
 
-        for(let projectile of this.enemyProjectiles) {
+        for (let projectile of this.enemyProjectiles) {
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, delta, player, removeProjectiles);
+            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, removeProjectiles);
+            removeProjectiles = this.checkStaticObjectCollisions(projectile, frameVelocity, collidables, removeProjectiles);
         }
 
         return removeProjectiles;
     }
 
-    private updateAndCollCheckEnemyProjectile(projectile: Projectile, delta: number, player: Player, removeProjectiles: Projectile[]) {
-         let collisionData: CollisionData;
-            let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            collisionData = this.collisionDetection.checkProjectileCollisionY([player.getCollisionArea()], projectile, frameVelocity);
-            projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
+    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, removeProjectiles: Projectile[]) {
+        let collisionData: CollisionData;
+        projectile.updateForces(delta);
 
-            if (collisionData.groundCollision) {
-                this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
-                projectile.velocity.y = 0;
-            }
+        let deltaVelocity = new Vector(frameVelocity.x - player.velocity.x * delta, frameVelocity.y - player.velocity.y * delta);
 
-            collisionData = this.collisionDetection.checkProjectileCollisionX([player.getCollisionArea()], projectile, frameVelocity);
-            projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
+        collisionData = this.collisionDetection.checkProjectileCollisionY([player.getCollisionArea()], projectile, deltaVelocity, false);
+        projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
+
+        if (collisionData.groundCollision) {
+            this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
+            this.setDamageAnimation(player, projectile);
+            projectile.velocity.y = 0;
+            removeProjectiles.push(projectile);
+        }
+
+        collisionData = this.collisionDetection.checkProjectileCollisionX([player.getCollisionArea()], projectile, deltaVelocity, false);
+        projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
+
+        if (collisionData.wallCollision) {
+            this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
+            this.setDamageAnimation(player, projectile);
+            projectile.velocity.x = 0;
+            removeProjectiles.push(projectile);
+        }
+
+        return removeProjectiles;
+    }
+
+    private setDamageAnimation(player: Player, projectile: Projectile) {
+        let animationOffset = new Vector(player.position.x - projectile.area.x, player.position.y - projectile.area.y);
+        player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse), animationOffset));
+        player.takeDamage(20);
+    }
+
+    private checkStaticObjectCollisions(projectile: Projectile, frameVelocity: Vector, collidables: Rectangle[], removeProjectiles: Projectile[]) {
+        let collisionData: CollisionData;
+
+        collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity, true);
+
+        if (collisionData.groundCollision) {
+            this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse);
+            removeProjectiles.push(projectile);
+        } else {
+            collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true);
 
             if (collisionData.wallCollision) {
-                this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
-                projectile.velocity.x = 0;
+                this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse);
+                removeProjectiles.push(projectile);
             }
+        }
 
-            return removeProjectiles;
+        return removeProjectiles;
+
     }
 
     private updateAndCollCheck(projectile: Projectile, delta: number, collidables: Rectangle[], removeProjectiles: Projectile[]) {
-            let collisionData: CollisionData;
+        let collisionData: CollisionData;
 
-            projectile.updateForces(delta);
+        projectile.updateForces(delta);
 
-            let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity);
-            projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
+        let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
+        collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity, true);
+        projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
 
-            if(projectile instanceof PhysicalProjectile) {
-                if(collisionData.groundCollision) {
-                    let currentFrame = projectile.animation.getCurrentFrame();
-                    projectile.animation.textureNumber = [currentFrame];
-                    projectile.animation.frameIndex = 0;
-                }
-            }
-
+        if (projectile instanceof PhysicalProjectile) {
             if (collisionData.groundCollision) {
-                projectile.velocity.y = 0;
+                let currentFrame = projectile.animation.getCurrentFrame();
+                projectile.animation.textureNumber = [currentFrame];
+                projectile.animation.frameIndex = 0;
             }
+        }
 
-            collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity);
-            projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
+        if (collisionData.groundCollision) {
+            projectile.velocity.y = 0;
+        }
 
-            if (projectile instanceof Spell) {
-                if (projectile.distance <= 0 || collisionData.wallCollision) {
-                    removeProjectiles.push(projectile);
-                }
+        collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true);
+        projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
+
+        if (projectile instanceof Spell) {
+            if (projectile.distance <= 0 || collisionData.wallCollision) {
+                removeProjectiles.push(projectile);
             }
+        }
 
-            if (collisionData.wallCollision) {
-                projectile.velocity.x = 0;
-            }
+        if (collisionData.wallCollision) {
+            projectile.velocity.x = 0;
+        }
 
-            return removeProjectiles;
+        return removeProjectiles;
     }
 
     private updateFriendslyProjectiles(delta: number, collidables: Rectangle[]) {
@@ -227,6 +280,6 @@ export class ProjectileHandler {
         this.projectiles.push(projectile);
     }
 
-    
-    
+
+
 }

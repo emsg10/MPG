@@ -62,13 +62,21 @@ export class CollisionDetection {
 		return clear;
 	}
 
-	public checkProjectileCollisionX(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
+	public checkProjectileCollisionX(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector, staticCollisions: boolean) {
 
 		let broadphasebox = this.getSweptBroadphaseBoxX(projectile.collisionArea, frameVelocity);
 
+		let possibleColls: Rectangle[] ;
+
+		if(staticCollisions) {
+			possibleColls = this.grid.get(broadphasebox);
+		} else {
+			possibleColls = collidables;
+		}
+
 		let collisionData: CollisionData = new CollisionData();
 
-		for(let collidable of collidables) {
+		for(let collidable of possibleColls) {
 			if(this.aabbCheck(broadphasebox, collidable)) {
 				collisionData = this.aabbCollisionX(projectile.collisionArea, collidable, frameVelocity, collisionData);
 			}
@@ -77,12 +85,20 @@ export class CollisionDetection {
 		return collisionData;
 	}
 
-	public checkProjectileCollisionY(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector) {
+	public checkProjectileCollisionY(collidables: Rectangle[], projectile: Projectile, frameVelocity: Vector, staticCollisions: boolean) {
 		let broadphasebox = this.getSweptBroadphaseBoxY(projectile.collisionArea, frameVelocity);
+
+		let possibleColls: Rectangle[] ;
+
+		if(staticCollisions) {
+			possibleColls = this.grid.get(broadphasebox);
+		} else {
+			possibleColls = collidables;
+		}
 
 		let collisionData: CollisionData = new CollisionData();
 
-		for(let collidable of collidables) {
+		for(let collidable of possibleColls) {
 			if(this.aabbCheck(broadphasebox, collidable)) {
 				collisionData = this.aabbCollisionY(projectile.collisionArea, collidable, frameVelocity, collisionData);
 			}
@@ -236,7 +252,7 @@ export class CollisionDetection {
 					collisionData.fallDeath = true;
 				}
             	
-				if(velocity.y > 18) {
+				if(velocity.y > 20) {
 					collisionData.fallDeath = true;
 				}
 

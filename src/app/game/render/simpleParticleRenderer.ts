@@ -45,7 +45,11 @@ export class SimpleParticleRenderer {
 				this.gl.uniform2f(this.resolutionLocation, this.context.gl.canvas.width, this.context.gl.canvas.height);
 				this.gl.uniform4f(this.colorUniformLocation, renderCall.color[0], renderCall.color[1], renderCall.color[2], renderCall.color[3]);
 
-				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.genericParticleTexture);
+				if (renderCall.textureType == TextureType.particleTexture) {
+					this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.genericParticleTexture);
+				} else if(renderCall.textureType == TextureType.frostTexture) {
+					this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.frostParticelTexture);
+				}
 
 				this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 				this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(renderCall.vertecies), this.gl.STATIC_DRAW);

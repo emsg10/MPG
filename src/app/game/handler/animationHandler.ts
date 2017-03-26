@@ -279,13 +279,40 @@ export class AnimationHandler {
         animation.textureNumber.push(258);
         animation.textureNumber.push(259);
         animation.textureNumber.push(260);
-        animation.textureNumber.push(261);        
+        animation.textureNumber.push(261);
 
         animation.inverse = inverse;
         animation.timeToChange = 100;
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
 
         animation.repetitions = 12;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public createArrow(area: Rectangle, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(268);
+        animation.inverse = inverse;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public createArrowHit(area: Rectangle, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(269);
+        animation.inverse = inverse;
+        animation.areaToRender = area;
+        animation.areaToRender.width = animation.areaToRender.width * 0.67;
+
+        animation.timeToChange = 2000;
+        animation.repetitions = 1;
+        
 
         this.animations.push(animation);
 
@@ -329,7 +356,7 @@ export class AnimationHandler {
         return animation;
     }
 
-    
+
 
     public update(delta: number) {
 
@@ -339,7 +366,7 @@ export class AnimationHandler {
             animation.next(delta);
             if (animation.repetitions <= 0) {
                 completedAnimations.push(animation);
-                if(animation.onCompletion) {
+                if (animation.onCompletion) {
                     animation.onCompletion();
                 }
             }
@@ -359,13 +386,14 @@ export class AnimationHandler {
         for (let animation of this.animations) {
             if (animation.delay <= 0) {
                 if (animation.inverse) {
-                    renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y  - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+                    renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
                 } else {
                     renderCall.vertecies = this.renderHelper.getVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
                 }
                 renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-                if(animation.color) {
+                renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
+                if (animation.color) {
                     renderCall.color = this.renderHelper.getColor(renderCall.color, animation.color);
                 } else {
                     renderCall.color = this.renderHelper.getColor(renderCall.color, null);

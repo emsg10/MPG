@@ -48,6 +48,7 @@ export class EnemyHandler {
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, enemy.currentAnimation.getCurrentFrame());
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             renderCall.color = this.renderHelper.getColor(renderCall.color, enemy.color);
+            renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
         }
 
         return renderCall;
@@ -87,7 +88,7 @@ export class EnemyHandler {
 
                 for (let enemy of this.enemies) {
                     let velocityDelta = new Vector((projectile.velocity.x * delta) - (enemy.toMove.x), (projectile.velocity.y * delta) - (enemy.toMove.y));
-                    let collisionData = this.collisionDetection.checkProjectileCollisionX([new Rectangle(enemy.position.x + (enemy.width / 2) - ((enemy.width * 0.5) / 2), enemy.position.y, enemy.width * 0.5, enemy.height)], projectile, velocityDelta);
+                    let collisionData = this.collisionDetection.checkProjectileCollisionX([new Rectangle(enemy.position.x + (enemy.width / 2) - ((enemy.width * 0.5) / 2), enemy.position.y, enemy.width * 0.5, enemy.height)], projectile, velocityDelta, false);
 
                     if (collisionData.wallCollision) {
 

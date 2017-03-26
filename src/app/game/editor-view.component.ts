@@ -49,7 +49,7 @@ export class EditorViewComponent implements AfterViewInit {
             this.asset.genericParticleTexture = data[8] as HTMLImageElement;
             this.editor.levelData = data[9];
 
-            //this.editor.init(this.asset, this.gameCanvas.nativeElement);
+            this.editor.init(this.asset, this.gameCanvas.nativeElement);
 
             this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.levelData);
         });

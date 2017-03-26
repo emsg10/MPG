@@ -86,6 +86,20 @@ export class RenderHelper {
 		return currentColors;
 	}
 
+	public getRotation(currentRotation: number[], rotation?: number[]) {
+		let rot: number[] = [];
+
+		if(rotation) {
+			rot = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
+		} else {
+			rot = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
+		}
+
+		currentRotation.push.apply(currentRotation, rot);
+
+		return currentRotation;
+	}
+
 	public getIndeciecColor(color: number[]) {
 		
 		for(let i = 0; i < 6; i++) {

@@ -105,7 +105,7 @@ export class ParticleRenderer {
 				this.gl.activeTexture(this.gl.TEXTURE0);
 
 				if(call.type == SpellType.frostBlast) {
-					this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.particleTexture);
+					this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.frostParticelTexture);
 				} else {
 					this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.genericParticleTexture);
 				}

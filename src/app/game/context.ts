@@ -8,7 +8,7 @@ export class Context
 	public simpleParticleProgram: WebGLProgram;
 	public gl: WebGLRenderingContext;
 	public glTexture: WebGLTexture;
-	public particleTexture: WebGLTexture;
+	public frostParticelTexture: WebGLTexture;
 	public genericParticleTexture: WebGLTexture;
 
 	constructor(asset: Asset, width: number, height: number, canvas: HTMLCanvasElement){
@@ -74,8 +74,8 @@ export class Context
   		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   		gl.generateMipmap(gl.TEXTURE_2D);
 
-		this.particleTexture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, this.particleTexture);
+		this.frostParticelTexture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, this.frostParticelTexture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, asset.particleTexture);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

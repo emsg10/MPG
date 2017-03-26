@@ -15,12 +15,7 @@ export class Swordman extends Enemy {
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;
-    private trackingAnimation = new Animation();
-    private hitAnimation = new Animation();
     private hitOffset = 40;
-    private searchAreaOffset = 150;
-    private hitAreaOffset = 40;
-    private tracking = false;
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
         super(position, width, height);
@@ -74,7 +69,7 @@ export class Swordman extends Enemy {
         this.setHitAnimation();
         this.checkHitCollisionAreas(player);
 
-        this.npcAction(delta, player);
+        this.npcAction(delta, player, tiles);
     }
 
     private checkHitCollisionAreas(player: Player) {
@@ -107,65 +102,7 @@ export class Swordman extends Enemy {
         }
     }
 
-    private npcAction(delta: number, player: Player) {
-
-        if (this.tracking) {
-            if (this.inRange(player, this.hitAreaOffset)) {
-                this.hit();
-                this.currentAnimation = this.hitAnimation;
-            } else {
-                this.currentAnimation = this.trackingAnimation;
-            }
-
-            this.track(player, delta);
-
-        } else {
-            if (this.inRange(player, this.searchAreaOffset)) {
-                this.startTracking();
-            } else {
-                this.patrol(delta);
-            }
-        }
-    }
-
-    private startTracking() {
-        this.tracking = true;
-        this.currentAnimation = this.trackingAnimation;
-        this.maxSpeed = 0.2;
-        this.actualSpeed = this.maxSpeed;
-    }
-
-    private track(player: Player, delta: number) {
-        if (player.position.x < this.position.x) {
-            this.moveLeft(delta);
-
-            this.checkStop(player);
-        } else if (player.position.x > this.position.x) {
-            this.moveRight(delta);
-
-            this.checkStop(player);
-        }
-    }
-
-    private checkStop(player: Player) {
-        if (this.nextToEdge || this.inRange(player, 5)) {
-            this.stop();
-        }
-    }
-
-    private patrol(delta: number) {
-        if (this.oldDirection != this.direction) {
-            this.oldDirection = this.direction;
-        }
-
-        if (this.oldDirection) {
-            this.moveLeft(delta);
-        } else {
-            this.moveRight(delta);
-        }
-    }
-
-    private inRange(player: Player, offset: number) {
+    protected inRange(player: Player, offset: number) {
 
         let area: Rectangle;
 
@@ -179,7 +116,7 @@ export class Swordman extends Enemy {
 
     }
 
-    private hit() {
+    protected hit(player: Player) {
         if (this.meeleAnimation) {
             if (this.meeleAnimation.repetitions <= 0) {
                 this.createHit();
@@ -187,10 +124,6 @@ export class Swordman extends Enemy {
         } else {
             this.createHit();
         }
-    }
-
-    private stop() {
-        this.velocity.x = 0;
     }
 
     private createHit() {

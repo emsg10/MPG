@@ -15,14 +15,20 @@ export class Enemy extends Character {
     protected collisionDetection = CollisionDetection.getInstance();
     protected nextToEdge: boolean;
     protected runningAnimation = new Animation();
+    protected hitAnimation = new Animation();
+    protected trackingAnimation = new Animation();
     protected collisionData: CollisionData;
     protected hp: number = 100;
-    protected freezeDamage: number = 0.04;
+    protected freezeDamage: number = 0.08;
+    protected flameDamage: number = 0.12;
     protected maxFreeze = this.hp/this.freezeDamage;
     protected freezeValue = 0;
     protected burnDamage = 0.2;
     protected cinderValue = 0;
     protected burnDurationFactor = 3;
+    protected tracking = false;
+    protected hitAreaOffset = 40;
+    protected searchAreaOffset = 150;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -33,7 +39,7 @@ export class Enemy extends Character {
         if(this.hp <= 0) {
             if(type == SpellType.frostBlast) {
                 this.deathType = DeathType.freezeDeath;
-            } if(type == SpellType.fireBlast) {
+            } else if(type == SpellType.fireBlast) {
                 this.deathType = DeathType.fireDeath;
             } else {
                 this.deathType = DeathType.swordDeath;
@@ -43,10 +49,10 @@ export class Enemy extends Character {
         }
     }
 
-    public burn(damage: number) {
+    public burn() {
         
         this.cinderValue += this.burnDurationFactor;
-        this.takeDamage(damage, SpellType.fireBlast);
+        this.takeDamage(this.flameDamage, SpellType.fireBlast);
 
         if(this.cinderValue > 300) {    
             this.burnValue += this.burnDurationFactor;
@@ -119,6 +125,80 @@ export class Enemy extends Character {
         let collisionArea = new Rectangle(this.position.x, this.position.y, this.width, 55);
 
         return collisionArea;
+    }
+
+    protected patrol(delta: number) {
+        if (this.oldDirection != this.direction) {
+            this.oldDirection = this.direction;
+        }
+
+        if (this.oldDirection) {
+            this.moveLeft(delta);
+        } else {
+            this.moveRight(delta);
+        }
+    }
+
+    protected hit(player: Player) {
+
+    }
+
+    protected npcAction(delta: number, player: Player, tiles: Tile[]) {
+
+        if (this.tracking) {
+            if (this.inRange(player, this.hitAreaOffset, tiles)) {
+                this.hit(player);
+                this.currentAnimation = this.hitAnimation;
+            } else {
+                this.currentAnimation = this.trackingAnimation;
+            }
+
+            this.track(player, delta, tiles);
+
+        } else {
+            if (this.inRange(player, this.searchAreaOffset, tiles)) {
+                this.startTracking();
+            } else {
+                this.patrol(delta);
+            }
+        }
+    }
+
+    protected checkStop(player: Player, tiles: Tile[]) {
+        if (this.nextToEdge || this.inRange(player, 5, tiles)) {
+            this.stop();
+        }
+    }
+
+    protected startTracking() {
+        this.tracking = true;
+        this.currentAnimation = this.trackingAnimation;
+        this.maxSpeed = 0.2;
+        this.actualSpeed = this.maxSpeed;
+    }
+
+    protected stop() {
+        this.velocity.x = 0;
+    }
+
+    protected track(player: Player, delta: number, tiles: Tile[]) {
+        if (player.position.x < this.position.x) {
+            this.moveLeft(delta);
+
+            this.checkStop(player, tiles);
+        } else if (player.position.x > this.position.x) {
+            this.moveRight(delta);
+
+            this.checkStop(player, tiles);
+        }
+    }
+
+    protected inRange(player: Player, offset: number, tiles: Tile[]) {
+
+    }
+
+    protected rand(min: number, max: number) {
+        return min + (Math.random() * (max - min))
     }
 
     private updateBurnDamage() {

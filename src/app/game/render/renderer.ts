@@ -12,11 +12,12 @@ export class Renderer {
 	private textureCoordBuffer: WebGLBuffer;
 	private indeciesBuffer: WebGLBuffer;
 	private colorBuffer: WebGLBuffer;
+	private rotationBuffer: WebGLBuffer;
 
 	private colorAttributeLocation: number;
 	private positionLocation: number;
 	private textureCoordAttribute: number;
-	private rotationLocation: WebGLUniformLocation;
+	private rotationLocation : WebGLUniformLocation;
 	private resolutionLocation: WebGLUniformLocation;
 
 	constructor(context: Context) {
@@ -32,13 +33,15 @@ export class Renderer {
 		this.positionLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
 		this.colorAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, "a_color");
 		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
-		this.rotationLocation = this.gl.getUniformLocation(this.shaderProgram, "u_rotation");
+		
 		this.resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
+		this.rotationLocation = this.gl.getUniformLocation(this.shaderProgram, "u_rotation");
 
 		this.colorBuffer = this.gl.createBuffer();
 		this.vertexBuffer = this.gl.createBuffer();
 		this.textureCoordBuffer = this.gl.createBuffer();
 		this.indeciesBuffer = this.gl.createBuffer();
+		this.rotationBuffer = this.gl.createBuffer();
 	}
 
 	public render(renderCalls: RenderCall[]) {
@@ -75,11 +78,7 @@ export class Renderer {
 			this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.activeTexture(this.gl.TEXTURE0);
-			if(renderCall.textureType == TextureType.particleTexture) {
-				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.genericParticleTexture);
-			} else {
-				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
-			}
+			this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
 			
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.drawElements(this.gl.TRIANGLES, renderCall.indecies.length, this.gl.UNSIGNED_SHORT, 0)

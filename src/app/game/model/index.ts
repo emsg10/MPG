@@ -15,6 +15,7 @@ import { PhysicalProjectile } from './animation/physicalProjectile';
 import { Meele } from './animation/meele';
 import { DebugElement } from './debug';
 import { TextureType } from './enum/textureType';
+import { StickyAnimation } from './animation/stickyAnimation';
 
 export {
     ShaderType,
@@ -33,5 +34,6 @@ export {
     Meele,
     DebugElement,
     TextureType,
-    FrameAnimation
+    FrameAnimation,
+    StickyAnimation
 };

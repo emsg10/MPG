@@ -14,10 +14,11 @@ import { ProjectileHandler } from './handler/projectileHandler';
 import { ParticleHandler } from './handler/particleHandler';
 import { SimpleParticleRenderer } from './render/simpleParticleRenderer';
 import { SimpleParticleRenderCall } from './render/simpleParticleRenderCall';
-import { DebuggHandler } from './handler/debugHandler';
+import { DebugHandler } from './handler/debugHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
 import { Camera } from './camera';
+import { Archer } from './character/archer';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -51,7 +52,7 @@ export class Game {
 	private projectileHandler: ProjectileHandler;
 	private enemyHandler: EnemyHandler;
 	private particleHandler: ParticleHandler;
-	private debugHandler = DebuggHandler.getInstance();
+	private debugHandler = DebugHandler.getInstance();
 	private camera: Camera;
 	private mouseRenderCall: RenderCall;
 	private levelCompleted = false;
@@ -106,6 +107,7 @@ export class Game {
 			while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
 				let delta = nextGameTick - this.lastUpdate;
 				this.lastUpdate = nextGameTick;
+				this.debugHandler.debugRects = [];
 
 				if (this.started) {
 					if (!this.player.dead && !this.levelCompleted) {
@@ -135,7 +137,6 @@ export class Game {
 	private render() {
 		this.context.clear([0, 0, 0, 0.95]);
 		let renderCall = new RenderCall();
-		let particleRenderCall = new SimpleParticleRenderCall();
 		let renderCalls: RenderCall[] = [];
 
 		let simpleRenderCalls: SimpleParticleRenderCall[] = [];
@@ -161,10 +162,9 @@ export class Game {
 		}
 
 		this.animationHandler.createRenderCall(renderCall, this.camera.position)
-		this.particleHandler.createRenderCall(particleRenderCall, this.camera.position);
+		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls, this.camera.position);
 
 		renderCalls.push(renderCall);
-		simpleRenderCalls.push(particleRenderCall);
 
 		this.debugHandler.createRenderCall(renderCall, this.camera.position);
 		this.renderer.render(renderCalls);
@@ -313,6 +313,9 @@ export class Game {
 		}
 
 		this.enemyHandler.enemies = enemies;
+		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1250), 50, 50, this.projectileHandler, this.animationHandler));
+		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1100), 50, 50, this.projectileHandler, this.animationHandler));
+		this.enemyHandler.enemies.push(new Archer(new Vector(600, 950), 50, 50, this.projectileHandler, this.animationHandler));
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
 		this.collision.createGrid(this.level.gameSize, this.level.tiles);
 

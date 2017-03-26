@@ -4,22 +4,22 @@ import { RenderHelper } from '../render/renderHelper';
 import { RenderCall } from '../render/renderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
 
-export class DebuggHandler {
+export class DebugHandler {
 
     public debugRects: DebugElement[] = [];
     private renderHelper = RenderHelper.getInstance();
-    private static instance: DebuggHandler = new DebuggHandler();
+    private static instance: DebugHandler = new DebugHandler();
 
     constructor() {
-		if (DebuggHandler.instance) {
+		if (DebugHandler.instance) {
 			throw new Error("Static class cant be instanced!");
 		}
 
-		DebuggHandler.instance = this;
+		DebugHandler.instance = this;
 	}
 
 	public static getInstance() {
-		return DebuggHandler.instance;
+		return DebugHandler.instance;
 	}
 
     createRenderCall(renderCall: RenderCall, camera: Vector) {
@@ -33,6 +33,7 @@ export class DebuggHandler {
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 1);
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             renderCall.color = this.renderHelper.getColor(renderCall.color, null);
+            renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
 		}
         
         return renderCall;

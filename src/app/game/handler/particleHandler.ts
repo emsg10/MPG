@@ -5,7 +5,7 @@ import { RenderCall } from '../render/renderCall';
 import { SimpleParticleRenderCall } from '../render/simpleParticleRenderCall';
 import { ParticleRenderCall } from '../render/particleRenderCall';
 import { CollisionDetection } from '../collision/collisionDetection';
-import { DebuggHandler } from './debugHandler';
+import { DebugHandler } from './debugHandler';
 import { EnemyHandler } from './enemyHandler';
 import { Enemy } from '../character/enemy';
 import { Gravity } from '../forces/gravity';
@@ -13,6 +13,7 @@ import { Gravity } from '../forces/gravity';
 export class ParticleHandler {
 
     public frostParticles: Particle[] = [];
+    public frostEffectParticles: Particle[] = [];
 
     public fireParticles: Particle[] = [];
     public fireEffectParticles: Particle[] = [];
@@ -21,6 +22,11 @@ export class ParticleHandler {
     private collisionDetection = CollisionDetection.getInstance();
     private tiles: Tile[];
     private gravity: Gravity = new Gravity(0.0001);
+    private noGravity: Gravity = new Gravity(0);
+
+    private fireColor = [1, 0.5, 0.2, 0.8];
+    private frostColor = [0.4, 0.9, 0.9, 0.9];
+    private frostEffectColor = [0.7, 0.9, 0.9, 0.9];
 
     private flameParticleSettings: number[] = [
         2, 5,
@@ -38,6 +44,22 @@ export class ParticleHandler {
         0.0
     ];
 
+    private frostParticleSettings: number[] = [
+        3, 5,
+        600, 800,
+        0.4, 0.5,
+        -0.02, 0.02,
+        0.2,
+    ]
+
+    private frostEffectParticleSettings: number[] = [
+        2, 4,
+        200, 800,
+        0.4, 0.5,
+        -0.08, 0.05,
+        0.0,
+    ]
+
     private burnEffectSettings: number[] = [
         10, 15,
         100, 400,
@@ -46,15 +68,15 @@ export class ParticleHandler {
         0.0
     ];
 
-    private latestRenderCalls: ParticleRenderCall[] = [];
-
     constructor(tiles: Tile[]) {
         this.tiles = tiles;
     }
 
     public createFrostBlast(position: Vector, inverse: boolean) {
-        let particles = this.createParticles(position, inverse, this.flameParticleSettings, 10);
+        let particles = this.createParticles(position, inverse, this.frostParticleSettings, 10);
+        let effectParticles = this.createParticles(position, inverse, this.frostEffectParticleSettings, 2);
 
+        this.frostEffectParticles.push(...effectParticles);
         this.frostParticles.push(...particles);
     }
 
@@ -82,77 +104,87 @@ export class ParticleHandler {
 
     public update(delta: number, enemies: Enemy[]) {
 
-        let effectParticleCollections: Particle[][] = [];
-        effectParticleCollections.push(this.fireEffectParticles);
+        this.updateEffectParticles(this.fireEffectParticles, delta);
+        this.updateEffectParticles(this.frostEffectParticles, delta);
 
-        let particleCollections: Particle[][] = [];
-        particleCollections.push(this.fireParticles);
-
-        this.updateEffectParticles(effectParticleCollections, delta);
-
-        this.updateParticles(particleCollections, delta, enemies);
+        this.updateParticles(this.frostParticles, this.noGravity, delta, enemies, SpellType.frostBlast);
+        this.updateParticles(this.fireParticles, this.gravity, delta, enemies, SpellType.fireBlast);
     }
 
-    public createRenderCall(renderCall: SimpleParticleRenderCall, camera: Vector) {
+    public createRenderCalls(renderCalls: SimpleParticleRenderCall[], camera: Vector) {
+        let fireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
+        let allFireParticles = this.fireParticles.concat(this.fireEffectParticles)
 
-        var temp: number[] = [];
+        renderCalls.push(this.addParticles(fireRenderCall, allFireParticles, camera, this.fireColor));
 
-        let totalParticles = this.fireParticles.concat(this.fireEffectParticles);
+        let frostRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
+        let frostEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
+        frostEffectRenderCall.textureType = TextureType.frostTexture;
 
-        for (let particle of totalParticles) {
+        renderCalls.push(this.addParticles(frostEffectRenderCall, this.frostEffectParticles, camera, this.frostEffectColor));
+        renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, camera, this.frostColor));
+
+        return renderCalls;
+    }
+
+    private addParticles(renderCall: SimpleParticleRenderCall, particles: Particle[], camera: Vector, color: number[]) {
+        for (let particle of particles) {
             renderCall.vertecies.push(...[particle.area.x - camera.x, particle.area.y - camera.y]);
             renderCall.pointSize.push(particle.area.width);
-            renderCall.color = [1, 0.5, 0.2, 0.8];
-            renderCall.itemCount = totalParticles.length;
+            renderCall.color = color;
+            renderCall.itemCount = particles.length;
         }
 
         return renderCall;
     }
 
-    private updateEffectParticles(effectParticleCollections: Particle[][], delta: number) {
-        for (let particleCollection of effectParticleCollections) {
-            let removeCollection: Particle[] = [];
+    private updateEffectParticles(particleCollection: Particle[], delta: number) {
+        let removeCollection: Particle[] = [];
 
-            for (let particle of particleCollection) {
-                this.updateParticle(particle, delta);
-                let collisionSize = particle.area.width / 2;
-                let collisionRectangle = new Rectangle(particle.area.x, particle.area.y, collisionSize, collisionSize);
+        for (let particle of particleCollection) {
+            this.updateParticle(particle, delta);
+            let collisionSize = particle.area.width / 2;
+            let collisionRectangle = new Rectangle(particle.area.x, particle.area.y, collisionSize, collisionSize);
 
-                if (particle.lifeTime <= 0 || particle.area.width < 0 || particle.dead) {
-                    removeCollection.push(particle);
-                }
-
-                this.removeParticles(removeCollection, particleCollection);
+            if (particle.lifeTime <= 0 || particle.area.width < 0 || particle.dead) {
+                removeCollection.push(particle);
             }
         }
+
+        this.removeParticles(removeCollection, particleCollection);
     }
 
-    private updateParticles(particleCollections: Particle[][], delta: number, enemies: Enemy[]) {
-        for (let particleCollection of particleCollections) {
-            let removeCollection: Particle[] = [];
+    private updateParticles(particleCollection: Particle[], gravity: Gravity, delta: number, enemies: Enemy[], spelltype: SpellType) {
 
-            for (let particle of particleCollection) {
-                this.updateParticle(particle, delta);
-                let collisionSize = particle.area.width / 2;
-                let collisionRectangle = new Rectangle(particle.area.x, particle.area.y, collisionSize, collisionSize);
+        let removeCollection: Particle[] = [];
 
-                if (!particle.dead) {
-                    for (let enemy of enemies) {
-                        if (this.collisionDetection.aabbCheck(collisionRectangle, enemy.getCollisionArea())) {
-                            enemy.burn(0.15);
-                            particle.dead = true;
-                            particle.lifeTime = particle.lifeTime > 10 ? 10 : particle.lifeTime;
+        for (let particle of particleCollection) {
+            gravity.apply(particle.velocity, delta);
+            this.updateParticle(particle, delta);
+            let collisionSize = particle.area.width / 2;
+            let collisionRectangle = new Rectangle(particle.area.x, particle.area.y, collisionSize, collisionSize);
+
+            if (!particle.dead) {
+                for (let enemy of enemies) {
+                    if (this.collisionDetection.aabbCheck(collisionRectangle, enemy.getCollisionArea())) {
+                        if(spelltype == SpellType.frostBlast) {
+                            enemy.freeze();
+                        } else {
+                            enemy.burn();
                         }
+                        
+                        particle.dead = true;
+                        particle.lifeTime = particle.lifeTime > 10 ? this.rand(10, 20) : particle.lifeTime;
                     }
                 }
+            }
 
-                if (particle.lifeTime <= 0 || particle.area.width < 0) {
-                    removeCollection.push(particle);
-                }
-
-                this.removeParticles(removeCollection, particleCollection);
+            if (particle.lifeTime <= 0 || particle.area.width < 0) {
+                removeCollection.push(particle);
             }
         }
+
+        this.removeParticles(removeCollection, particleCollection);
     }
 
     private removeParticles(removeCollection: Particle[], particleCollection: Particle[]) {
@@ -166,7 +198,6 @@ export class ParticleHandler {
     }
 
     private updateParticle(particle: Particle, delta: number) {
-        this.gravity.apply(particle.velocity, delta);
         particle.area.x += particle.velocity.x * delta;
         particle.area.y += particle.velocity.y * delta;
         particle.lifeTime -= delta;

@@ -9,7 +9,6 @@ varying highp vec2 v_texture_coord;
 varying vec4 v_color;
 
 void main() {
-
   v_color = a_color;
   vec2 rotatedPosition = vec2(
      a_position.x * u_rotation.y + a_position.y * u_rotation.x,

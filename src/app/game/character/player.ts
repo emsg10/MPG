@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellCast, SpellType } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellCast, SpellType, StickyAnimation } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../';
@@ -14,6 +14,7 @@ export class Player extends Character{
 
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
+	public damageAnimations: StickyAnimation[] = [];
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private particleHandler: ParticleHandler;
@@ -30,6 +31,7 @@ export class Player extends Character{
 	private runningAnimation = new Animation();
 	private castAnimation = new Animation();
 	private casting = false;
+	private hp = 100;
 
 	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number) {
 		super(position, width, height);
@@ -58,6 +60,14 @@ export class Player extends Character{
 		this.runningAnimation.textureNumber.push(202);
 
 		this.castAnimation.textureNumber.push(249);
+	}
+
+	public takeDamage(damage: number) {
+		this.hp -= damage;
+
+		if(this.hp <= 0) {
+			this.deathType = DeathType.swordDeath;
+		}
 	}
 
 	public createRenderCall(renderCall: RenderCall, camera: Vector) {
@@ -94,6 +104,7 @@ export class Player extends Character{
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
 		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
+		renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
 
 		return renderCall;
 
@@ -101,6 +112,7 @@ export class Player extends Character{
 
 	public update(collisionData: CollisionData, delta: number, type: SpellType) {
 
+		
 		if(this.deathType) {
 			if(this.deathType == DeathType.swordDeath) {
 				this.dead = true;
@@ -158,6 +170,9 @@ export class Player extends Character{
 		this.moving = false;
 		this.toMove.x = this.velocity.x * delta;
 		this.toMove.y = this.velocity.y * delta;
+
+		this.updateDamageAnimations();
+				
 	}
 
 	public moveRight(delta: number) {
@@ -209,6 +224,27 @@ export class Player extends Character{
 
 	public cancelCast() {
 		this.casting = false;
+	}
+
+	private updateDamageAnimations() {
+		let removeItems: StickyAnimation[] = [];
+		
+		for(let stickyAnimation of this.damageAnimations) {
+			stickyAnimation.animation.areaToRender.x = this.position.x - stickyAnimation.offset.x;
+			stickyAnimation.animation.areaToRender.y = this.position.y - stickyAnimation.offset.y;
+
+			if(stickyAnimation.animation.repetitions <= 0) {
+				removeItems.push(stickyAnimation);
+			}
+		}
+
+		for(let remove of removeItems) {
+			let index = this.damageAnimations.indexOf(remove);
+
+			if(index != -1) {
+				this.damageAnimations.splice(index, 1);
+			}
+		}
 	}
 
 }

@@ -6,13 +6,13 @@ export class RenderCall {
 	public textureCoords: number[];
 	public indecies: number[];
 	public color: number[];
-	public textureType: TextureType;
+	public rotation: number[];
 
 	constructor() {
 		this.vertecies = [];
 		this.indecies = [];
 		this.textureCoords = [];
 		this.color = [];
-		this.textureType = TextureType.tileTexture;
+		this.rotation = [];
 	}
 }

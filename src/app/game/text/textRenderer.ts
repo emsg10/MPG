@@ -17,7 +17,6 @@ export class TextRenderer {
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, type);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
-		renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
 
 		return renderCall;
 	}

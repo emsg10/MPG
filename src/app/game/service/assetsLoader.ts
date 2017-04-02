@@ -49,6 +49,18 @@ export class AssetsLoader {
       .catch(this.handleError);
   }
 
+  getDynamicVertexShader() {
+    return this.http.get(this.shaderUrl + "/dynamicVertexShader.c")
+      .map(this.extractTextData)
+      .catch(this.handleError);
+  }
+
+  getDynamicFragmentShader() {
+    return this.http.get(this.shaderUrl + "/dynamicFragmentShader.c")
+      .map(this.extractTextData)
+      .catch(this.handleError);
+  }
+
   getTexture(url: string) {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();

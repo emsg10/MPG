@@ -1,16 +1,16 @@
 import { Context } from '../';
 import { TextureType } from '../model';
 
-export class RenderCall {
+export class DynamicRenderCall {
 	public vertecies: number[];
 	public textureCoords: number[];
 	public indecies: number[];
-	public color: number[];
+	public matrices: number[];
 
 	constructor() {
 		this.vertecies = [];
 		this.indecies = [];
 		this.textureCoords = [];
-		this.color = [];
+		this.matrices = [];
 	}
 }

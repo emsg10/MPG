@@ -1,5 +1,5 @@
 import { Context, TileMap, Renderer } from './';
-import { RenderCall, ParticleRenderer } from './render';
+import { RenderCall, ParticleRenderer, DynamicRenderCall } from './render';
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
@@ -19,6 +19,7 @@ import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
 import { Camera } from './camera';
 import { Archer } from './character/archer';
+import { DynamicRenderer } from './render/dynamicRenderer';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -30,6 +31,7 @@ export class Game {
 	private renderer: Renderer;
 	private particelRenderer: ParticleRenderer;
 	private simpleParticleRenderer: SimpleParticleRenderer;
+	private dynamicRenderer: DynamicRenderer;
 	private collision: CollisionDetection = CollisionDetection.getInstance();
 	private player: Player;
 	private leftKeyPress: boolean;
@@ -68,6 +70,7 @@ export class Game {
 		this.renderer = new Renderer(this.context);
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
+		this.dynamicRenderer = new DynamicRenderer(this.context);
 
 		this.particleHandler = new ParticleHandler(this.levelData.tiles);
 		this.animationHandler = new AnimationHandler(this.particleHandler);
@@ -136,6 +139,7 @@ export class Game {
 
 	private render() {
 		this.context.clear([0, 0, 0, 0.95]);
+		let dynamicRenderCall = new DynamicRenderCall();
 		let renderCall = new RenderCall();
 		let renderCalls: RenderCall[] = [];
 
@@ -149,7 +153,7 @@ export class Game {
 		}
 
 		//GAME
-		this.enemyHandler.createRenderCall(renderCall, this.camera.position);
+		renderCalls = this.enemyHandler.createRenderCall(renderCalls, renderCall, this.camera.position);
 		this.tileMap.createRenderCall(this.level.tiles, renderCall, this.camera.position);
 		this.tileMap.createGoalRenderCall(this.level.goal, renderCall, this.camera.position);
 
@@ -161,6 +165,7 @@ export class Game {
 			renderCall = this.player.createRenderCall(renderCall, this.camera.position)
 		}
 
+		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(renderCall, this.camera.position)
 		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls, this.camera.position);
 
@@ -169,6 +174,7 @@ export class Game {
 		this.debugHandler.createRenderCall(renderCall, this.camera.position);
 		this.renderer.render(renderCalls);
 		this.simpleParticleRenderer.render(simpleRenderCalls);
+		this.dynamicRenderer.render([dynamicRenderCall]);
 		//this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
 	}
 
@@ -316,6 +322,9 @@ export class Game {
 		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1250), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1100), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(600, 950), 50, 50, this.projectileHandler, this.animationHandler));
+		this.enemyHandler.enemies.push(new Archer(new Vector(2400, 700), 50, 50, this.projectileHandler, this.animationHandler));
+		this.enemyHandler.enemies.push(new Archer(new Vector(2100, 1000), 50, 50, this.projectileHandler, this.animationHandler));
+		
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
 		this.collision.createGrid(this.level.gameSize, this.level.tiles);
 

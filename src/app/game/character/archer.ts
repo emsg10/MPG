@@ -13,8 +13,8 @@ export class Archer extends Enemy {
     private textureMapper = TextureMapper.getInstance();
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
-    protected hitAreaOffset: number = 800;
-    protected searchAreaOffset: number = 1000;
+    protected hitAreaOffset: number = 600;
+    protected searchAreaOffset: number = 800;
     private arrowVelocity = 0.5;
     private shoot = false;
     public debugHandler = DebugHandler.getInstance();
@@ -94,11 +94,30 @@ export class Archer extends Enemy {
     private getDeltaPosition(player: Player) {
         return new Vector(player.position.x - this.position.x, player.position.y - this.position.y);
     }
+    
+    private getDeltaVelocity(player: Player, deltaPos: Vector) {
+        
+        let deltaVelocity = player.velocity.x * player.velocity.x * 500;
+        if(deltaPos.x < 0) {
+            if(player.velocity.x > 0) {
+                return -deltaVelocity;
+            } else {
+                return deltaVelocity;
+            }
+        } else {
+            if(player.velocity.x > 0) {
+                return deltaVelocity;
+            } else {
+                return -deltaVelocity;
+            }
+        }
+        
+    }
 
     private calculatePath(player: Player, inverse: boolean) {
         let deltaPos = this.getDeltaPosition(player);
 
-        deltaPos.y = deltaPos.y - (deltaPos.x * deltaPos.x * 0.0007);
+        deltaPos.y = deltaPos.y - ((deltaPos.x * deltaPos.x * 0.0007) + this.getDeltaVelocity(player, deltaPos));
         
         let velocity = new Vector(deltaPos.x, deltaPos.y * this.rand(0.85, 1.15));
         velocity.normalize();

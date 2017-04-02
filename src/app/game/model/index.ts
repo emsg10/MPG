@@ -16,6 +16,7 @@ import { Meele } from './animation/meele';
 import { DebugElement } from './debug';
 import { TextureType } from './enum/textureType';
 import { StickyAnimation } from './animation/stickyAnimation';
+import { RotationAnimation } from './animation/rotationAnimation';
 
 export {
     ShaderType,
@@ -35,5 +36,6 @@ export {
     DebugElement,
     TextureType,
     FrameAnimation,
-    StickyAnimation
+    StickyAnimation,
+    RotationAnimation
 };

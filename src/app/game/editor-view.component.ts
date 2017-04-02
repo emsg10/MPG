@@ -32,6 +32,8 @@ export class EditorViewComponent implements AfterViewInit {
             this.assetsLoader.getParticleFragmentShader(),
             this.assetsLoader.getSimpleParticleVertexShader(),
             this.assetsLoader.getSimpleParticleFragmentShader(),
+            this.assetsLoader.getDynamicVertexShader(),
+            this.assetsLoader.getDynamicFragmentShader(),
             this.assetsLoader.getTileTexture(),
             this.assetsLoader.getParticleTexture(),
             this.assetsLoader.getGenericParticleTexture(),
@@ -43,13 +45,15 @@ export class EditorViewComponent implements AfterViewInit {
             this.asset.particleFragmentShader = data[3] as string;
             this.asset.simpleParticleVertexShader = data[4] as string;
             this.asset.simpleParticleFragmentShader = data[5] as string;
-            
-            this.asset.texture = data[6] as HTMLImageElement;
-            this.asset.particleTexture = data[7] as HTMLImageElement;
-            this.asset.genericParticleTexture = data[8] as HTMLImageElement;
-            this.editor.levelData = data[9];
+            this.asset.dynamicVertexShader = data[6] as string;
+            this.asset.dynamicFragmentShader = data[7] as string;
 
-            this.editor.init(this.asset, this.gameCanvas.nativeElement);
+            this.asset.texture = data[8] as HTMLImageElement;
+            this.asset.particleTexture = data[9] as HTMLImageElement;
+            this.asset.genericParticleTexture = data[10] as HTMLImageElement;
+            this.editor.levelData = data[11];
+
+            //this.editor.init(this.asset, this.gameCanvas.nativeElement);
 
             this.game = new Game(this.asset, this.editor.startElement.nativeElement, this.editor.restartElement.nativeElement, this.gameCanvas.nativeElement, this.editor.levelData);
         });

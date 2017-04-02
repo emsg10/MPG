@@ -1,7 +1,5 @@
-import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation } from '../model'
-import { TextureMapper } from '../render/textureMapper';
-import { RenderCall } from '../render/renderCall';
-import { RenderHelper } from '../render/renderHelper';
+import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation, RotationAnimation } from '../model'
+import { RenderCall, DynamicRenderCall, RenderHelper, Matrix3, TextureMapper } from '../render';
 import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
 import { Player } from '../character/player';
@@ -10,6 +8,7 @@ import { ParticleHandler } from '../handler/particleHandler';
 export class AnimationHandler {
 
     public animations: Animation[] = [];
+    public dynamicAnimations: Animation[] = [];
     private particleHandler: ParticleHandler;
     private textureMapper = TextureMapper.getInstance();
     private renderHelper = RenderHelper.getInstance();
@@ -292,29 +291,33 @@ export class AnimationHandler {
         return animation;
     }
 
-    public createArrow(area: Rectangle, inverse: boolean) {
-        let animation = new Animation();
+    public createArrow(area: Rectangle, inverse: boolean, velocity: Vector) {
+        let animation = new RotationAnimation(velocity);
         animation.textureNumber.push(268);
         animation.inverse = inverse;
-        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+        animation.areaToRender = area;
 
-        this.animations.push(animation);
+        this.dynamicAnimations.push(animation);
 
         return animation;
     }
 
-    public createArrowHit(area: Rectangle, inverse: boolean) {
-        let animation = new Animation();
+    public createArrowHit(area: Rectangle, inverse: boolean, angle: Vector) {
+
+        let collAngle = new Vector(angle.x, angle.y);
+
+        let animation = new RotationAnimation(collAngle);
         animation.textureNumber.push(269);
         animation.inverse = inverse;
+
         animation.areaToRender = area;
         animation.areaToRender.width = animation.areaToRender.width * 0.67;
 
         animation.timeToChange = 2000;
         animation.repetitions = 1;
-        
 
-        this.animations.push(animation);
+
+        this.dynamicAnimations.push(animation);
 
         return animation;
     }
@@ -361,8 +364,9 @@ export class AnimationHandler {
     public update(delta: number) {
 
         let completedAnimations: Animation[] = [];
+        let totalAnimations = this.animations.concat(this.dynamicAnimations);
 
-        for (let animation of this.animations) {
+        for (let animation of totalAnimations) {
             animation.next(delta);
             if (animation.repetitions <= 0) {
                 completedAnimations.push(animation);
@@ -373,10 +377,30 @@ export class AnimationHandler {
         }
 
         for (let completedAnimation of completedAnimations) {
-            let index = this.animations.indexOf(completedAnimation);
+            this.remove(completedAnimation);
+        }
+    }
 
-            if (index != -1) {
-                this.animations.splice(index, 1);
+    public createDynamicRenderCall(renderCall: DynamicRenderCall, camera: Vector) {
+
+
+        for (let animation of this.dynamicAnimations) {
+            if (animation instanceof RotationAnimation) {
+
+                let x = animation.areaToRender.x - camera.x;
+                let y = animation.areaToRender.y - camera.y;
+                let width = animation.areaToRender.width;
+                let height = animation.areaToRender.height;
+
+                if (animation.inverse) {
+                    renderCall.vertecies = this.renderHelper.getInverseVertecies(x, y, width, height, renderCall.vertecies);
+                } else {
+                    renderCall.vertecies = this.renderHelper.getVertecies(x, y, width, height, renderCall.vertecies);
+                }
+
+                renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
+                renderCall.matrices = this.renderHelper.getMatrices(x, y, width, height, animation.angle, renderCall.matrices);
+                renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             }
         }
     }
@@ -385,14 +409,20 @@ export class AnimationHandler {
 
         for (let animation of this.animations) {
             if (animation.delay <= 0) {
+                let x = animation.areaToRender.x - camera.x;
+                let y = animation.areaToRender.y - camera.y;
+                let width = animation.areaToRender.width;
+                let height = animation.areaToRender.height;
+
                 if (animation.inverse) {
-                    renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+                    renderCall.vertecies = this.renderHelper.getInverseVertecies(x, y, width, height, renderCall.vertecies);
                 } else {
-                    renderCall.vertecies = this.renderHelper.getVertecies(animation.areaToRender.x - camera.x, animation.areaToRender.y - camera.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+                    renderCall.vertecies = this.renderHelper.getVertecies(x, y, width, height, renderCall.vertecies);
                 }
+
                 renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
+
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-                renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
                 if (animation.color) {
                     renderCall.color = this.renderHelper.getColor(renderCall.color, animation.color);
                 } else {
@@ -408,6 +438,11 @@ export class AnimationHandler {
         let index = this.animations.indexOf(animation);
         if (index != -1) {
             this.animations.splice(index, 1);
+        } else {
+            index = this.dynamicAnimations.indexOf(animation);
+            if (index != -1) {
+                this.dynamicAnimations.splice(index, 1);
+            }
         }
     }
 

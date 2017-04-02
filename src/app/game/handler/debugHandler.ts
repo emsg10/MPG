@@ -33,7 +33,6 @@ export class DebugHandler {
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 1);
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             renderCall.color = this.renderHelper.getColor(renderCall.color, null);
-            renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
 		}
         
         return renderCall;

@@ -1,4 +1,16 @@
-import { Projectile, Vector, Rectangle, SpellType, Spell, PhysicalProjectile, Meele, Animation, DebugElement, StickyAnimation } from '../model';
+import {
+    Projectile,
+    Vector,
+    Rectangle,
+    SpellType,
+    Spell,
+    PhysicalProjectile,
+    Meele,
+    Animation,
+    DebugElement,
+    StickyAnimation,
+    RotationAnimation
+} from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
 import { EnemyHandler } from './enemyHandler';
@@ -41,9 +53,12 @@ export class ProjectileHandler {
     public createArrow(position: Vector, inverse: boolean, velocity: Vector) {
         let arrow: PhysicalProjectile;
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
-        let collRect = new Rectangle(position.x + 10, position.y, 5, 5);
+        let collRect: Rectangle;
 
-        arrow = new PhysicalProjectile(velocity, rectangle, this.animationHandler.createArrow(rectangle, inverse), 1, collRect);
+        collRect = new Rectangle(position.x + 20, position.y + 5, 5, 5);
+
+        let animation = this.animationHandler.createArrow(rectangle, inverse, velocity);
+        arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect, true);
         arrow.gravity = new Gravity(0.0003);
         arrow.drag = new Drag(0);
 
@@ -131,7 +146,7 @@ export class ProjectileHandler {
 
     public destroyProjectile(projectile: Projectile, projectiles: Projectile[]) {
         this.destroyAnimation(projectile);
-        this.animationHandler.animations.splice(this.animationHandler.animations.indexOf(projectile.animation), 1);
+        this.animationHandler.remove(projectile.animation);
         let index = projectiles.indexOf(projectile);
         if (index != -1) {
             projectiles.splice(index, 1);
@@ -189,7 +204,7 @@ export class ProjectileHandler {
 
     private setDamageAnimation(player: Player, projectile: Projectile) {
         let animationOffset = new Vector(player.position.x - projectile.area.x, player.position.y - projectile.area.y);
-        player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse), animationOffset));
+        player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse, projectile.velocity), animationOffset));
         player.takeDamage(20);
     }
 
@@ -199,13 +214,13 @@ export class ProjectileHandler {
         collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity, true);
 
         if (collisionData.groundCollision) {
-            this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse);
+            this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse, projectile.velocity);
             removeProjectiles.push(projectile);
         } else {
             collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true);
 
             if (collisionData.wallCollision) {
-                this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse);
+                this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse, projectile.velocity);
                 removeProjectiles.push(projectile);
             }
         }

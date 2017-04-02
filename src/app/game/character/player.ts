@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellCast, SpellType, StickyAnimation } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellCast, SpellType, StickyAnimation, DebugElement } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../';
@@ -9,6 +9,7 @@ import { ParticleHandler } from '../handler/particleHandler';
 import { Drag } from '../forces/drag';
 import { Character } from './character';
 import { DeathType } from './deathType';
+import { DebugHandler } from '../handler/debugHandler';
 
 export class Player extends Character{
 
@@ -104,7 +105,6 @@ export class Player extends Character{
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
 		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
-		renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
 
 		return renderCall;
 
@@ -196,6 +196,7 @@ export class Player extends Character{
 
 	public getCollisionArea() {
 		var collisionArea = new Rectangle(this.position.x, this.position.y, 43, 42);
+		
 
 		return collisionArea;
 	}

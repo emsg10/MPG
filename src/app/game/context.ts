@@ -6,6 +6,7 @@ export class Context
 	public shaderProgram: WebGLProgram;
 	public particleProgram: WebGLProgram;
 	public simpleParticleProgram: WebGLProgram;
+	public dynamicVertecyProgram: WebGLProgram;
 	public gl: WebGLRenderingContext;
 	public glTexture: WebGLTexture;
 	public frostParticelTexture: WebGLTexture;
@@ -38,6 +39,17 @@ export class Context
 
 		let simpleParticleVertexShader = this.compileShader(asset.simpleParticleVertexShader, ShaderType.Vertex);
 		let simpleParticleFragmentShader = this.compileShader(asset.simpleParticleFragmentShader, ShaderType.Fragment);
+
+		let dynamicVertexShader = this.compileShader(asset.dynamicVertexShader, ShaderType.Vertex);
+		let dynamicFragmentShader = this.compileShader(asset.dynamicFragmentShader, ShaderType.Fragment);
+
+		this.dynamicVertecyProgram = this.gl.createProgram();
+		this.gl.attachShader(this.dynamicVertecyProgram, dynamicVertexShader);
+		this.gl.attachShader(this.dynamicVertecyProgram, dynamicFragmentShader);
+		this.gl.linkProgram(this.dynamicVertecyProgram);
+		if (!this.gl.getProgramParameter(this.dynamicVertecyProgram, this.gl.LINK_STATUS)) {
+			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.dynamicVertecyProgram));
+		}
 
 		this.simpleParticleProgram = this.gl.createProgram();
 		this.gl.attachShader(this.simpleParticleProgram, simpleParticleVertexShader);

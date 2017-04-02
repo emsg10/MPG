@@ -1,5 +1,6 @@
 import { TextureMapper } from './textureMapper';
 import { Vector, Rectangle } from '../model';
+import { Matrix3 } from './matrix3';
 
 export class RenderHelper {
 
@@ -8,6 +9,7 @@ export class RenderHelper {
 	private static textureSize = 2048;
 	private canvasWidth = 1200;
 	private canvasHeight = 800;
+	private projectionMatrix = Matrix3.createProjectionMatrix(this.canvasWidth, this.canvasHeight);
 
 	constrcuctor() {
 		if (RenderHelper.instance) {
@@ -23,15 +25,14 @@ export class RenderHelper {
 
 	public getRelativeValue(x: number, y: number) {
 
-		let relativePosition = new Vector(0,0);
-		relativePosition.x = x/(this.canvasWidth/2) - 1;
-		relativePosition.y = -y/(this.canvasHeight/2) + 1;
+		let relativePosition = new Vector(0, 0);
+		relativePosition.x = x / (this.canvasWidth / 2) - 1;
+		relativePosition.y = -y / (this.canvasHeight / 2) + 1;
 
 		return relativePosition;
 	}
 
 	public getVertecies(x: number, y: number, width: number, height: number, currentVertecies: number[]) {
-
 		var x1 = x;
 		var x2 = x + width;
 		var y1 = y;
@@ -52,12 +53,13 @@ export class RenderHelper {
 	}
 
 	public getInverseVertecies(x: number, y: number, width: number, height: number, currentVertecies: number[]) {
-		var x1 = x + width;
-		var x2 = x;
-		var y1 = y;
-		var y2 = y + height;
 
-		var newVertecies = [
+		let x1 = x + width;
+		let x2 = x;
+		let y1 = y;
+		let y2 = y + height;
+
+		let newVertecies = [
 			x1, y1,
 			x2, y2,
 			x2, y1,
@@ -72,10 +74,10 @@ export class RenderHelper {
 	}
 
 	public getColor(currentColors: number[], color?: number[]) {
-		
+
 		let col: number[] = [];
 
-		if(color) {
+		if (color) {
 			col = color;
 		} else {
 			col = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
@@ -86,27 +88,35 @@ export class RenderHelper {
 		return currentColors;
 	}
 
-	public getRotation(currentRotation: number[], rotation?: number[]) {
-		let rot: number[] = [];
+	public getMatrices(x: number, y: number, width: number, height: number, angle: number, currentMatrices: number[]) {
 
-		if(rotation) {
-			rot = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
-		} else {
-			rot = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
-		}
+		let rotationPointX = x + width / 2;
+		let rotationPointY = y + height / 2;
 
-		currentRotation.push.apply(currentRotation, rot);
+		let moveToRotationPointMatrix = Matrix3.createTranslationMatrix(-rotationPointX, -rotationPointY);
+		let rotationMatrix = Matrix3.createRotationMatrix(angle);
+		let moveBackMatrix = Matrix3.createTranslationMatrix(rotationPointX, rotationPointY);
 
-		return currentRotation;
+		let matrix = Matrix3.multiply(moveToRotationPointMatrix, rotationMatrix);
+		matrix = Matrix3.multiply(matrix, moveBackMatrix);
+		matrix = Matrix3.multiply(matrix, this.projectionMatrix);
+
+		matrix = this.getIndeciesAttribute(matrix);
+
+		currentMatrices.push.apply(currentMatrices, matrix);
+
+		return currentMatrices;
 	}
 
-	public getIndeciecColor(color: number[]) {
-		
-		for(let i = 0; i < 6; i++) {
-			color.push(...color);
+	public getIndeciesAttribute(attribute: number[]) {
+
+		let copy = attribute.slice(0, attribute.length);
+
+		for (let i = 0; i < 5; i++) {
+			attribute.push(...copy);
 		}
 
-		return color;
+		return attribute;
 	}
 
 	public getIndecies(currentIndecies: number[]) {

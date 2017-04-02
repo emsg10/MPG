@@ -37,8 +37,7 @@ export class EnemyHandler {
         }
     }
 
-    createRenderCall(renderCall: RenderCall, camera: Vector) {
-
+    createRenderCall(renderCalls: RenderCall[], renderCall: RenderCall, camera: Vector) {
         for (let enemy of this.enemies) {
             if (enemy.inverse) {
                 renderCall.vertecies = this.renderHelper.getInverseVertecies(enemy.position.x - camera.x, enemy.position.y - camera.y, enemy.width, enemy.height, renderCall.vertecies);
@@ -48,10 +47,9 @@ export class EnemyHandler {
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, enemy.currentAnimation.getCurrentFrame());
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             renderCall.color = this.renderHelper.getColor(renderCall.color, enemy.color);
-            renderCall.rotation = this.renderHelper.getRotation(renderCall.rotation, null);
         }
 
-        return renderCall;
+        return renderCalls;
     }
 
     remove(enemy: Enemy) {

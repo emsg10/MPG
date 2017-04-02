@@ -1,6 +1,7 @@
 import { Context } from '../context';
 import { RenderCall } from './renderCall';
-import { TextureType } from '../model';
+import { TextureType, Vector } from '../model';
+import { Matrix3 } from './matrix3';
 
 export class Renderer {
 
@@ -17,8 +18,12 @@ export class Renderer {
 	private colorAttributeLocation: number;
 	private positionLocation: number;
 	private textureCoordAttribute: number;
+	private resolutionLocation : WebGLUniformLocation;
 	private rotationLocation : WebGLUniformLocation;
-	private resolutionLocation: WebGLUniformLocation;
+
+	private projectionMatrix: number[];
+
+	private resolution: Vector;
 
 	constructor(context: Context) {
 		this.context = context;
@@ -35,7 +40,8 @@ export class Renderer {
 		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
 		
 		this.resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
-		this.rotationLocation = this.gl.getUniformLocation(this.shaderProgram, "u_rotation");
+
+		this.resolution = new Vector(this.context.gl.canvas.width, this.context.gl.canvas.height);
 
 		this.colorBuffer = this.gl.createBuffer();
 		this.vertexBuffer = this.gl.createBuffer();
@@ -47,7 +53,6 @@ export class Renderer {
 	public render(renderCalls: RenderCall[]) {
 		this.gl.useProgram(this.shaderProgram);
 		for(let renderCall of renderCalls) {
-			var rotation = [0, 1];
 			
 			this.gl.enableVertexAttribArray(this.positionLocation);
 			this.gl.enableVertexAttribArray(this.textureCoordAttribute);
@@ -64,18 +69,17 @@ export class Renderer {
 
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(renderCall.indecies), this.gl.STATIC_DRAW);
-
-			this.gl.uniform2fv(this.rotationLocation, rotation);
-			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 			
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 			this.gl.vertexAttribPointer(this.positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-			this.gl.uniform2f(this.resolutionLocation, this.context.gl.canvas.width, this.context.gl.canvas.height);
 
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
 			this.gl.vertexAttribPointer(this.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
 			this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
+
+			this.gl.uniform2f(this.resolutionLocation, this.resolution.x, this.resolution.y);
 
 			this.gl.activeTexture(this.gl.TEXTURE0);
 			this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
@@ -87,8 +91,7 @@ export class Renderer {
 			this.gl.disableVertexAttribArray(this.textureCoordAttribute);
 			this.gl.disableVertexAttribArray(this.colorAttributeLocation);
 		}
-
-		
 	}
+
 	
 }

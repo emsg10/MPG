@@ -6,7 +6,7 @@ import { CollisionDetection } from '../collision/collisionDetection';
 
 export class DebugHandler {
 
-    public debugRects: DebugElement[] = [];
+    public debugRects: Rectangle[] = [];
     private renderHelper = RenderHelper.getInstance();
     private static instance: DebugHandler = new DebugHandler();
 
@@ -25,11 +25,7 @@ export class DebugHandler {
     createRenderCall(renderCall: RenderCall, camera: Vector) {
 
         for(let rect of this.debugRects) {
-            if(rect.inverse) {
-                renderCall.vertecies = this.renderHelper.getInverseVertecies(rect.area.x - camera.x, rect.area.y - camera.y, rect.area.width, rect.area.height, renderCall.vertecies);
-            } else {
-                renderCall.vertecies = this.renderHelper.getVertecies(rect.area.x - camera.x, rect.area.y - camera.y, rect.area.width, rect.area.height, renderCall.vertecies);
-            }
+            renderCall.vertecies = this.renderHelper.getVertecies(rect.x - camera.x, rect.y - camera.y, rect.width, rect.height, renderCall.vertecies);
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 1);
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             renderCall.color = this.renderHelper.getColor(renderCall.color, null);

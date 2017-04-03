@@ -17,6 +17,7 @@ export class Archer extends Enemy {
     protected searchAreaOffset: number = 800;
     private arrowVelocity = 0.5;
     private shoot = false;
+    private shooting = false;
     public debugHandler = DebugHandler.getInstance();
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
@@ -33,6 +34,7 @@ export class Archer extends Enemy {
         this.runningAnimation.textureNumber.push(265);
 
         this.hitAnimation.textureNumber.push(262);
+        this.hitAnimation.textureNumber.push(264);
         this.hitAnimation.textureNumber.push(263);
         this.hitAnimation.textureNumber.push(264);
 
@@ -62,9 +64,11 @@ export class Archer extends Enemy {
     }
 
     protected hit(player: Player) {
-        
-        if(this.hitAnimation.frameIndex == 2) {
+        this.shooting = true;
+
+        if(this.hitAnimation.frameIndex == 3) {
             if(!this.shoot) {
+                this.shooting = false;
                 this.shoot = true;
                 let velocity = this.calculatePath(player, this.inverse);
                 let bowPosition = new Vector(this.position.x, this.position.y + 20); 
@@ -77,11 +81,19 @@ export class Archer extends Enemy {
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
+        if(this.shooting) {
+            return true;
+        }
+
         let deltaPos = this.getDeltaPosition(player);
         let magnitude = deltaPos.magnitude();
-
+        
         if(magnitude < this.searchAreaOffset) {
-            return true;
+            if(this.clearShoot(deltaPos, tiles)) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -93,6 +105,43 @@ export class Archer extends Enemy {
 
     private getDeltaPosition(player: Player) {
         return new Vector(player.position.x - this.position.x, player.position.y - this.position.y);
+    }
+
+    private clearShoot(deltaPos: Vector, tiles: Tile[]) {
+        let clear = true;
+        let pathBlocks = this.getPathBlocks(deltaPos);
+
+        //this.debugHandler.debugRects.push(...pathBlocks);
+
+        for(let block of pathBlocks) {
+            if(!this.collisionDetection.fastCheckEnviroment(block, tiles)){
+                clear = false;
+                break;
+            }
+        }
+
+        return clear;
+    }
+
+    private getPathBlocks(deltaPos: Vector) {
+
+        let blocksize = 20;
+        let magnitude = deltaPos.magnitude();
+        let direction = deltaPos.copy(deltaPos);
+        let bowPosition = new Vector(this.position.x, this.position.y + 10); 
+
+        direction.normalize();
+
+        let blocks: Rectangle[] = [];
+
+        for(let i = 0; i < Math.floor(magnitude/blocksize); i++) {
+
+            let newMagnitude = magnitude - (i * blocksize);
+
+            blocks.push(new Rectangle(bowPosition.x + direction.x * newMagnitude, bowPosition.y + direction.y * newMagnitude, blocksize, 17));
+        }
+
+        return blocks;
     }
     
     private getDeltaVelocity(player: Player, deltaPos: Vector) {
@@ -117,7 +166,7 @@ export class Archer extends Enemy {
     private calculatePath(player: Player, inverse: boolean) {
         let deltaPos = this.getDeltaPosition(player);
 
-        deltaPos.y = deltaPos.y - ((deltaPos.x * deltaPos.x * 0.0007) + this.getDeltaVelocity(player, deltaPos));
+        deltaPos.y = deltaPos.y - ((deltaPos.x * deltaPos.x * 0.00063) + this.getDeltaVelocity(player, deltaPos));
         
         let velocity = new Vector(deltaPos.x, deltaPos.y * this.rand(0.85, 1.15));
         velocity.normalize();

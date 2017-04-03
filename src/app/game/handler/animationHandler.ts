@@ -1,4 +1,4 @@
-import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation, RotationAnimation } from '../model'
+import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation, RotationAnimation, Projectile } from '../model'
 import { RenderCall, DynamicRenderCall, RenderHelper, Matrix3, TextureMapper } from '../render';
 import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
@@ -302,15 +302,20 @@ export class AnimationHandler {
         return animation;
     }
 
-    public createArrowHit(area: Rectangle, inverse: boolean, angle: Vector) {
+    public createArrowHit(projectile: Projectile, useCollisionArea: boolean) {
 
-        let collAngle = new Vector(angle.x, angle.y);
+        let collAngle = new Vector(projectile.velocity.x, projectile.velocity.y);
 
         let animation = new RotationAnimation(collAngle);
         animation.textureNumber.push(269);
-        animation.inverse = inverse;
+        animation.inverse = projectile.animation.inverse;
 
-        animation.areaToRender = area;
+        if(useCollisionArea) {
+            animation.areaToRender = new Rectangle(projectile.collisionArea.x, projectile.collisionArea.y, projectile.area.width, projectile.area.height);
+        } else {
+            animation.areaToRender = new Rectangle(projectile.area.x, projectile.area.y, projectile.area.width, projectile.area.height);
+        }
+        
         animation.areaToRender.width = animation.areaToRender.width * 0.67;
 
         animation.timeToChange = 2000;

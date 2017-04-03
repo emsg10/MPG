@@ -55,7 +55,7 @@ export class ProjectileHandler {
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
         let collRect: Rectangle;
 
-        collRect = new Rectangle(position.x + 20, position.y + 5, 5, 5);
+        collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
 
         let animation = this.animationHandler.createArrow(rectangle, inverse, velocity);
         arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect, true);
@@ -179,17 +179,17 @@ export class ProjectileHandler {
 
         let deltaVelocity = new Vector(frameVelocity.x - player.velocity.x * delta, frameVelocity.y - player.velocity.y * delta);
 
-        collisionData = this.collisionDetection.checkProjectileCollisionY([player.getCollisionArea()], projectile, deltaVelocity, false);
+        collisionData = this.collisionDetection.checkProjectileCollisionY([player.getProjectileCollisionArea()], projectile, deltaVelocity, false);
         projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
 
         if (collisionData.groundCollision) {
-            this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
+            this.animationHandler.bloodAnimation_A(new Vector(projectile.collisionArea.x, projectile.collisionArea.y), 10);
             this.setDamageAnimation(player, projectile);
             projectile.velocity.y = 0;
             removeProjectiles.push(projectile);
         }
 
-        collisionData = this.collisionDetection.checkProjectileCollisionX([player.getCollisionArea()], projectile, deltaVelocity, false);
+        collisionData = this.collisionDetection.checkProjectileCollisionX([player.getProjectileCollisionArea()], projectile, deltaVelocity, false);
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
         if (collisionData.wallCollision) {
@@ -203,8 +203,10 @@ export class ProjectileHandler {
     }
 
     private setDamageAnimation(player: Player, projectile: Projectile) {
-        let animationOffset = new Vector(player.position.x - projectile.area.x, player.position.y - projectile.area.y);
-        player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse, projectile.velocity), animationOffset));
+
+        let animationOffset: Vector;
+        animationOffset = new Vector((player.position.x) - (projectile.area.x), player.position.y - projectile.area.y);
+        player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile, true), animationOffset));
         player.takeDamage(20);
     }
 
@@ -214,13 +216,13 @@ export class ProjectileHandler {
         collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity, true);
 
         if (collisionData.groundCollision) {
-            this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse, projectile.velocity);
+            this.animationHandler.createArrowHit(projectile, false);
             removeProjectiles.push(projectile);
         } else {
             collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true);
 
             if (collisionData.wallCollision) {
-                this.animationHandler.createArrowHit(projectile.area, projectile.animation.inverse, projectile.velocity);
+                this.animationHandler.createArrowHit(projectile, false);
                 removeProjectiles.push(projectile);
             }
         }

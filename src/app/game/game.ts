@@ -324,6 +324,7 @@ export class Game {
 		this.enemyHandler.enemies.push(new Archer(new Vector(600, 950), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(2400, 700), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(2100, 1000), 50, 50, this.projectileHandler, this.animationHandler));
+		this.enemyHandler.enemies.push(new Archer(new Vector(3330, 1000), 50, 50, this.projectileHandler, this.animationHandler));
 		
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
 		this.collision.createGrid(this.level.gameSize, this.level.tiles);

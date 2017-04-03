@@ -306,5 +306,4 @@ export class CollisionDetection {
 
         return collisionData;
     }
-
 }

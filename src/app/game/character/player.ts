@@ -34,6 +34,8 @@ export class Player extends Character{
 	private casting = false;
 	private hp = 100;
 
+	private debugHandler = DebugHandler.getInstance();
+
 	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number) {
 		super(position, width, height);
 		this.context = context;
@@ -196,7 +198,12 @@ export class Player extends Character{
 
 	public getCollisionArea() {
 		var collisionArea = new Rectangle(this.position.x, this.position.y, 43, 42);
-		
+
+		return collisionArea;
+	}
+
+	public getProjectileCollisionArea() {
+		var collisionArea = new Rectangle(this.position.x + 10, this.position.y + 5, 43 - 10, 42 - 5);
 
 		return collisionArea;
 	}

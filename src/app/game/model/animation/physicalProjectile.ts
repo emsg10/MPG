@@ -25,18 +25,5 @@ export class PhysicalProjectile extends Projectile {
     public updateForces(delta: number) {
         this.gravity.apply(this.velocity, delta);
         this.drag.apply(this.velocity, delta);
-
-        if(this.angle) {
-            let animation = this.animation as RotationAnimation;
-            let inverseAngleMax = Math.PI * 0.5;
-            if(animation.angle < inverseAngleMax) {
-                let factor = animation.angle/(Math.PI * 0.5);
-                this.collisionArea.x = this.area.x + 10 + (factor * this.area.width/2);
-            } else {
-                let factor = animation.angle/(Math.PI * 1.5);
-                this.collisionArea.x = this.area.x - 20  + (factor * this.area.width/2);
-            }
-        }
-        
     }
 }

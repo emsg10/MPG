@@ -29,6 +29,8 @@ export class Enemy extends Character {
     protected tracking = false;
     protected hitAreaOffset = 40;
     protected searchAreaOffset = 150;
+    protected trackingTime = 0;
+    protected trackingMaxTime = 3000;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -115,6 +117,11 @@ export class Enemy extends Character {
             this.velocity.x = 0;
         }
 
+        this.trackingTime -= delta;
+        if(this.trackingTime <= 0) {
+            this.tracking = false;
+        }
+
         let freezePercent = this.freezeValue/this.maxFreeze;
         this.updateColor([1.0 + (freezePercent * 1.0), 1.0 + (freezePercent * 2.0), 1.0 + (freezePercent * 2.0), 1.0]);
 
@@ -147,6 +154,7 @@ export class Enemy extends Character {
 
         if (this.tracking) {
             if (this.inRange(player, this.hitAreaOffset, tiles)) {
+                this.trackingTime = this.trackingMaxTime;
                 this.hit(player);
                 this.currentAnimation = this.hitAnimation;
             } else {
@@ -157,6 +165,7 @@ export class Enemy extends Character {
 
         } else {
             if (this.inRange(player, this.searchAreaOffset, tiles)) {
+                this.trackingTime = this.trackingMaxTime;
                 this.startTracking();
             } else {
                 this.patrol(delta);

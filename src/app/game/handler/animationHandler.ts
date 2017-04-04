@@ -107,6 +107,50 @@ export class AnimationHandler {
         return animation;
     }
 
+    public createArcherDeath(area: Rectangle, inverse: boolean) {
+        this.bloodAnimation_C(new Vector(area.x - 10, area.y - 20), 75);
+        this.bloodAnimation_B_Left(new Vector(area.x - 10, area.y - 20), 75);
+        this.bloodAnimation_B_Right(new Vector(area.x - 10, area.y - 20), 75);
+        this.archer_death(area, inverse);
+        this.archer_corpse(area, inverse);
+    }
+
+    public archer_death(area: Rectangle, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(290);
+        animation.textureNumber.push(291);
+        animation.textureNumber.push(292);
+        animation.textureNumber.push(293);
+
+        animation.timeToChange = 120;
+
+        animation.repetitions = 4;
+
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public archer_corpse(area: Rectangle, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(293);
+        animation.timeToChange = 120;
+
+        animation.delay = 4;
+
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.inverse = inverse;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
     public player_sword_death_corpse(position: Vector, inverse: boolean) {
         let animation = new Animation();
         animation.textureNumber.push(236);
@@ -175,6 +219,8 @@ export class AnimationHandler {
 
         return animation;
     }
+
+    
 
     public createSpellAnimation(position: Vector, animationSize: number, inverse: boolean, type: SpellType) {
         switch (type) {
@@ -266,7 +312,7 @@ export class AnimationHandler {
             this.particleHandler.createFireDeath(position);
         }
 
-        let animation = new FrameAnimation(0, 6, 5, 10, onUpdate);
+        let animation = new FrameAnimation(0, -4, 0, 0, onUpdate);
         animation.textureNumber.push(250);
         animation.textureNumber.push(251);
         animation.textureNumber.push(252);
@@ -275,16 +321,39 @@ export class AnimationHandler {
         animation.textureNumber.push(255);
         animation.textureNumber.push(256);
         animation.textureNumber.push(257);
-        animation.textureNumber.push(258);
-        animation.textureNumber.push(259);
-        animation.textureNumber.push(260);
-        animation.textureNumber.push(261);
 
         animation.inverse = inverse;
         animation.timeToChange = 100;
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
 
-        animation.repetitions = 12;
+        animation.repetitions = 8;
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public fireDeathArcher(area: Rectangle, inverse: boolean) {
+
+        let onUpdate = (position: Vector) => {
+            this.particleHandler.createFireDeath(position);
+        }
+
+        let animation = new FrameAnimation(0, -4, 0, 0, onUpdate);
+        animation.textureNumber.push(282);
+        animation.textureNumber.push(283);
+        animation.textureNumber.push(284);
+        animation.textureNumber.push(285);
+        animation.textureNumber.push(286);
+        animation.textureNumber.push(287);
+        animation.textureNumber.push(288);
+        animation.textureNumber.push(289);
+
+        animation.inverse = inverse;
+        animation.timeToChange = 100;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.repetitions = 8;
 
         this.animations.push(animation);
 
@@ -349,9 +418,31 @@ export class AnimationHandler {
         return animation;
     }
 
-    public frozenPart(area: Rectangle, inverse: boolean, color: number[], partIndex: number) {
+    public frozenArcher(area: Rectangle, inverse: boolean, color: number[], onCompletion: () => void) {
         let animation = new Animation();
-        animation.textureNumber.push(243 + partIndex);
+        animation.textureNumber.push(270);
+        animation.textureNumber.push(271);
+        animation.textureNumber.push(272);
+        animation.textureNumber.push(273);
+        animation.textureNumber.push(274);
+        animation.textureNumber.push(275);
+        animation.inverse = inverse;
+        animation.color = color;
+        animation.timeToChange = 250;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.onCompletion = onCompletion;
+
+        this.animations.push(animation);
+
+        animation.repetitions = 6;
+
+        return animation;
+    }
+
+    public frozenPart(area: Rectangle, inverse: boolean, color: number[], partIndex: number, baseTextureNumber: number) {
+        let animation = new Animation();
+        animation.textureNumber.push(baseTextureNumber + partIndex);
         animation.inverse = inverse;
         animation.color = color;
         animation.timeToChange = 2000;

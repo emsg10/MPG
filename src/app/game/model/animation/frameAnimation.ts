@@ -9,7 +9,7 @@ export class FrameAnimation extends Animation {
     private offsetX: number = 10;
     private particleFunction: (position: Vector) => void;
 
-	constructor(growthX: number, growthY: number, offsetX: number, offsetY: number ,particleFunction: (position: Vector) => void) {
+	constructor(growthX: number, growthY: number, offsetX: number, offsetY: number, particleFunction: (position: Vector) => void) {
         super();
 
         this.particleFunction = particleFunction;
@@ -24,8 +24,8 @@ export class FrameAnimation extends Animation {
 	public next(delta: number) {
         if(this.lastFrameIndex != this.frameIndex) {
             this.lastFrameIndex = this.frameIndex;
-            this.areaToRender.x += this.growthX;
-            this.areaToRender.y += this.growthY;
+            this.offsetX += this.growthX;
+            this.offsetY += this.growthY;
         }
         
         this.particleFunction(new Vector(this.areaToRender.x + this.offsetX, this.areaToRender.y - this.offsetY));

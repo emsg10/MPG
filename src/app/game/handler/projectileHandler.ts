@@ -121,11 +121,41 @@ export class ProjectileHandler {
             ];
 
             for (let i = 0; i < 6; i++) {
-                this.createFrozenPart(velocotyies[i], area, inverse, color, i, collisionAreas[i]);
+                this.createFrozenPart(velocotyies[i], area, inverse, color, i, 243, collisionAreas[i]);
             }
         };
 
         this.animationHandler.frozenSwordMan(area, inverse, color, onComplete);
+    }
+
+    public createFrozenArcherDeath(area: Rectangle, inverse: boolean, color: number[]) {
+
+        let onComplete = () => {
+
+            let velocotyies = [
+                new Vector((Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((-Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((-Math.random() * 0.15), (-Math.random() * 0.3)),
+                new Vector((-Math.random() * 0.15), (-Math.random() * 0.3)),
+            ];
+
+            let collisionAreas = [
+                new Rectangle(area.x + 8, area.y + 2, 11, 6),
+                new Rectangle(area.x + 4, area.y + 4, 9, 14),
+                new Rectangle(area.x + 17, area.y + 3, 11, 11),
+                new Rectangle(area.x + 13, area.y + 7, 15, 15),
+                new Rectangle(area.x + 5, area.y + 15, 13, 17),
+                new Rectangle(area.x + 14, area.y + 19, 13, 13)
+            ];
+
+            for (let i = 0; i < 6; i++) {
+                this.createFrozenPart(velocotyies[i], area, inverse, color, i, 276 ,collisionAreas[i]);
+            }
+        };
+
+        this.animationHandler.frozenArcher(area, inverse, color, onComplete);
     }
 
     public update(delta: number, collidables: Rectangle[], player: Player) {
@@ -289,13 +319,15 @@ export class ProjectileHandler {
         }
     }
 
-    private createFrozenPart(velocity: Vector, rect: Rectangle, inverse: boolean, color: number[], partIndex: number, collisionArea: Rectangle) {
+    private createFrozenPart(velocity: Vector, rect: Rectangle, inverse: boolean, color: number[], partIndex: number, baseNumber: number, collisionArea: Rectangle) {
         let projectile: Projectile;
 
-        projectile = new PhysicalProjectile(velocity, new Rectangle(rect.x, rect.y, rect.width, rect.width), this.animationHandler.frozenPart(rect, inverse, color, partIndex), 1, collisionArea)
+        projectile = new PhysicalProjectile(velocity, new Rectangle(rect.x, rect.y, rect.width, rect.width), this.animationHandler.frozenPart(rect, inverse, color, partIndex, baseNumber), 1, collisionArea)
 
         this.projectiles.push(projectile);
     }
+
+
 
 
 

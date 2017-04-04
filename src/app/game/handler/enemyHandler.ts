@@ -2,6 +2,7 @@ import { Tile, Spell, Vector, Rectangle } from '../model';
 import { Enemy } from '../character/enemy';
 import { Player } from '../character/player';
 import { Swordman } from '../character/swordman';
+import { Archer } from '../character/archer';
 import { RenderCall, RenderHelper } from '../render';
 import { Context } from '../context';
 import { ProjectileHandler } from './projectileHandler';
@@ -68,10 +69,25 @@ export class EnemyHandler {
     private checkEnemyDeath(enemy: Enemy) {
         if (enemy.dead) {
             if (enemy.deathType == DeathType.freezeDeath) {
-                this.projectileHandler.createFrozenSwordManDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
+                if(enemy instanceof Swordman) {
+                    this.projectileHandler.createFrozenSwordManDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
+                } else if (enemy instanceof Archer) {
+                    this.projectileHandler.createFrozenArcherDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
+                }
+                
                 this.remove(enemy);
             } else if (enemy.deathType == DeathType.fireDeath) {
-                this.animationHandler.fireDeathSwordman(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                if(enemy instanceof Swordman) {
+                    this.animationHandler.fireDeathSwordman(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof Archer) {
+                    this.animationHandler.fireDeathArcher(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                }
+                this.remove(enemy);
+            } else if (enemy.deathType == DeathType.swordDeath) {
+                if(enemy instanceof Archer) {
+                    this.animationHandler.createArcherDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                }
+
                 this.remove(enemy);
             }
         }
@@ -100,8 +116,10 @@ export class EnemyHandler {
                         this.projectileHandler.destroyProjectile(projectile, this.projectileHandler.projectiles);
 
                         if (enemy.dead) {
-                            this.projectileHandler.createSwordman_death(enemy.position, enemy.inverse, this.projectileHandler.calculateDirection(projectile.area, enemy));
-                            removeEnemy.push(enemy);
+                            if(enemy instanceof Swordman) {
+                                this.projectileHandler.createSwordman_death(enemy.position, enemy.inverse, this.projectileHandler.calculateDirection(projectile.area, enemy));
+                                removeEnemy.push(enemy);
+                            }
                         }
                     }
                 }

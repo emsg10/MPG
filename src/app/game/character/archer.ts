@@ -15,6 +15,7 @@ export class Archer extends Enemy {
     private animationHandler: AnimationHandler;
     protected hitAreaOffset: number = 600;
     protected searchAreaOffset: number = 800;
+    protected hp = 50;
     private arrowVelocity = 0.5;
     private shoot = false;
     private shooting = false;

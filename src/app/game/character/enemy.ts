@@ -21,7 +21,7 @@ export class Enemy extends Character {
     protected hp: number = 100;
     protected freezeDamage: number = 0.08;
     protected flameDamage: number = 0.12;
-    protected maxFreeze = this.hp/this.freezeDamage;
+    protected maxFreeze = this.hp / this.freezeDamage;
     protected freezeValue = 0;
     protected burnDamage = 0.2;
     protected cinderValue = 0;
@@ -31,6 +31,10 @@ export class Enemy extends Character {
     protected searchAreaOffset = 150;
     protected trackingTime = 0;
     protected trackingMaxTime = 3000;
+    protected turnCooldown = 0;
+    protected turnMaxCooldown = 150;
+    protected lastTurnLeft = true;
+
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -38,31 +42,31 @@ export class Enemy extends Character {
 
     public takeDamage(damage: number, type: SpellType) {
         this.hp = this.hp - damage;
-        if(this.hp <= 0) {
-            if(type == SpellType.frostBlast) {
+        if (this.hp <= 0) {
+            if (type == SpellType.frostBlast) {
                 this.deathType = DeathType.freezeDeath;
-            } else if(type == SpellType.fireBlast) {
+            } else if (type == SpellType.fireBlast) {
                 this.deathType = DeathType.fireDeath;
             } else {
                 this.deathType = DeathType.swordDeath;
             }
-            
+
             this.dead = true;
         }
     }
 
     public burn() {
-        
+
         this.cinderValue += this.burnDurationFactor;
         this.takeDamage(this.flameDamage, SpellType.fireBlast);
 
-        if(this.cinderValue > 300) {    
+        if (this.cinderValue > 300) {
             this.burnValue += this.burnDurationFactor;
         }
     }
 
     public freeze() {
-        if(this.actualSpeed > this.maxSpeed * 0.3) {
+        if (this.actualSpeed > this.maxSpeed * 0.3) {
             this.actualSpeed = this.actualSpeed * 0.997;
         }
 
@@ -75,7 +79,7 @@ export class Enemy extends Character {
         this.toMove.y = this.velocity.y * delta;
         this.nextToEdge = false;
 
-        if(this.actualSpeed < this.maxSpeed) {
+        if (this.actualSpeed < this.maxSpeed) {
             this.actualSpeed = this.actualSpeed * 1.005;
         }
 
@@ -117,12 +121,15 @@ export class Enemy extends Character {
             this.velocity.x = 0;
         }
 
+        this.turnCooldown -= delta;
+
         this.trackingTime -= delta;
-        if(this.trackingTime <= 0) {
+        if (this.trackingTime <= 0) {
             this.tracking = false;
+            this.currentAnimation = this.runningAnimation;
         }
 
-        let freezePercent = this.freezeValue/this.maxFreeze;
+        let freezePercent = this.freezeValue / this.maxFreeze;
         this.updateColor([1.0 + (freezePercent * 1.0), 1.0 + (freezePercent * 2.0), 1.0 + (freezePercent * 2.0), 1.0]);
 
         this.updateBurnDamage();
@@ -180,6 +187,7 @@ export class Enemy extends Character {
     }
 
     protected startTracking() {
+        this.trackingTime = this.trackingMaxTime;
         this.tracking = true;
         this.currentAnimation = this.trackingAnimation;
         this.maxSpeed = 0.2;
@@ -191,14 +199,28 @@ export class Enemy extends Character {
     }
 
     protected track(player: Player, delta: number, tiles: Tile[]) {
-        if (player.position.x < this.position.x) {
-            this.moveLeft(delta);
 
-            this.checkStop(player, tiles);
-        } else if (player.position.x > this.position.x) {
-            this.moveRight(delta);
+        if (this.turnCooldown <= 0) {
+            if (player.position.x < this.position.x) {
+                this.moveLeft(delta);
 
-            this.checkStop(player, tiles);
+                if (!this.lastTurnLeft) {
+                    this.turnCooldown = this.turnMaxCooldown;
+                }
+
+                this.lastTurnLeft = true;
+
+                this.checkStop(player, tiles);
+            } else if (player.position.x > this.position.x) {
+                this.moveRight(delta);
+
+                if (this.lastTurnLeft) {
+                    this.turnCooldown = this.turnMaxCooldown;
+                }
+
+                this.lastTurnLeft = false;
+                this.checkStop(player, tiles);
+            }
         }
     }
 
@@ -211,7 +233,7 @@ export class Enemy extends Character {
     }
 
     private updateBurnDamage() {
-        if(this.burnValue > 0) {
+        if (this.burnValue > 0) {
             this.takeDamage(this.burnDamage, SpellType.fireBlast);
             this.burnValue--;
         }
@@ -220,7 +242,7 @@ export class Enemy extends Character {
     private updateColor(color: number[]) {
         let colorColl: number[] = [];
 
-        for(let i = 0; i < 6; i++) {
+        for (let i = 0; i < 6; i++) {
             colorColl.push(...color);
         }
 

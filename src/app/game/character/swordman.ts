@@ -48,9 +48,7 @@ export class Swordman extends Enemy {
 
     public takeDamage(damage: number, type: SpellType) {
         super.takeDamage(damage, type);
-        if(!this.tracking) {
-            this.startTracking();
-        }
+        this.startTracking();
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {

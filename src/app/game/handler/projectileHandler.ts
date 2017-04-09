@@ -9,7 +9,9 @@ import {
     Animation,
     DebugElement,
     StickyAnimation,
-    RotationAnimation
+    RotationAnimation,
+    CollisionProjectile,
+    ProjectileType
 } from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
@@ -62,9 +64,27 @@ export class ProjectileHandler {
         arrow.gravity = new Gravity(0.0003);
         arrow.drag = new Drag(0);
 
+        arrow.projectileType = ProjectileType.Arrow;
+
         this.enemyProjectiles.push(arrow);
 
         return arrow;
+    }
+
+    createSwordHit(position: Vector, offset: number, inverse: boolean) {
+        let rect: Rectangle;
+        let velocity: Vector;
+        if (inverse) {
+            rect = new Rectangle(position.x, position.y - 10, 10, 10);
+            velocity = new Vector(-0.5, 0.6);
+        } else {
+            rect = new Rectangle(position.x + offset, position.y - 10, 10, 10);
+            velocity = new Vector(0.5, 0.6);
+        }
+        let collisionProjectile = new CollisionProjectile(velocity, rect, 40, this.animationHandler.voidAnimation(), 30);
+        collisionProjectile.projectileType = ProjectileType.Sword;
+
+        this.enemyProjectiles.push(collisionProjectile);
     }
 
     public createSwordman_death(position: Vector, inverse: boolean, velocity: Vector) {
@@ -151,7 +171,7 @@ export class ProjectileHandler {
             ];
 
             for (let i = 0; i < 6; i++) {
-                this.createFrozenPart(velocotyies[i], area, inverse, color, i, 276 ,collisionAreas[i]);
+                this.createFrozenPart(velocotyies[i], area, inverse, color, i, 276, collisionAreas[i]);
             }
         };
 
@@ -193,51 +213,83 @@ export class ProjectileHandler {
 
     private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[]) {
         let removeProjectiles: Projectile[] = [];
+        let shieldCollidables: Rectangle[] = [];
+        let playerCollisionArea = player.getCollisionArea();
+        shieldCollidables.push(...player.shieldCollidables);
 
         for (let projectile of this.enemyProjectiles) {
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, removeProjectiles);
+            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, playerCollisionArea, shieldCollidables, removeProjectiles);
             removeProjectiles = this.checkStaticObjectCollisions(projectile, frameVelocity, collidables, removeProjectiles);
         }
 
         return removeProjectiles;
     }
 
-    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, removeProjectiles: Projectile[]) {
+    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, playerCollisionArea: Rectangle, shieldCollidables: Rectangle[], removeProjectiles: Projectile[]) {
         let collisionData: CollisionData;
+        let shieldCollisionData: CollisionData;
         projectile.updateForces(delta);
 
         let deltaVelocity = new Vector(frameVelocity.x - player.velocity.x * delta, frameVelocity.y - player.velocity.y * delta);
 
-        collisionData = this.collisionDetection.checkProjectileCollisionY([player.getProjectileCollisionArea()], projectile, deltaVelocity, false);
+        collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
+        shieldCollisionData = this.collisionDetection.checkProjectileCollisionY(shieldCollidables, projectile, deltaVelocity, false);
         projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
 
-        if (collisionData.groundCollision) {
-            this.animationHandler.bloodAnimation_A(new Vector(projectile.collisionArea.x, projectile.collisionArea.y), 10);
+        if (shieldCollisionData.groundCollision) {
+            this.setShieldDamage(player, projectile);
+            removeProjectiles.push(projectile);
+        } else if (collisionData.groundCollision) {
+            this.animationHandler.bloodAnimation_A(new Vector(projectile.collisionArea.x, projectile.collisionArea.y), 20);
             this.setDamageAnimation(player, projectile);
-            projectile.velocity.y = 0;
             removeProjectiles.push(projectile);
         }
 
-        collisionData = this.collisionDetection.checkProjectileCollisionX([player.getProjectileCollisionArea()], projectile, deltaVelocity, false);
+        if (projectile.projectileType == ProjectileType.Arrow) {
+            collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, false);
+            shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, false);
+        } else {
+            collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, true);
+            shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, true);
+        }
+
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
-        if (collisionData.wallCollision) {
-            this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 10);
-            this.setDamageAnimation(player, projectile);
-            projectile.velocity.x = 0;
+        if (shieldCollisionData.wallCollision) {
+            this.setShieldDamage(player, projectile);
             removeProjectiles.push(projectile);
+        } else if (collisionData.wallCollision) {
+            this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 20);
+            this.setDamageAnimation(player, projectile);
+            removeProjectiles.push(projectile);
+        }
+
+        if (projectile instanceof CollisionProjectile) {
+            if (projectile.distance <= 0) {
+                removeProjectiles.push(projectile);
+            }
         }
 
         return removeProjectiles;
     }
 
     private setDamageAnimation(player: Player, projectile: Projectile) {
+        if (projectile.projectileType == ProjectileType.Arrow) {
+            this.createStickyArrowAnimation(player, projectile);
+            player.takeDamage(20);
+        } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
+            player.takeDamage(projectile.damage);
+        }
+    }
 
-        let animationOffset: Vector;
-        animationOffset = new Vector((player.position.x) - (projectile.area.x), player.position.y - projectile.area.y);
-        player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile, true), animationOffset));
-        player.takeDamage(20);
+    private setShieldDamage(player: Player, projectile: Projectile) {
+        if (projectile.projectileType == ProjectileType.Arrow) {
+            this.createStickyArrowAnimation(player, projectile);
+            player.useMana(20);
+        } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
+            player.useMana(projectile.damage);
+        }
     }
 
     private checkStaticObjectCollisions(projectile: Projectile, frameVelocity: Vector, collidables: Rectangle[], removeProjectiles: Projectile[]) {
@@ -246,19 +298,33 @@ export class ProjectileHandler {
         collisionData = this.collisionDetection.checkProjectileCollisionY(collidables, projectile, frameVelocity, true);
 
         if (collisionData.groundCollision) {
-            this.animationHandler.createArrowHit(projectile, false);
+            this.setStaticObjectAnimation(projectile);
             removeProjectiles.push(projectile);
         } else {
-            collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true);
+            collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true, false);
 
             if (collisionData.wallCollision) {
-                this.animationHandler.createArrowHit(projectile, false);
+                this.setStaticObjectAnimation(projectile);
                 removeProjectiles.push(projectile);
             }
         }
 
         return removeProjectiles;
 
+    }
+
+    private createStickyArrowAnimation(player: Player, projectile: Projectile) {
+        if (projectile.projectileType == ProjectileType.Arrow) {
+            let animationOffset: Vector;
+            animationOffset = new Vector((player.position.x) - (projectile.area.x), player.position.y - projectile.area.y);
+            player.damageAnimations.push(new StickyAnimation(this.animationHandler.createArrowHit(projectile, true), animationOffset));
+        }
+    }
+
+    private setStaticObjectAnimation(projectile: Projectile) {
+        if (projectile.projectileType == ProjectileType.Arrow) {
+            this.animationHandler.createArrowHit(projectile, false);
+        }
     }
 
     private updateAndCollCheck(projectile: Projectile, delta: number, collidables: Rectangle[], removeProjectiles: Projectile[]) {
@@ -282,7 +348,7 @@ export class ProjectileHandler {
             projectile.velocity.y = 0;
         }
 
-        collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true);
+        collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true, false);
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
         if (projectile instanceof Spell) {

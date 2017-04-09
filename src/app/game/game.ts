@@ -20,6 +20,7 @@ import { LevelData, EnemyType } from './map/model';
 import { Camera } from './camera';
 import { Archer } from './character/archer';
 import { DynamicRenderer } from './render/dynamicRenderer';
+import { UI } from './UI/ui';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -40,6 +41,7 @@ export class Game {
 	private channelingKeyPress: boolean;
 	private frostKeyPress: boolean;
 	private fireKeyPress: boolean;
+	private shieldKeyPress: boolean;
 	private spellType: SpellType;
 	private started: boolean = false;
 	private lastUpdate: number;
@@ -52,6 +54,7 @@ export class Game {
 	private levelData: LevelData;
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
+	private UI: UI;
 	private enemyHandler: EnemyHandler;
 	private particleHandler: ParticleHandler;
 	private debugHandler = DebugHandler.getInstance();
@@ -72,6 +75,7 @@ export class Game {
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
 
+		this.UI = new UI(100, 200);
 		this.particleHandler = new ParticleHandler(this.levelData.tiles);
 		this.animationHandler = new AnimationHandler(this.particleHandler);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
@@ -122,6 +126,7 @@ export class Game {
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
+						this.UI.update(this.player.hp, this.player.mana);
 						this.camera.update(this.player.position);
 					} else {
 						this.animationHandler.update(delta);
@@ -167,14 +172,19 @@ export class Game {
 
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(renderCall, this.camera.position)
+		this.UI.createRenderCall(renderCall, this.camera.position);
 		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls, this.camera.position);
+
+		this.debugHandler.createRenderCall(renderCall, this.camera.position);
+		
 
 		renderCalls.push(renderCall);
 
-		this.debugHandler.createRenderCall(renderCall, this.camera.position);
+		
 		this.renderer.render(renderCalls);
 		this.simpleParticleRenderer.render(simpleRenderCalls);
 		this.dynamicRenderer.render([dynamicRenderCall]);
+		
 		//this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
 	}
 
@@ -191,6 +201,12 @@ export class Game {
 
 		if (this.jumpKeyPress) {
 			this.player.jump();
+		}
+
+		if(this.shieldKeyPress) {
+			this.player.castShield(true);
+		} else {
+			this.player.castShield(false);
 		}
 
 		if (this.frostKeyPress) {
@@ -235,6 +251,9 @@ export class Game {
 				case 'Numpad4':
 					this.fireKeyPress = true;
 					break;
+				case 'Numpad5':
+					this.shieldKeyPress = true;
+					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = true;
 					break;
@@ -244,6 +263,7 @@ export class Game {
 				case 'ArrowLeft':
 					this.leftKeyPress = true;
 					break;
+				
 			}
 
 		});
@@ -273,6 +293,9 @@ export class Game {
 					break;
 				case 'Numpad4':
 					this.fireKeyPress = false;
+					break;
+				case 'Numpad5':
+					this.shieldKeyPress = false;
 					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = false;
@@ -326,7 +349,7 @@ export class Game {
 		this.enemyHandler.enemies.push(new Archer(new Vector(2100, 1000), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(3330, 1000), 50, 50, this.projectileHandler, this.animationHandler));
 		
-		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45);
+		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45, 100, 200);
 		this.collision.createGrid(this.level.gameSize, this.level.tiles);
 
 	}

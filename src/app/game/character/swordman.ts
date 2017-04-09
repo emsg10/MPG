@@ -16,6 +16,7 @@ export class Swordman extends Enemy {
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;
     private hitOffset = 40;
+    private hitting = false;
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
         super(position, width, height);
@@ -30,7 +31,6 @@ export class Swordman extends Enemy {
         this.runningAnimation.textureNumber.push(227);
 
         this.runningAnimation.timeToChange = 150;
-
 
         this.hitAnimation.textureNumber.push(231);
         this.hitAnimation.textureNumber.push(231);
@@ -48,16 +48,16 @@ export class Swordman extends Enemy {
 
     public takeDamage(damage: number, type: SpellType) {
         super.takeDamage(damage, type);
-        this.startTracking();
+        if (!this.tracking) {
+            this.startTracking();
+        }
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
         super.update(delta, tiles, player);
 
-        if (this.meeleAnimation) {
-            if (this.meeleAnimation.repetitions > 0) {
-                this.currentAnimation.next(delta);
-            }
+        if (this.currentAnimation == this.hitAnimation) {
+            this.currentAnimation.next(delta);
         } else {
             if (this.velocity.x != 0 || this.collisionData.wallCollision) {
                 this.currentAnimation.next(delta);
@@ -71,31 +71,14 @@ export class Swordman extends Enemy {
     }
 
     private checkHitCollisionAreas(player: Player) {
-        this.hitCollisionAreas = [];
-        if (this.meeleAnimation) {
-            if (this.meeleAnimation.repetitions > 0) {
-                if (this.meeleAnimation.repetitions == 5 || this.meeleAnimation.repetitions == 4) {
-                    if (!this.inverse) {
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset, this.position.y, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 10, this.position.y + 10, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 20, this.position.y + 20, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 30, this.position.y + 30, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x + this.hitOffset + 35, this.position.y + 40, 5, 5));
-                    } else {
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x, this.position.y, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 10, this.position.y + 10, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 20, this.position.y + 20, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 30, this.position.y + 30, 5, 5));
-                        this.hitCollisionAreas.push(new Rectangle(this.position.x - 35, this.position.y + 40, 5, 5));
-                    }
-                }
+        if (this.hitAnimation) {
+            if (this.hitAnimation.frameIndex == 4 && !this.hitting) {
+                this.hitting = true;
+                this.projectileHandler.createSwordHit(this.position, this.width, this.inverse);
+            }
 
-                if (this.collisionDetection.aabbCheckS(player.getCollisionArea(), this.hitCollisionAreas)) {
-                    player.deathType = DeathType.swordDeath;
-                }
-
-            } else {
-                this.meeleAnimation = null;
+            if (this.hitAnimation.frameIndex == 0) {
+                this.hitting = false;
             }
         }
     }
@@ -117,19 +100,20 @@ export class Swordman extends Enemy {
     protected hit(player: Player) {
         if (this.meeleAnimation) {
             if (this.meeleAnimation.repetitions <= 0) {
-                this.createHit();
+                this.createHit(player);
             }
         } else {
-            this.createHit();
+            this.createHit(player);
         }
     }
 
-    private createHit() {
-        this.hitAnimation.reset();
-        if (!this.inverse) {
-            this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x + this.hitOffset, this.position.y), 50, !this.inverse);
-        } else {
-            this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x - this.hitOffset, this.position.y), 50, !this.inverse);
+    private createHit(player: Player) {
+        if (player.shieldCollidables.length <= 0) {
+            if (!this.inverse) {
+                this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x + this.hitOffset, this.position.y), 50, !this.inverse);
+            } else {
+                this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x - this.hitOffset, this.position.y), 50, !this.inverse);
+            }
         }
     }
 

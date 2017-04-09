@@ -1,10 +1,11 @@
-import { Vector, Rectangle, Animation, SpellType } from '../';
+import { Vector, Rectangle, Animation, SpellType, ProjectileType } from '../';
 
 export abstract class Projectile {
     public velocity: Vector;
     public area: Rectangle;
     public collisionArea: Rectangle;
     public animation: Animation;
+    public projectileType: ProjectileType = ProjectileType.None;
 
     constructor(velocity: Vector, area: Rectangle, animation: Animation, collisionRatio: number, collisionArea?: Rectangle) {
         this.velocity = velocity;

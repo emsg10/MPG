@@ -70,6 +70,14 @@ export class AnimationHandler {
         return animation;
     }
 
+    public voidAnimation() {
+        let animation = new Animation();
+
+        animation.areaToRender = new Rectangle(0, 0, 0, 0);
+
+        return animation;
+    }
+
     public bloodAnimation_C(position: Vector, size: number) {
         let animation = new Animation();
         animation.textureNumber.push(147);

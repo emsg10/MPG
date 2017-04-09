@@ -31,10 +31,6 @@ export class Enemy extends Character {
     protected searchAreaOffset = 150;
     protected trackingTime = 0;
     protected trackingMaxTime = 3000;
-    protected turnCooldown = 0;
-    protected turnMaxCooldown = 150;
-    protected lastTurnLeft = true;
-
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -121,8 +117,6 @@ export class Enemy extends Character {
             this.velocity.x = 0;
         }
 
-        this.turnCooldown -= delta;
-
         this.trackingTime -= delta;
         if (this.trackingTime <= 0) {
             this.tracking = false;
@@ -200,28 +194,18 @@ export class Enemy extends Character {
 
     protected track(player: Player, delta: number, tiles: Tile[]) {
 
-        if (this.turnCooldown <= 0) {
+        if (Math.abs(player.position.x - this.position.x) > 10) {
             if (player.position.x < this.position.x) {
                 this.moveLeft(delta);
-
-                if (!this.lastTurnLeft) {
-                    this.turnCooldown = this.turnMaxCooldown;
-                }
-
-                this.lastTurnLeft = true;
 
                 this.checkStop(player, tiles);
             } else if (player.position.x > this.position.x) {
                 this.moveRight(delta);
 
-                if (this.lastTurnLeft) {
-                    this.turnCooldown = this.turnMaxCooldown;
-                }
-
-                this.lastTurnLeft = false;
                 this.checkStop(player, tiles);
             }
         }
+
     }
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {

@@ -17,6 +17,8 @@ import { DebugElement } from './debug';
 import { TextureType } from './enum/textureType';
 import { StickyAnimation } from './animation/stickyAnimation';
 import { RotationAnimation } from './animation/rotationAnimation';
+import { CollisionProjectile } from './animation/collisionProjectile';
+import { ProjectileType } from './animation/projectileType';
 
 export {
     ShaderType,
@@ -37,5 +39,7 @@ export {
     TextureType,
     FrameAnimation,
     StickyAnimation,
-    RotationAnimation
+    RotationAnimation,
+    CollisionProjectile,
+    ProjectileType
 };

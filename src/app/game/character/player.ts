@@ -16,6 +16,9 @@ export class Player extends Character{
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
 	public damageAnimations: StickyAnimation[] = [];
+	public shieldCollidables: Rectangle[] = [];
+	public hp: number;
+	public mana: number;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private particleHandler: ParticleHandler;
@@ -32,11 +35,11 @@ export class Player extends Character{
 	private runningAnimation = new Animation();
 	private castAnimation = new Animation();
 	private casting = false;
-	private hp = 100;
+	private castingShield = false;
 
 	private debugHandler = DebugHandler.getInstance();
 
-	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number) {
+	constructor( position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number, hp:number, mana: number) {
 		super(position, width, height);
 		this.context = context;
 		this.projectileHandler = projectileHandler;
@@ -45,6 +48,9 @@ export class Player extends Character{
 		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
 		this.currentAnimation = this.idleAnimation;
 		
+		this.hp = hp;
+		this.mana = mana;
+
 		this.spellCast.defaultValue = 20;
 		this.spellCast.maxValue = 100;
 		this.spellCast.speed = 0.03;
@@ -69,7 +75,16 @@ export class Player extends Character{
 		this.hp -= damage;
 
 		if(this.hp <= 0) {
+			this.hp = 0;
 			this.deathType = DeathType.swordDeath;
+		}
+	}
+
+	public useMana(mana: number) {
+		this.mana -= mana;
+
+		if(this.mana < 0) {
+			this.mana = 0;
 		}
 	}
 
@@ -108,8 +123,11 @@ export class Player extends Character{
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
 		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
 
-		return renderCall;
+		if(this.castingShield) {
+			renderCall = this.renderShield(renderCall, camera);
+		}
 
+		return renderCall;
 	}
 
 	public update(collisionData: CollisionData, delta: number, type: SpellType) {
@@ -153,9 +171,32 @@ export class Player extends Character{
 			this.dragForce.apply(this.velocity, delta);
 		}
 
+		this.shieldCollidables = [];
+		if(this.castingShield) {
+			let r = 35;
+			let posx = this.position.x + 20;
+			let posy = this.position.y + 13;
+
+			for(let i = 0; i < 10; i++) {
+				let angle: number;
+				let x: number;
+				if(this.inverse) {
+					angle = Math.PI * (i * 0.1 + 0.6);
+					x = posx - 5  + (30 * Math.cos(angle));
+				} else {
+					angle = Math.PI * (i * 0.1 - 0.5);
+					x = posx + (30 * Math.cos(angle));
+				}
+				
+				
+				let y = posy + (35 * Math.sin(angle));
+				this.shieldCollidables.push(new Rectangle(x, y, 10, 10));
+			}
+		}
+
 		if(this.casting) {
 			this.currentAnimation = this.castAnimation;
-		} else  if (this.spellCast.casting) {
+		} else if (this.spellCast.casting) {
 			this.currentAnimation = this.spellCast.castAnimation;
 		} else if (this.spellCast.channeling && this.velocity.x == 0) {
 			this.currentAnimation =  this.spellCast.channelAnimation;
@@ -232,6 +273,28 @@ export class Player extends Character{
 
 	public cancelCast() {
 		this.casting = false;
+	}
+
+	public castShield(casting: boolean) {
+		if(this.mana > 0) {
+			this.castingShield = casting;
+		} else {
+			this.castingShield = false;
+		}
+	}
+
+	private renderShield(renderCall: RenderCall, camera: Vector) {
+
+		if(this.inverse) {
+			renderCall.vertecies =  this.renderHelper.getInverseVertecies(this.position.x - 15 - camera.x, this.position.y - camera.y - 20, 60, 80, renderCall.vertecies);
+		} else {
+			renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x - camera.x, this.position.y - camera.y - 20, 60, 80, renderCall.vertecies);
+		}
+		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 300);
+		renderCall.color = this.renderHelper.getColor(renderCall.color, this.renderHelper.getIndeciesAttribute([0, 0.2, 1, 0.8]));
+		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+
+        return renderCall;
 	}
 
 	private updateDamageAnimations() {

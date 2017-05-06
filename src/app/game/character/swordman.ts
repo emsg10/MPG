@@ -108,7 +108,7 @@ export class Swordman extends Enemy {
     }
 
     private createHit(player: Player) {
-        if (player.shieldCollidables.length <= 0) {
+        if (player.getShieldCollidables.length <= 0) {
             if (!this.inverse) {
                 this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x + this.hitOffset, this.position.y), 50, !this.inverse);
             } else {

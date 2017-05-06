@@ -1,4 +1,4 @@
-import { Tile, Spell, Vector, Rectangle } from '../model';
+import { Tile, Spell, Vector, Rectangle, ParticleProjectile, SpellType } from '../model';
 import { Enemy } from '../character/enemy';
 import { Player } from '../character/player';
 import { Swordman } from '../character/swordman';
@@ -96,7 +96,7 @@ export class EnemyHandler {
     private enemyCollisionCheck(delta: number) {
         for (let projectile of this.projectileHandler.projectiles) {
 
-            if (projectile instanceof Spell) {
+            if (projectile instanceof ParticleProjectile) {
 
                 let removeEnemy: Enemy[] = [];
 
@@ -106,7 +106,7 @@ export class EnemyHandler {
 
                     if (collisionData.wallCollision) {
 
-                        enemy.takeDamage(projectile.area.width, projectile.type)
+                        enemy.takeDamage(projectile.area.width, SpellType.fireball)
                         if (enemy.inverse) {
                             this.animationHandler.bloodAnimation_B_Right(new Vector(enemy.position.x + 10, enemy.position.y - 20), 75);
                         } else {

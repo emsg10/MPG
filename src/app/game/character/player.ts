@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellCast, SpellType, StickyAnimation, DebugElement } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../';
@@ -6,6 +6,7 @@ import { CollisionData } from '../collision';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ParticleHandler } from '../handler/particleHandler';
+import { SpellHandler } from '../handler/spellHandler';
 import { Drag } from '../forces/drag';
 import { Character } from './character';
 import { DeathType } from './deathType';
@@ -16,12 +17,12 @@ export class Player extends Character{
 	public defaultJumpSpeed: number = -0.7;
 	public jumpSpeed: number = this.defaultJumpSpeed;
 	public damageAnimations: StickyAnimation[] = [];
-	public shieldCollidables: Rectangle[] = [];
 	public hp: number;
 	public mana: number;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private particleHandler: ParticleHandler;
+	private spellHandler: SpellHandler;
 	private drag: number = 0.0015;
 	private dragForce: Drag = new Drag(this.drag);
 	private idleAnimation: Animation = new Animation();
@@ -29,13 +30,10 @@ export class Player extends Character{
 	private idleTimeChange = 3000;
 	private jumping: boolean = false;
 	private renderHelper = RenderHelper.getInstance();
-	private spellCast: SpellCast;
-	private spellType: SpellType;
 	private context: Context;
 	private runningAnimation = new Animation();
-	private castAnimation = new Animation();
-	private casting = false;
-	private castingShield = false;
+	private manaRegen = 1;
+	private maxMana: number;
 
 	private debugHandler = DebugHandler.getInstance();
 
@@ -45,30 +43,18 @@ export class Player extends Character{
 		this.projectileHandler = projectileHandler;
 		this.animationHandler = animationHandler;
 		this.particleHandler = particleHandler;
-		this.spellCast = new SpellCast(this.animationHandler, this.projectileHandler);
+		this.spellHandler = new SpellHandler(this.animationHandler, this.projectileHandler, this.particleHandler, this);
 		this.currentAnimation = this.idleAnimation;
 		
 		this.hp = hp;
 		this.mana = mana;
-
-		this.spellCast.defaultValue = 20;
-		this.spellCast.maxValue = 100;
-		this.spellCast.speed = 0.03;
-
-		this.spellCast.channelAnimation.textureNumber.push(204);
-
-		this.spellCast.castAnimation.textureNumber.push(205);
-		this.spellCast.castAnimation.textureNumber.push(208);
-		this.spellCast.castAnimation.repetitions = 0;
-		this.spellCast.castAnimation.timeToChange = 120;
+		this.maxMana = this.mana;
 
 		this.idleAnimation.textureNumber.push(203);
 
 		this.runningAnimation.textureNumber.push(200);
 		this.runningAnimation.textureNumber.push(201);
 		this.runningAnimation.textureNumber.push(202);
-
-		this.castAnimation.textureNumber.push(249);
 	}
 
 	public takeDamage(damage: number) {
@@ -81,10 +67,21 @@ export class Player extends Character{
 	}
 
 	public useMana(mana: number) {
+
+		if(this.mana - mana <= 0) {
+			return false;
+		}
+
 		this.mana -= mana;
 
-		if(this.mana < 0) {
-			this.mana = 0;
+		return true;
+	}
+
+	public regenMana() {
+		this.mana += this.manaRegen;
+
+		if(this.mana > this.maxMana) {
+			this.mana = this.maxMana;
 		}
 	}
 
@@ -123,16 +120,16 @@ export class Player extends Character{
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
 		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
 
-		if(this.castingShield) {
+		if(this.spellHandler.castingShield) {
 			renderCall = this.renderShield(renderCall, camera);
+			this.spellHandler.castingShield = false;
 		}
 
 		return renderCall;
 	}
 
-	public update(collisionData: CollisionData, delta: number, type: SpellType) {
+	public update(collisionData: CollisionData, delta: number) {
 
-		
 		if(this.deathType) {
 			if(this.deathType == DeathType.swordDeath) {
 				this.dead = true;
@@ -171,43 +168,16 @@ export class Player extends Character{
 			this.dragForce.apply(this.velocity, delta);
 		}
 
-		this.shieldCollidables = [];
-		if(this.castingShield) {
-			let r = 35;
-			let posx = this.position.x + 20;
-			let posy = this.position.y + 13;
+		this.spellHandler.update(delta);
 
-			for(let i = 0; i < 10; i++) {
-				let angle: number;
-				let x: number;
-				if(this.inverse) {
-					angle = Math.PI * (i * 0.1 + 0.6);
-					x = posx - 5  + (30 * Math.cos(angle));
-				} else {
-					angle = Math.PI * (i * 0.1 - 0.5);
-					x = posx + (30 * Math.cos(angle));
-				}
-				
-				
-				let y = posy + (35 * Math.sin(angle));
-				this.shieldCollidables.push(new Rectangle(x, y, 10, 10));
-			}
-		}
-
-		if(this.casting) {
-			this.currentAnimation = this.castAnimation;
-		} else if (this.spellCast.casting) {
-			this.currentAnimation = this.spellCast.castAnimation;
-		} else if (this.spellCast.channeling && this.velocity.x == 0) {
-			this.currentAnimation =  this.spellCast.channelAnimation;
-			this.idleTime = this.idleTimeChange;
+		if(this.spellHandler.currentCast) {
+			this.currentAnimation = this.spellHandler.currentCast.currentAnimation;
 		} else if (this.idleTime >= this.idleTimeChange) {
 			this.currentAnimation = this.idleAnimation;
 		} else {
 			this.currentAnimation = this.runningAnimation;
 		}
 
-		this.spellType = type;
 		this.fall(delta);
 		this.jumping = false;
 		this.moving = false;
@@ -219,21 +189,10 @@ export class Player extends Character{
 	}
 
 	public moveRight(delta: number) {
-		this.spellCast.cancel = true;
-
-		if(this.inverse) {
-			this.spellCast.switchAnimation(this.position, this.spellType);
-		}
-
 		super.moveRight(delta);
 	}
 
 	public moveLeft(delta: number) {
-		this.spellCast.cancel = true;
-		if(!this.inverse) {
-			this.spellCast.switchAnimation(this.position, this.spellType);
-		}
-
 		super.moveLeft(delta);
 	}
 
@@ -249,38 +208,23 @@ export class Player extends Character{
 		return collisionArea;
 	}
 
-	public jump() {
-		this.spellCast.cancel = true;
+	public getShieldCollidables() {
+		if(this.spellHandler.castingShield) {
+			return this.spellHandler.shieldCollidables;
+		} else {
+			return [];
+		}
+		
+	}
 
+	public jump() {
 		if (!this.jumping) {
 			this.jumping = true;
 		}
 	}
 
-	public channel(channeling: boolean, delta: number, type: SpellType) {
-		this.spellCast.update(channeling, delta, this.inverse, this.position, type);
-	}
-
 	public cast(type: SpellType) {
-		this.casting = true;
-		if(type == SpellType.frostBlast) {
-			this.particleHandler.createFrostBlast(this.position, this.inverse);
-		} else {
-			this.particleHandler.createFireBlast(this.position, this.inverse);
-		}
-		
-	}
-
-	public cancelCast() {
-		this.casting = false;
-	}
-
-	public castShield(casting: boolean) {
-		if(this.mana > 0) {
-			this.castingShield = casting;
-		} else {
-			this.castingShield = false;
-		}
+		this.spellHandler.cast(type);
 	}
 
 	private renderShield(renderCall: RenderCall, camera: Vector) {

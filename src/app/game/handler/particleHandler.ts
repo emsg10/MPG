@@ -44,12 +44,28 @@ export class ParticleHandler {
         0.0
     ];
 
+    private channelMagicEffectSettings: number[] = [
+        8, 4,
+        500, 500,
+        -10, 10,
+        0, 0,
+        -0.2
+    ];
+
+    private magicEffectSettings: number[] = [
+        1, 3,
+        300, 300,
+        -0.01, 0.01,
+        -0.2, 0,
+        0.1
+    ];
+
     private frostParticleSettings: number[] = [
         3, 5,
         600, 800,
         0.4, 0.5,
         -0.02, 0.02,
-        0.2,
+        0.2
     ]
 
     private frostEffectParticleSettings: number[] = [
@@ -72,17 +88,93 @@ export class ParticleHandler {
         this.tiles = tiles;
     }
 
+    public createFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {
+
+        let positionOffset = new Vector(position.x, position.y);
+        let strength = size / 2;
+        let radius = strength / 2;
+        let offset = strength / 10;
+        let settingFactor = size/100;
+
+        if (inverse) {
+            positionOffset.x += (strength - offsetX);
+        } else {
+            positionOffset.x += (strength + offsetX);
+        }
+
+        positionOffset.y += strength;
+
+        let channelMagicEffectSettings: number[] = [
+            4 + (4 * settingFactor), 2 + (2 * settingFactor),
+            500, 500,
+            -10, 10,
+            0, 0,
+            -0.2
+        ];
+
+        let effectParticles = this.createCircleParticles(positionOffset, radius, radius, channelMagicEffectSettings, false, offset, strength, 200, -offset, 2);
+
+        this.fireEffectParticles.push(...effectParticles);
+
+    }
+
+    public createChannelMagic(position: Vector, inverse: boolean) {
+
+        let positionOffset = new Vector(position.x, position.y + 25);
+
+        if (inverse) {
+            positionOffset.x += 20;
+        } else {
+            positionOffset.x += 25;
+        }
+
+        let effectParticles = this.createCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
+
+        this.fireEffectParticles.push(...effectParticles);
+    }
+
+    public createMagicEffect(position: Vector, inverse: boolean) {
+
+        let offSetX = this.rand(-10, 10) + 22;
+        let offSetY = this.rand(-5, 10) + 25;
+        let positionOffset = new Vector(position.x + offSetX, position.y + offSetY);
+
+        let effectParticles = this.createParticles(positionOffset, inverse, this.magicEffectSettings, 1);
+
+        this.fireEffectParticles.push(...effectParticles);
+    }
+
     public createFrostBlast(position: Vector, inverse: boolean) {
-        let particles = this.createParticles(position, inverse, this.frostParticleSettings, 10);
-        let effectParticles = this.createParticles(position, inverse, this.frostEffectParticleSettings, 2);
+
+        let positionOffset = new Vector(position.x, position.y);
+        positionOffset.y += 25;
+
+        if (inverse) {
+            positionOffset.x += 20;
+        } else {
+            positionOffset.x += 25;
+        }
+
+        let particles = this.createParticles(positionOffset, inverse, this.frostParticleSettings, 10);
+        let effectParticles = this.createParticles(positionOffset, inverse, this.frostEffectParticleSettings, 2);
 
         this.frostEffectParticles.push(...effectParticles);
         this.frostParticles.push(...particles);
     }
 
     public createFireBlast(position: Vector, inverse: boolean) {
-        let particles = this.createParticles(position, inverse, this.flameParticleSettings, 10);
-        let effectParticles = this.createParticles(position, inverse, this.flameEffectSettings, 5);
+
+        let positionOffset = new Vector(position.x, position.y);
+        positionOffset.y += 25;
+
+        if (inverse) {
+            positionOffset.x += 20;
+        } else {
+            positionOffset.x += 25;
+        }
+
+        let particles = this.createParticles(positionOffset, inverse, this.flameParticleSettings, 10);
+        let effectParticles = this.createParticles(positionOffset, inverse, this.flameEffectSettings, 5);
 
         this.fireParticles.push(...particles);
         this.fireEffectParticles.push(...effectParticles);
@@ -90,14 +182,19 @@ export class ParticleHandler {
 
     public createBurn(position: Vector) {
         let positionCopy = new Vector(position.x, position.y);
-        positionCopy.x += this.rand(-10, 15);
-        positionCopy.y += this.rand(-10, 10);
+        positionCopy.x += this.rand(-10, 15) + 25;
+        positionCopy.y += this.rand(-10, 10) + 25;
+
         let effectParticles = this.createParticles(positionCopy, false, this.burnEffectSettings, 1);
         this.fireEffectParticles.push(...effectParticles);
     }
 
     public createFireDeath(position: Vector) {
         position.x += this.rand(-15, 15);
+
+        position.x += 25;
+        position.y += 25;
+
         let effectParticles = this.createParticles(position, false, this.burnEffectSettings, 5);
         this.fireEffectParticles.push(...effectParticles);
     }
@@ -167,12 +264,12 @@ export class ParticleHandler {
             if (!particle.dead) {
                 for (let enemy of enemies) {
                     if (this.collisionDetection.aabbCheck(collisionRectangle, enemy.getCollisionArea())) {
-                        if(spelltype == SpellType.frostBlast) {
+                        if (spelltype == SpellType.frostBlast) {
                             enemy.freeze();
                         } else {
                             enemy.burn();
                         }
-                        
+
                         particle.dead = true;
                         particle.lifeTime = particle.lifeTime > 10 ? this.rand(10, 20) : particle.lifeTime;
                     }
@@ -213,18 +310,17 @@ export class ParticleHandler {
 
             let particleSize = this.rand(settings[0], settings[1]);
 
-
             let velocity: Vector;
             let area: Rectangle;
             let deltaX: number;
 
             if (inverse) {
                 velocity = new Vector(-this.rand(settings[4], settings[5]), this.rand(settings[6], settings[7]));
-                area = new Rectangle(position.x + 15, position.y + 25, particleSize, particleSize);
+                area = new Rectangle(position.x, position.y, particleSize, particleSize);
                 deltaX = this.collisionDetection.getClosestX(new Rectangle(area.x - settings[3], area.y - 8, settings[3], 1), this.tiles, inverse) - area.x;
             } else {
                 velocity = new Vector(this.rand(settings[4], settings[5]), this.rand(settings[6], settings[7]));
-                area = new Rectangle(position.x + 25, position.y + 25, particleSize, particleSize);
+                area = new Rectangle(position.x, position.y, particleSize, particleSize);
                 deltaX = this.collisionDetection.getClosestX(new Rectangle(area.x, area.y - 8, settings[3], 1), this.tiles, inverse) - area.x;
             }
 
@@ -247,6 +343,49 @@ export class ParticleHandler {
         }
 
         return newParticles;
+    }
+
+    private createCircleParticles(position: Vector, radiusX: number, radiusY: number, settings: number[], inward: boolean, centerOffsetValue: number, centerSize: number, centerLifeTime: number, centerGrowth: number, particleNumber: number) {
+
+        let newParticles: Particle[] = [];
+
+        let centerOffSetX = this.rand(-centerOffsetValue, centerOffsetValue);
+        let centerOffSetY = this.rand(-centerOffsetValue, centerOffsetValue);
+        let centerParticle = new Particle(new Rectangle(position.x + centerOffSetX, position.y + centerOffSetY, centerSize, centerSize), centerLifeTime, new Vector(0, 0), centerGrowth);
+
+        newParticles.push(centerParticle);
+
+        for (let i = 0; i < particleNumber; i++) {
+
+            let particleSize = this.rand(settings[0], settings[1]);
+            let lifeTime = this.rand(settings[2], settings[3]);
+            let offSet = this.rand(settings[4], settings[5]);
+
+            let x: number;
+            let y: number;
+            let velocity: Vector;
+            let angle = this.rand(0, Math.PI * 2);
+            x = position.x + ((radiusX + offSet) * Math.cos(angle));
+            y = position.y + ((radiusY + offSet) * Math.sin(angle));
+
+            if (inward) {
+                velocity = new Vector(-(x - position.x), -(y - position.y));
+            } else {
+                velocity = new Vector(x - position.x, y - position.y);
+            }
+
+            velocity.normalize();
+            velocity.multiply(0.1);
+
+            let particle = new Particle(new Rectangle(x, y, particleSize, particleSize), lifeTime, velocity, settings[8]);
+
+            newParticles.push(particle);
+
+        };
+
+        return newParticles;
+
+
     }
 
     private rand(min: number, max: number) {

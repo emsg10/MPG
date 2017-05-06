@@ -11,7 +11,8 @@ import {
     StickyAnimation,
     RotationAnimation,
     CollisionProjectile,
-    ProjectileType
+    ProjectileType,
+    ParticleProjectile
 } from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
@@ -57,7 +58,12 @@ export class ProjectileHandler {
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
         let collRect: Rectangle;
 
-        collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
+        if(inverse) {
+            collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
+        } else {
+            collRect = new Rectangle(position.x + 15, position.y + 5, 1, 1);
+        }
+        
 
         let animation = this.animationHandler.createArrow(rectangle, inverse, velocity);
         arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect, true);
@@ -71,7 +77,20 @@ export class ProjectileHandler {
         return arrow;
     }
 
-    createSwordHit(position: Vector, offset: number, inverse: boolean) {
+    public createFireBall(position: Vector, inverse: boolean, velocityValue: number, strength: number, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
+        
+        let fireBall: ParticleProjectile;
+        
+        if (inverse) {
+            fireBall = new ParticleProjectile(new Vector(-velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
+        } else {
+            fireBall = new ParticleProjectile(new Vector(velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
+        }
+        
+        this.projectiles.push(fireBall);
+    }
+
+    public createSwordHit(position: Vector, offset: number, inverse: boolean) {
         let rect: Rectangle;
         let velocity: Vector;
         if (inverse) {
@@ -215,7 +234,8 @@ export class ProjectileHandler {
         let removeProjectiles: Projectile[] = [];
         let shieldCollidables: Rectangle[] = [];
         let playerCollisionArea = player.getCollisionArea();
-        shieldCollidables.push(...player.shieldCollidables);
+        
+        shieldCollidables.push(...player.getShieldCollidables());
 
         for (let projectile of this.enemyProjectiles) {
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
@@ -351,7 +371,7 @@ export class ProjectileHandler {
         collisionData = this.collisionDetection.checkProjectileCollisionX(collidables, projectile, frameVelocity, true, false);
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
-        if (projectile instanceof Spell) {
+        if (projectile instanceof Spell || projectile instanceof ParticleProjectile) {
             if (projectile.distance <= 0 || collisionData.wallCollision) {
                 removeProjectiles.push(projectile);
             }

@@ -3,5 +3,6 @@ export enum SpellType{
     electricbolt = 2,
     frostBlast = 3,
     fireBlast = 4,
-    shield = 5
+    shield = 5,
+    channelmagic = 6
 }

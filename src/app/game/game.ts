@@ -38,11 +38,11 @@ export class Game {
 	private leftKeyPress: boolean;
 	private rightKeyPress: boolean;
 	private jumpKeyPress: boolean;
-	private channelingKeyPress: boolean;
+	private fireballKeyPress: boolean;
+	private channelMagicKeyPress: boolean;
 	private frostKeyPress: boolean;
 	private fireKeyPress: boolean;
 	private shieldKeyPress: boolean;
-	private spellType: SpellType;
 	private started: boolean = false;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
@@ -114,7 +114,7 @@ export class Game {
 			while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
 				let delta = nextGameTick - this.lastUpdate;
 				this.lastUpdate = nextGameTick;
-				this.debugHandler.debugRects = [];
+				//this.debugHandler.debugRects = [];
 
 				if (this.started) {
 					if (!this.player.dead && !this.levelCompleted) {
@@ -122,7 +122,7 @@ export class Game {
 						this.checkKeys(delta);
 						this.collision.checkCoutOfBounds(this.player, this.levelData.gameSize);
 						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
-						this.player.update(collisionData, delta, this.spellType);
+						this.player.update(collisionData, delta);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
@@ -204,21 +204,18 @@ export class Game {
 		}
 
 		if(this.shieldKeyPress) {
-			this.player.castShield(true);
-		} else {
-			this.player.castShield(false);
+			this.player.cast(SpellType.shield);
 		}
 
 		if (this.frostKeyPress) {
 			this.player.cast(SpellType.frostBlast);
 		} else if (this.fireKeyPress) {
 			this.player.cast(SpellType.fireBlast);
-		} else {
-			this.player.cancelCast();
+		} else if(this.fireballKeyPress) {
+			this.player.cast(SpellType.fireball);
+		} else if(this.channelMagicKeyPress) {
+			this.player.cast(SpellType.channelmagic);
 		}
-
-		this.player.channel(this.channelingKeyPress, delta, this.spellType);
-
 	}
 
 	private initKeyBindings() {
@@ -238,12 +235,10 @@ export class Game {
 					this.jumpKeyPress = true;
 					break;
 				case 'Numpad1':
-					this.channelingKeyPress = true;
-					this.spellType = SpellType.fireball;
+					this.fireballKeyPress = true;
 					break;
 				case 'Numpad2':
-					this.channelingKeyPress = true;
-					this.spellType = SpellType.electricbolt;
+					this.channelMagicKeyPress = true;
 					break;
 				case 'Numpad3':
 					this.frostKeyPress = true;
@@ -283,10 +278,10 @@ export class Game {
 					this.jumpKeyPress = false;
 					break;
 				case 'Numpad1':
-					this.channelingKeyPress = false;
+					this.fireballKeyPress = false;
 					break;
 				case 'Numpad2':
-					this.channelingKeyPress = false;
+					this.channelMagicKeyPress = false;
 					break;
 				case 'Numpad3':
 					this.frostKeyPress = false;

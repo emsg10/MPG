@@ -34,6 +34,7 @@ export class Player extends Character{
 	private runningAnimation = new Animation();
 	private manaRegen = 1;
 	private maxMana: number;
+	private externalVelocity: Vector;
 
 	private debugHandler = DebugHandler.getInstance();
 

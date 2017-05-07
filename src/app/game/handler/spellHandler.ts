@@ -21,7 +21,7 @@ export class SpellHandler {
 
     private channelMagicCast: ChannelCast;
 
-
+    private break: number = 0;
 
     constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler, particleHandler: ParticleHandler, player: Player) {
         this.animationHandler = animationHandler;
@@ -34,7 +34,7 @@ export class SpellHandler {
 
     public update(delta: number) {
 
-        if (this.currentCast) {
+        if (this.currentCast && this.break == 0) {
             this.currentCast.update(delta);
 
             if (this.currentCast.done) {
@@ -53,27 +53,29 @@ export class SpellHandler {
 
         if (this.castingShield) {
             this.shieldCollidables = [];
-            if (this.castingShield) {
-                let r = 35;
-                let posx = this.player.position.x + 20;
-                let posy = this.player.position.y + 13;
+            let r = 35;
+            let posx = this.player.position.x + 20;
+            let posy = this.player.position.y + 13;
 
-                for (let i = 0; i < 10; i++) {
-                    let angle: number;
-                    let x: number;
-                    if (this.player.inverse) {
-                        angle = Math.PI * (i * 0.1 + 0.6);
-                        x = posx - 5 + (30 * Math.cos(angle));
-                    } else {
-                        angle = Math.PI * (i * 0.1 - 0.5);
-                        x = posx + (30 * Math.cos(angle));
-                    }
-
-                    let y = posy + (35 * Math.sin(angle));
-                    this.shieldCollidables.push(new Rectangle(x, y, 10, 10));
+            for (let i = 0; i < 10; i++) {
+                let angle: number;
+                let x: number;
+                if (this.player.inverse) {
+                    angle = Math.PI * (i * 0.1 + 0.6);
+                    x = posx - 5 + (30 * Math.cos(angle));
+                } else {
+                    angle = Math.PI * (i * 0.1 - 0.5);
+                    x = posx + (30 * Math.cos(angle));
                 }
+
+                let y = posy + (35 * Math.sin(angle));
+                this.shieldCollidables.push(new Rectangle(x, y, 10, 10));
             }
+
+            this.particleHandler.createShieldEffect(this.getCalculatedPos(this.player.position, 0), this.player.inverse);
         }
+
+        this.updateBreak(delta);
     }
 
     public cast(spellType: SpellType) {
@@ -95,6 +97,14 @@ export class SpellHandler {
 
             case SpellType.channelmagic: this.castChannelMagic();
                 break;
+        }
+    }
+
+    private updateBreak(delta: number) {
+        this.break -= delta;
+
+        if (this.break < 0) {
+            this.break = 0;
         }
     }
 
@@ -126,6 +136,8 @@ export class SpellHandler {
             if (this.player.useMana(0.5)) {
                 this.fireBlastCast.reset();
                 this.currentCast = this.fireBlastCast;
+            } else {
+                this.break = 500;
             }
         }
     }
@@ -135,13 +147,19 @@ export class SpellHandler {
             if (this.player.useMana(0.5)) {
                 this.frostBlastCast.reset();
                 this.currentCast = this.frostBlastCast;
+            } else {
+                this.break = 500;
             }
         }
     }
 
     private castShield() {
-        if (this.player.useMana(0.1) && this.player.mana > 10) {
-            this.castingShield = true;
+        if (this.player.useMana(0.1)) {
+            if(this.break == 0) {
+                this.castingShield = true;
+            }
+        } else {
+            this.break = 500;
         }
     }
 

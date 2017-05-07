@@ -1,4 +1,4 @@
-import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation, RotationAnimation, Projectile } from '../model'
+import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation, RotationAnimation, StaticRotationAnimation, Projectile } from '../model'
 import { RenderCall, DynamicRenderCall, RenderHelper, Matrix3, TextureMapper } from '../render';
 import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
@@ -374,6 +374,26 @@ export class AnimationHandler {
         animation.inverse = inverse;
         animation.areaToRender = area;
 
+        animation.timeToChange = 20000;
+        animation.repetitions = 1;
+
+        this.dynamicAnimations.push(animation);
+
+        return animation;
+    }
+
+    public createDeadArrow(area: Rectangle, inverse: boolean, velocity: Vector) {
+        let collAngle = new Vector(velocity.x, velocity.y);
+
+        let animation = new StaticRotationAnimation(collAngle, inverse);
+        animation.textureNumber.push(268);
+        animation.inverse = inverse;
+
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.timeToChange = 2000;
+        animation.repetitions = 1;
+
         this.dynamicAnimations.push(animation);
 
         return animation;
@@ -489,7 +509,7 @@ export class AnimationHandler {
 
 
         for (let animation of this.dynamicAnimations) {
-            if (animation instanceof RotationAnimation) {
+            if (animation instanceof RotationAnimation || animation instanceof StaticRotationAnimation) {
 
                 let x = animation.areaToRender.x - camera.x;
                 let y = animation.areaToRender.y - camera.y;

@@ -5,7 +5,7 @@ import { DebugHandler } from '../../handler/debugHandler';
 
 export class PhysicalProjectile extends Projectile {
 
-    private gravityStrength: number = 0.0025;
+    public gravityStrength: number = 0.0025;
     public gravity: Gravity = new Gravity(this.gravityStrength);
     private dragStrength = 0.0005;
     public drag: Drag = new Drag(this.dragStrength);

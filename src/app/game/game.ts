@@ -3,7 +3,7 @@ import { RenderCall, ParticleRenderer, DynamicRenderCall } from './render';
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
-import { Vector, Rectangle, Asset, SpellType, Level, Tile } from './model';
+import { Vector, Rectangle, Asset, SpellType, Level, Tile, Animation } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
@@ -164,6 +164,11 @@ export class Game {
 
 		if (this.player.dead) {
 			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
+			
+			for(let stickyAnimation of this.player.damageAnimations) {
+				this.animationHandler.remove(stickyAnimation.animation);
+			}
+			this.player.damageAnimations = [];
 		} else if(this.levelCompleted) {
 			this.textRenderer.createTextRenderCall(800, 96, 51, renderCall);
 		} else {

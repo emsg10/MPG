@@ -61,9 +61,8 @@ export class ProjectileHandler {
         if(inverse) {
             collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
         } else {
-            collRect = new Rectangle(position.x + 15, position.y + 5, 1, 1);
+            collRect = new Rectangle(position.x + 20, position.y + 5, 1, 1);
         }
-        
 
         let animation = this.animationHandler.createArrow(rectangle, inverse, velocity);
         arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect, true);
@@ -73,6 +72,30 @@ export class ProjectileHandler {
         arrow.projectileType = ProjectileType.Arrow;
 
         this.enemyProjectiles.push(arrow);
+
+        return arrow;
+    }
+
+    public createDeadArrow(position: Vector, inverse: boolean, velocity: Vector) {
+        let arrow: PhysicalProjectile;
+        let rectangle = new Rectangle(position.x, position.y, 40, 10);
+        let collRect: Rectangle;
+
+        if(inverse) {
+            collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
+        } else {
+            collRect = new Rectangle(position.x + 20, position.y + 5, 1, 1);
+        }
+
+        let animation = this.animationHandler.createDeadArrow(rectangle, inverse, velocity);
+        velocity.x = -velocity.x/4;
+        arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect);
+        arrow.gravity = new Gravity(0.0003);
+        arrow.drag = new Drag(0.0002);
+
+        arrow.projectileType = ProjectileType.None;
+
+        this.projectiles.push(arrow);
 
         return arrow;
     }
@@ -276,7 +299,7 @@ export class ProjectileHandler {
 
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
-        if (shieldCollisionData.wallCollision) {
+        if (shieldCollisionData.wallCollision && !shieldCollisionData.groundCollision) {
             this.setShieldDamage(player, projectile);
             removeProjectiles.push(projectile);
         } else if (collisionData.wallCollision) {
@@ -305,10 +328,14 @@ export class ProjectileHandler {
 
     private setShieldDamage(player: Player, projectile: Projectile) {
         if (projectile.projectileType == ProjectileType.Arrow) {
-            this.createStickyArrowAnimation(player, projectile);
-            player.useMana(20);
+            this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), true, projectile.velocity);
+            if(!player.useMana(20)) {
+                player.mana = 0;
+            }
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
-            player.useMana(projectile.damage);
+            if(!player.useMana(projectile.damage)) {
+                player.mana = 0;
+            };
         }
     }
 

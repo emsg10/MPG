@@ -72,7 +72,7 @@ export class Swordman extends Enemy {
 
     private checkHitCollisionAreas(player: Player) {
         if (this.hitAnimation) {
-            if (this.hitAnimation.frameIndex == 4 && !this.hitting) {
+            if (this.hitAnimation.frameIndex == 1 && !this.hitting) {
                 this.hitting = true;
                 this.projectileHandler.createSwordHit(this.position, this.width, this.inverse);
             }

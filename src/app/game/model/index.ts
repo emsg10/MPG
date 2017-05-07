@@ -16,6 +16,7 @@ import { DebugElement } from './debug';
 import { TextureType } from './enum/textureType';
 import { StickyAnimation } from './animation/stickyAnimation';
 import { RotationAnimation } from './animation/rotationAnimation';
+import { StaticRotationAnimation } from './animation/staticRotationAnimation';
 import { CollisionProjectile } from './animation/collisionProjectile';
 import { ProjectileType } from './animation/projectileType';
 import { Cast } from './casts/cast';
@@ -49,5 +50,6 @@ export {
     InstantCast,
     ChannelCast,
     SpellCast,
-    ParticleProjectile
+    ParticleProjectile,
+    StaticRotationAnimation
 };

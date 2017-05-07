@@ -35,4 +35,11 @@ export class Vector {
 		this.x = this.x * factor;
 		this.y = this.y * factor;
 	}
+
+	public invert() {
+		this.x = -this.x;
+		this.y = -this.y;
+
+		return this;
+	}
 }

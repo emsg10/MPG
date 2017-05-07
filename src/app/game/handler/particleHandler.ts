@@ -18,6 +18,8 @@ export class ParticleHandler {
     public fireParticles: Particle[] = [];
     public fireEffectParticles: Particle[] = [];
 
+    public shieldEffectParticles: Particle[] = [];
+
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
     private tiles: Tile[];
@@ -27,6 +29,7 @@ export class ParticleHandler {
     private fireColor = [1, 0.5, 0.2, 0.8];
     private frostColor = [0.4, 0.9, 0.9, 0.9];
     private frostEffectColor = [0.7, 0.9, 0.9, 0.9];
+    private shieldColor = [0.5, 0.4, 0.7, 0.7];
 
     private flameParticleSettings: number[] = [
         2, 5,
@@ -49,7 +52,8 @@ export class ParticleHandler {
         500, 500,
         -10, 10,
         0, 0,
-        -0.2
+        -0.2,
+        0, Math.PI * 2
     ];
 
     private magicEffectSettings: number[] = [
@@ -82,6 +86,24 @@ export class ParticleHandler {
         0.05, -0.05,
         -0.1, -0.1,
         0.0
+    ];
+
+    private shieldEffectSettings: number[] = [
+        2, 4,
+        100, 100,
+        10, 10,
+        0, 0,
+        0.2,
+        -Math.PI * 0.52, Math.PI * 0.30
+    ];
+
+    private invertedShieldEffectSettings: number[] = [
+        2, 4,
+        100, 100,
+        10, 10,
+        0, 0,
+        0.2,
+        -Math.PI * 0.52, -Math.PI * 1.30
     ];
 
     constructor(tiles: Tile[]) {
@@ -131,6 +153,21 @@ export class ParticleHandler {
         let effectParticles = this.createCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
 
         this.fireEffectParticles.push(...effectParticles);
+    }
+
+    public createShieldEffect(position: Vector, inverse: boolean) {
+        position.y = position.y - 5;
+
+        let settings: number[] = [];
+        if(inverse) {
+            settings = this.invertedShieldEffectSettings;
+        } else {
+            settings = this.shieldEffectSettings;
+        }
+
+        let effectParticles = this.createCircleParticles(position, 20, 20, settings, false, 0, 0, 100, 0, 2);
+
+        this.shieldEffectParticles.push(...effectParticles);
     }
 
     public createMagicEffect(position: Vector, inverse: boolean) {
@@ -203,6 +240,7 @@ export class ParticleHandler {
 
         this.updateEffectParticles(this.fireEffectParticles, delta);
         this.updateEffectParticles(this.frostEffectParticles, delta);
+        this.updateEffectParticles(this.shieldEffectParticles, delta);
 
         this.updateParticles(this.frostParticles, this.noGravity, delta, enemies, SpellType.frostBlast);
         this.updateParticles(this.fireParticles, this.gravity, delta, enemies, SpellType.fireBlast);
@@ -218,8 +256,13 @@ export class ParticleHandler {
         let frostEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         frostEffectRenderCall.textureType = TextureType.frostTexture;
 
+        let shieldEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();        
+        shieldEffectRenderCall.textureType = TextureType.particleTexture;
+
+
         renderCalls.push(this.addParticles(frostEffectRenderCall, this.frostEffectParticles, camera, this.frostEffectColor));
         renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, camera, this.frostColor));
+        renderCalls.push(this.addParticles(shieldEffectRenderCall, this.shieldEffectParticles, camera, this.shieldColor))
 
         return renderCalls;
     }
@@ -364,7 +407,7 @@ export class ParticleHandler {
             let x: number;
             let y: number;
             let velocity: Vector;
-            let angle = this.rand(0, Math.PI * 2);
+            let angle = this.rand(settings[9], settings[10]);
             x = position.x + ((radiusX + offSet) * Math.cos(angle));
             y = position.y + ((radiusY + offSet) * Math.sin(angle));
 

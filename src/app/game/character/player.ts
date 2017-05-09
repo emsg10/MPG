@@ -24,7 +24,9 @@ export class Player extends Character{
 	private particleHandler: ParticleHandler;
 	private spellHandler: SpellHandler;
 	private drag: number = 0.0015;
+	private externalDragForce: number = 0.0001;
 	private dragForce: Drag = new Drag(this.drag);
+	private externalDrag = new Drag(this.externalDragForce);
 	private idleAnimation: Animation = new Animation();
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
@@ -34,7 +36,7 @@ export class Player extends Character{
 	private runningAnimation = new Animation();
 	private manaRegen = 1;
 	private maxMana: number;
-	private externalVelocity: Vector;
+	private externalVelocity: Vector = new Vector(0, 0);
 
 	private debugHandler = DebugHandler.getInstance();
 
@@ -86,6 +88,14 @@ export class Player extends Character{
 		}
 	}
 
+	public getVelocity() {
+		return new Vector(this.velocity.x + this.externalVelocity.x, this.velocity.y + this.externalVelocity.y);
+	}
+
+	public isMoving() {
+		return this.velocity.x == 0;
+	}
+
 	public createRenderCall(renderCall: RenderCall, camera: Vector) {
 
 		let call = new RenderCall();
@@ -134,7 +144,7 @@ export class Player extends Character{
 		if(this.deathType) {
 			if(this.deathType == DeathType.swordDeath) {
 				this.dead = true;
-				this.projectileHandler.createPlayerSword_death(this.position, this.inverse, this.velocity);
+				this.projectileHandler.createPlayerSword_death(this.position, this.inverse);
 			}
 		}
 
@@ -156,6 +166,7 @@ export class Player extends Character{
 
 		if (collisionData.wallCollision) {
 			this.velocity.x = 0;
+			this.externalVelocity.x = 0;
 		}
 
 		if (this.velocity.x != 0 || collisionData.wallCollision) {
@@ -166,7 +177,11 @@ export class Player extends Character{
 		}
 
 		if (!this.moving) {
-			this.dragForce.apply(this.velocity, delta);
+			if(this.externalVelocity.x > 0) {
+				this.externalDrag.apply(this.externalVelocity, delta);
+			} else {
+				this.dragForce.apply(this.velocity, delta);
+			}
 		}
 
 		this.spellHandler.update(delta);
@@ -182,8 +197,10 @@ export class Player extends Character{
 		this.fall(delta);
 		this.jumping = false;
 		this.moving = false;
-		this.toMove.x = this.velocity.x * delta;
-		this.toMove.y = this.velocity.y * delta;
+
+		let totalVelocity = this.getVelocity();
+		this.toMove.x = totalVelocity.x * delta;
+		this.toMove.y = totalVelocity.y * delta;
 
 		this.updateDamageAnimations();
 				
@@ -216,6 +233,14 @@ export class Player extends Character{
 			return [];
 		}
 		
+	}
+
+	public shieldExplosion() {
+		if(this.inverse) {
+			this.externalVelocity.x += 0.5;
+		} else {
+			this.externalVelocity.x -= 0.5;
+		}
 	}
 
 	public jump() {

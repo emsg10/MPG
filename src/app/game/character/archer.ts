@@ -147,15 +147,16 @@ export class Archer extends Enemy {
     
     private getDeltaVelocity(player: Player, deltaPos: Vector) {
         
-        let deltaVelocity = player.velocity.x * player.velocity.x * 800;
+        let velocity = player.getVelocity();
+        let deltaVelocity = velocity.x * velocity.x * 800;
         if(deltaPos.x < 0) {
-            if(player.velocity.x > 0) {
+            if(velocity.x > 0) {
                 return -deltaVelocity;
             } else {
                 return deltaVelocity;
             }
         } else {
-            if(player.velocity.x > 0) {
+            if(velocity.x > 0) {
                 return deltaVelocity;
             } else {
                 return -deltaVelocity;

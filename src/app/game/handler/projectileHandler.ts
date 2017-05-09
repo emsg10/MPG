@@ -143,10 +143,11 @@ export class ProjectileHandler {
         this.projectiles.push(projectile);
     }
 
-    public createPlayerSword_death(position: Vector, inverse: boolean, velocity: Vector) {
+    public createPlayerSword_death(position: Vector, inverse: boolean) {
 
         let projectile: Projectile;
         let projectileCorpse: Projectile;
+        let velocity = new Vector(0, 0);
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_animation(position, inverse), 1)
         projectileCorpse = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_corpse(position, inverse), 1)
@@ -276,7 +277,8 @@ export class ProjectileHandler {
         let groundCollision: boolean;
         projectile.updateForces(delta);
 
-        let deltaVelocity = new Vector(frameVelocity.x - player.velocity.x * delta, frameVelocity.y - player.velocity.y * delta);
+        let velocity = player.getVelocity();
+        let deltaVelocity = new Vector(frameVelocity.x - velocity.x * delta, frameVelocity.y - velocity.y * delta);
 
         collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
         shieldCollisionData = this.collisionDetection.checkProjectileCollisionY(shieldCollidables, projectile, deltaVelocity, false);
@@ -337,6 +339,7 @@ export class ProjectileHandler {
             this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity);
             if (!player.useMana(20)) {
                 player.mana = 0;
+                player.shieldExplosion();
             }
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             if (!player.useMana(projectile.damage)) {

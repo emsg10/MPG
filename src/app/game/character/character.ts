@@ -4,7 +4,6 @@ import { DeathType } from './deathType';
 
 export abstract class Character {
     public position: Vector;
-	public velocity: Vector = new Vector(0, 0);
 	public toMove: Vector = new Vector(0, 0);
     public dead: boolean = false;
 	public deathType: DeathType;
@@ -12,6 +11,7 @@ export abstract class Character {
 	public width: number;
 	public height: number;
     public currentAnimation: Animation = new Animation();
+	protected velocity: Vector = new Vector(0, 0);
     protected maxSpeed: number = 0.3;
 	protected actualSpeed: number = 0.3;
     protected acceleration: number = 0.009;

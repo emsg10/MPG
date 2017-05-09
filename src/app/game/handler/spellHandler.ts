@@ -124,7 +124,7 @@ export class SpellHandler {
     }
 
     private castChannelMagic() {
-        if ((!this.currentCast || this.currentCast == this.channelMagicCast) && this.player.velocity.x == 0) {
+        if ((!this.currentCast || this.currentCast == this.channelMagicCast) && this.player.isMoving()) {
             this.channelMagicCast.channeling = true;
             this.channelMagicCast.done = false;
             this.currentCast = this.channelMagicCast;

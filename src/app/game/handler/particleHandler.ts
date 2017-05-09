@@ -51,9 +51,18 @@ export class ParticleHandler {
         8, 4,
         500, 500,
         -10, 10,
-        0, 0,
+        0.1, 0.1,
         -0.2,
         0, Math.PI * 2
+    ];
+
+    private fireExplosionSettings: number[] = [
+        4, 8,
+        500, 500,
+        -20, 20,
+        0.05, 0.2,
+        -0.2,
+        0, Math.PI * 2,
     ];
 
     private magicEffectSettings: number[] = [
@@ -92,7 +101,7 @@ export class ParticleHandler {
         2, 4,
         100, 100,
         10, 10,
-        0, 0,
+        0.1, 0.1,
         0.2,
         -Math.PI * 0.52, Math.PI * 0.30
     ];
@@ -101,7 +110,7 @@ export class ParticleHandler {
         2, 4,
         100, 100,
         10, 10,
-        0, 0,
+        0.1, 0.1,
         0.2,
         -Math.PI * 0.52, -Math.PI * 1.30
     ];
@@ -116,7 +125,7 @@ export class ParticleHandler {
         let strength = size / 2;
         let radius = strength / 2;
         let offset = strength / 10;
-        let settingFactor = size/100;
+        let settingFactor = size / 100;
 
         if (inverse) {
             positionOffset.x += (strength - offsetX);
@@ -134,10 +143,31 @@ export class ParticleHandler {
             -0.2
         ];
 
-        let effectParticles = this.createCircleParticles(positionOffset, radius, radius, channelMagicEffectSettings, false, offset, strength, 200, -offset, 2);
+        let effectParticles = this.createCenterCircleParticles(positionOffset, radius, radius, channelMagicEffectSettings, false, offset, strength, 200, -offset, 2);
 
         this.fireEffectParticles.push(...effectParticles);
+    }
 
+    public createFireballExplosion(position: Vector, size: number) {
+
+        let radius = size / 2;
+        let particleSize = 2 + (size/20);
+
+        position.x = position.x + radius;
+        position.y = position.y + radius;
+
+        let settings: number[] = [
+            particleSize, particleSize * 2,
+            500, 500,
+            -20, 20,
+            0.05, 0.2,
+            -0.2,
+            0, Math.PI * 2,
+        ];
+
+        let effectParticles = this.createCircleParticles(position, 0, 0, false, settings, 50);
+
+        this.fireEffectParticles.push(...effectParticles);
     }
 
     public createChannelMagic(position: Vector, inverse: boolean) {
@@ -150,7 +180,7 @@ export class ParticleHandler {
             positionOffset.x += 25;
         }
 
-        let effectParticles = this.createCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
+        let effectParticles = this.createCenterCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
 
         this.fireEffectParticles.push(...effectParticles);
     }
@@ -159,13 +189,13 @@ export class ParticleHandler {
         position.y = position.y - 5;
 
         let settings: number[] = [];
-        if(inverse) {
+        if (inverse) {
             settings = this.invertedShieldEffectSettings;
         } else {
             settings = this.shieldEffectSettings;
         }
 
-        let effectParticles = this.createCircleParticles(position, 20, 20, settings, false, 0, 0, 100, 0, 2);
+        let effectParticles = this.createCenterCircleParticles(position, 20, 20, settings, false, 0, 0, 100, 0, 2);
 
         this.shieldEffectParticles.push(...effectParticles);
     }
@@ -256,7 +286,7 @@ export class ParticleHandler {
         let frostEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         frostEffectRenderCall.textureType = TextureType.frostTexture;
 
-        let shieldEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();        
+        let shieldEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         shieldEffectRenderCall.textureType = TextureType.particleTexture;
 
 
@@ -388,7 +418,7 @@ export class ParticleHandler {
         return newParticles;
     }
 
-    private createCircleParticles(position: Vector, radiusX: number, radiusY: number, settings: number[], inward: boolean, centerOffsetValue: number, centerSize: number, centerLifeTime: number, centerGrowth: number, particleNumber: number) {
+    private createCenterCircleParticles(position: Vector, radiusX: number, radiusY: number, settings: number[], inward: boolean, centerOffsetValue: number, centerSize: number, centerLifeTime: number, centerGrowth: number, particleNumber: number) {
 
         let newParticles: Particle[] = [];
 
@@ -397,6 +427,14 @@ export class ParticleHandler {
         let centerParticle = new Particle(new Rectangle(position.x + centerOffSetX, position.y + centerOffSetY, centerSize, centerSize), centerLifeTime, new Vector(0, 0), centerGrowth);
 
         newParticles.push(centerParticle);
+        newParticles.push(...this.createCircleParticles(position, radiusX, radiusY, inward, settings, particleNumber));
+
+        return newParticles;
+    }
+
+    private createCircleParticles(position: Vector, radiusX: number, radiusY: number, inward: boolean, settings: number[], particleNumber: number) {
+
+        let particles: Particle[] = [];
 
         for (let i = 0; i < particleNumber; i++) {
 
@@ -418,17 +456,14 @@ export class ParticleHandler {
             }
 
             velocity.normalize();
-            velocity.multiply(0.1);
+            velocity.multiply(this.rand(settings[6], settings[7]));
 
             let particle = new Particle(new Rectangle(x, y, particleSize, particleSize), lifeTime, velocity, settings[8]);
 
-            newParticles.push(particle);
-
+            particles.push(particle);
         };
 
-        return newParticles;
-
-
+        return particles;
     }
 
     private rand(min: number, max: number) {

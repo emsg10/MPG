@@ -16,6 +16,7 @@ import {
 } from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
+import { ParticleHandler } from './particleHandler';
 import { EnemyHandler } from './enemyHandler';
 import { DebugHandler } from './debugHandler';
 import { Gravity } from '../forces/gravity';
@@ -32,7 +33,7 @@ export class ProjectileHandler {
     private collisionDetection = CollisionDetection.getInstance();
     private debuggHandler = DebugHandler.getInstance();
 
-    constructor(animationHandler: AnimationHandler, ) {
+    constructor(animationHandler: AnimationHandler) {
         this.animationHandler = animationHandler;
     }
 
@@ -58,7 +59,7 @@ export class ProjectileHandler {
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
         let collRect: Rectangle;
 
-        if(inverse) {
+        if (inverse) {
             collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
         } else {
             collRect = new Rectangle(position.x + 20, position.y + 5, 1, 1);
@@ -81,14 +82,14 @@ export class ProjectileHandler {
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
         let collRect: Rectangle;
 
-        if(inverse) {
+        if (inverse) {
             collRect = new Rectangle(position.x + 10, position.y + 5, 1, 1);
         } else {
             collRect = new Rectangle(position.x + 20, position.y + 5, 1, 1);
         }
 
         let animation = this.animationHandler.createDeadArrow(rectangle, inverse, velocity);
-        velocity.x = -velocity.x/4;
+        velocity.x = -velocity.x / 4;
         arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect);
         arrow.gravity = new Gravity(0.0003);
         arrow.drag = new Drag(0.0002);
@@ -101,15 +102,15 @@ export class ProjectileHandler {
     }
 
     public createFireBall(position: Vector, inverse: boolean, velocityValue: number, strength: number, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
-        
+
         let fireBall: ParticleProjectile;
-        
+
         if (inverse) {
             fireBall = new ParticleProjectile(new Vector(-velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
         } else {
             fireBall = new ParticleProjectile(new Vector(velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
         }
-        
+
         this.projectiles.push(fireBall);
     }
 
@@ -257,7 +258,7 @@ export class ProjectileHandler {
         let removeProjectiles: Projectile[] = [];
         let shieldCollidables: Rectangle[] = [];
         let playerCollisionArea = player.getCollisionArea();
-        
+
         shieldCollidables.push(...player.getShieldCollidables());
 
         for (let projectile of this.enemyProjectiles) {
@@ -272,6 +273,7 @@ export class ProjectileHandler {
     private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, playerCollisionArea: Rectangle, shieldCollidables: Rectangle[], removeProjectiles: Projectile[]) {
         let collisionData: CollisionData;
         let shieldCollisionData: CollisionData;
+        let groundCollision: boolean;
         projectile.updateForces(delta);
 
         let deltaVelocity = new Vector(frameVelocity.x - player.velocity.x * delta, frameVelocity.y - player.velocity.y * delta);
@@ -279,6 +281,8 @@ export class ProjectileHandler {
         collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
         shieldCollisionData = this.collisionDetection.checkProjectileCollisionY(shieldCollidables, projectile, deltaVelocity, false);
         projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
+
+        groundCollision = shieldCollisionData.groundCollision;
 
         if (shieldCollisionData.groundCollision) {
             this.setShieldDamage(player, projectile);
@@ -299,13 +303,15 @@ export class ProjectileHandler {
 
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
-        if (shieldCollisionData.wallCollision && !shieldCollisionData.groundCollision) {
-            this.setShieldDamage(player, projectile);
-            removeProjectiles.push(projectile);
-        } else if (collisionData.wallCollision) {
-            this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 20);
-            this.setDamageAnimation(player, projectile);
-            removeProjectiles.push(projectile);
+        if (!groundCollision) {
+            if (shieldCollisionData.wallCollision) {
+                this.setShieldDamage(player, projectile);
+                removeProjectiles.push(projectile);
+            } else if (collisionData.wallCollision) {
+                this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 20);
+                this.setDamageAnimation(player, projectile);
+                removeProjectiles.push(projectile);
+            }
         }
 
         if (projectile instanceof CollisionProjectile) {
@@ -328,12 +334,12 @@ export class ProjectileHandler {
 
     private setShieldDamage(player: Player, projectile: Projectile) {
         if (projectile.projectileType == ProjectileType.Arrow) {
-            this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), true, projectile.velocity);
-            if(!player.useMana(20)) {
+            this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity);
+            if (!player.useMana(20)) {
                 player.mana = 0;
             }
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
-            if(!player.useMana(projectile.damage)) {
+            if (!player.useMana(projectile.damage)) {
                 player.mana = 0;
             };
         }
@@ -388,6 +394,7 @@ export class ProjectileHandler {
                 let currentFrame = projectile.animation.getCurrentFrame();
                 projectile.animation.textureNumber = [currentFrame];
                 projectile.animation.frameIndex = 0;
+                projectile.onGroundCollision();
             }
         }
 
@@ -423,12 +430,8 @@ export class ProjectileHandler {
     }
 
     private destroyAnimation(projectile: Projectile) {
-        if (projectile instanceof Spell) {
-            if (projectile.type == SpellType.electricbolt) {
-                this.animationHandler.sizzle(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
-            } else {
-                this.animationHandler.fireball_destroy(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
-            }
+        if (projectile instanceof ParticleProjectile) {
+            this.animationHandler.fireball_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
         }
     }
 

@@ -8,7 +8,6 @@ import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
 import { Observable } from 'rxjs';
-import { Editor } from './editor/editor';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
 import { ParticleHandler } from './handler/particleHandler';

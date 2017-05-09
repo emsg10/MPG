@@ -280,6 +280,10 @@ export class AnimationHandler {
         return animation;
     }
 
+    public fireball_explosion(position: Vector, size: number) {
+        this.particleHandler.createFireballExplosion(position, size);
+    }
+
     public swordscut_a(position: Vector, size: number, inverse: boolean) {
 
         let animation = new Animation();

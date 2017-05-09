@@ -1,4 +1,4 @@
-import { Projectile, Rectangle, Vector, Animation, DebugElement, RotationAnimation } from '../';
+import { Projectile, Rectangle, Vector, Animation, DebugElement, RotationAnimation, StaticRotationAnimation } from '../';
 import { Gravity } from '../../forces/gravity';
 import { Drag } from '../../forces/drag';
 import { DebugHandler } from '../../handler/debugHandler';
@@ -25,5 +25,15 @@ export class PhysicalProjectile extends Projectile {
     public updateForces(delta: number) {
         this.gravity.apply(this.velocity, delta);
         this.drag.apply(this.velocity, delta);
+    }
+
+    public onGroundCollision() {
+        if(this.animation instanceof StaticRotationAnimation) {
+            if(this.animation.inverse) {
+                this.animation.angle = 0;
+            } else {
+                this.animation.angle = Math.PI * 2;
+            }
+        }
     }
 }

@@ -1,9 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import { Observable, Observer } from 'rxjs';
 import { LoadHelper } from './loadHelper';
 
-@Injectable()
 export class AssetsLoader {
   private shaderUrl = 'src/assets/shader';
   private textureUrl = "src/assets/texture/tiles.png";
@@ -11,57 +8,49 @@ export class AssetsLoader {
   private genericParticleTextureUrl = "src/assets/texture/genericParticle.png";
   private levelUrl = "src/app/game/map";
 
-  constructor(private http: Http) { }
+  constructor() { }
 
-  getFragmentShader() {
-    return this.http.get(this.shaderUrl + "/fragmentShader.c")
-      .map(this.extractTextData)
+  public getFragmentShader() {
+    return this.httpGet(this.shaderUrl + "/fragmentShader.c")
       .catch(this.handleError);
   }
 
-  getVertexShader() {
-    return this.http.get(this.shaderUrl + "/vertexShader.c")
-      .map(this.extractTextData)
+  public getVertexShader() {
+    return this.httpGet(this.shaderUrl + "/vertexShader.c")
       .catch(this.handleError);
   }
 
-  getParticleVertexShader() {
-    return this.http.get(this.shaderUrl + "/particleVertexShader.c")
-      .map(this.extractTextData)
+  public getParticleVertexShader() {
+    return this.httpGet(this.shaderUrl + "/particleVertexShader.c")
       .catch(this.handleError);
   }
 
-  getParticleFragmentShader() {
-    return this.http.get(this.shaderUrl + "/particleFragmentShader.c")
-      .map(this.extractTextData)
+  public getParticleFragmentShader() {
+    return this.httpGet(this.shaderUrl + "/particleFragmentShader.c")
       .catch(this.handleError);
   }
 
-  getSimpleParticleVertexShader() {
-    return this.http.get(this.shaderUrl + "/simpleParticleVertexShader.c")
-      .map(this.extractTextData)
+  public getSimpleParticleVertexShader() {
+    return this.httpGet(this.shaderUrl + "/simpleParticleVertexShader.c")
       .catch(this.handleError);
   }
 
-  getSimpleParticleFragmentShader() {
-    return this.http.get(this.shaderUrl + "/simpleParticleFragmentShader.c")
-      .map(this.extractTextData)
+  public getSimpleParticleFragmentShader() {
+    return this.httpGet(this.shaderUrl + "/simpleParticleFragmentShader.c")
       .catch(this.handleError);
   }
 
-  getDynamicVertexShader() {
-    return this.http.get(this.shaderUrl + "/dynamicVertexShader.c")
-      .map(this.extractTextData)
+  public getDynamicVertexShader() {
+    return this.httpGet(this.shaderUrl + "/dynamicVertexShader.c")
       .catch(this.handleError);
   }
 
-  getDynamicFragmentShader() {
-    return this.http.get(this.shaderUrl + "/dynamicFragmentShader.c")
-      .map(this.extractTextData)
+  public getDynamicFragmentShader() {
+    return this.httpGet(this.shaderUrl + "/dynamicFragmentShader.c")
       .catch(this.handleError);
   }
 
-  getTexture(url: string) {
+  public getTexture(url: string) {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();
       texture.src = url;
@@ -72,55 +61,57 @@ export class AssetsLoader {
     });
   }
 
-  getParticleTexture() {
+  public getParticleTexture() {
     return this.getTexture(this.particleTextureUrl);
   }
 
-  getGenericParticleTexture() {
+  public getGenericParticleTexture() {
     return this.getTexture(this.genericParticleTextureUrl);
   }
 
-  getTileTexture() {
+  public getTileTexture() {
     return this.getTexture(this.textureUrl);
   }
 
-  getLevel(level: string) {
-    return this.http.get(this.levelUrl + "/" + level + ".json")
+  public getLevel(level: string) {
+    return this.httpGet(this.levelUrl + "/" + level + ".json")
       .map(this.extractData)
       .catch(this.handleError);
   }
 
-  private extractImageData(res: Response) {
-    let body = res.arrayBuffer();
-    return body;
+  private httpGet(url: string) : Observable<string>{
+    return Observable.create((observer: Observer<string>) => {
+      let xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = () => {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+          observer.next(xmlHttp.responseText);
+          observer.complete();
+        };
+      };
+
+      xmlHttp.onerror = () => {
+        observer.error(xmlHttp.responseText);
+      };
+
+      xmlHttp.open("GET", url, true);
+      xmlHttp.send(null);
+    });
   }
 
-  private extractTextData(res: Response) {
-    let body = res.text();
-    return body;
-  }
-
-  private extractData(res: Response) {
+  private extractData(responseText: string) {
     let loadHelper = LoadHelper.getInstance();
-    let body = res.json();
+    let body = JSON.parse(responseText);
 
-    if(loadHelper.checkLevelType(body)) {
+    if (loadHelper.checkLevelType(body)) {
       return body;
     } else {
       throw new Error("Invalid data type");
     }
   }
 
-  private handleError(error: Response | any) {
-    // In a real world app, we might use a remote logging infrastructure
+  private handleError(error: any) {
     let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
+    errMsg = error.message ? error.message : error.toString();
     console.error(errMsg);
     return Observable.throw(errMsg);
   }

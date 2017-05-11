@@ -25,7 +25,7 @@ export class Player extends Character{
 	private particleHandler: ParticleHandler;
 	private spellHandler: SpellHandler;
 	private drag: number = 0.0015;
-	private externalDragForce: number = 0.0001;
+	private externalDragForce: number = 0.0005;
 	private dragForce: Drag = new Drag(this.drag);
 	private externalDrag = new Drag(this.externalDragForce);
 	private idleAnimation: Animation = new Animation();
@@ -197,7 +197,7 @@ export class Player extends Character{
 		}
 
 		if (!this.moving) {
-			if(this.externalVelocity.x > 0) {
+			if(this.externalVelocity.x != 0) {
 				this.externalDrag.apply(this.externalVelocity, delta);
 			} else {
 				this.dragForce.apply(this.velocity, delta);
@@ -266,9 +266,9 @@ export class Player extends Character{
 		this.particleHandler.createShieldExplosionEffect(this.getCalculatedPos(this.position, 0), this.inverse);
 		this.stun();
 		if(this.inverse) {
-			this.externalVelocity.x += 0.5;
+			this.externalVelocity.x += 0.7;
 		} else {
-			this.externalVelocity.x -= 0.5;
+			this.externalVelocity.x -= 0.7;
 		}
 	}
 

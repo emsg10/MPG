@@ -78,7 +78,7 @@ export class Game {
 		this.particleHandler = new ParticleHandler(this.levelData.tiles);
 		this.animationHandler = new AnimationHandler(this.particleHandler);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
-		
+
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.tileMap = new TileMap(this.context);
 
@@ -92,7 +92,7 @@ export class Game {
 		if (!(mouseRenderCall && this.started)) {
 			this.loadLevel(levelData);
 			this.started = false;
-		} 
+		}
 
 		this.mouseRenderCall = mouseRenderCall;
 	}
@@ -163,12 +163,12 @@ export class Game {
 
 		if (this.player.dead) {
 			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
-			
-			for(let stickyAnimation of this.player.damageAnimations) {
+
+			for (let stickyAnimation of this.player.damageAnimations) {
 				this.animationHandler.remove(stickyAnimation.animation);
 			}
 			this.player.damageAnimations = [];
-		} else if(this.levelCompleted) {
+		} else if (this.levelCompleted) {
 			this.textRenderer.createTextRenderCall(800, 96, 51, renderCall);
 		} else {
 			renderCall = this.player.createRenderCall(renderCall, this.camera.position)
@@ -180,15 +180,15 @@ export class Game {
 		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls, this.camera.position);
 
 		this.debugHandler.createRenderCall(renderCall, this.camera.position);
-		
+
 
 		renderCalls.push(renderCall);
 
-		
+
 		this.renderer.render(renderCalls);
 		this.simpleParticleRenderer.render(simpleRenderCalls);
 		this.dynamicRenderer.render([dynamicRenderCall]);
-		
+
 		//this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
 	}
 
@@ -197,28 +197,30 @@ export class Game {
 	}
 
 	private checkKeys(delta: number) {
-		if (this.leftKeyPress) {
-			this.player.moveLeft(delta);
-		} else if (this.rightKeyPress) {
-			this.player.moveRight(delta);
-		}
+		if (!this.player.stunned) {
+			if (this.leftKeyPress) {
+				this.player.moveLeft(delta);
+			} else if (this.rightKeyPress) {
+				this.player.moveRight(delta);
+			}
 
-		if (this.jumpKeyPress) {
-			this.player.jump();
-		}
+			if (this.jumpKeyPress) {
+				this.player.jump();
+			}
 
-		if(this.shieldKeyPress) {
-			this.player.cast(SpellType.shield);
-		}
+			if (this.shieldKeyPress) {
+				this.player.cast(SpellType.shield);
+			}
 
-		if (this.frostKeyPress) {
-			this.player.cast(SpellType.frostBlast);
-		} else if (this.fireKeyPress) {
-			this.player.cast(SpellType.fireBlast);
-		} else if(this.fireballKeyPress) {
-			this.player.cast(SpellType.fireball);
-		} else if(this.channelMagicKeyPress) {
-			this.player.cast(SpellType.channelmagic);
+			if (this.frostKeyPress) {
+				this.player.cast(SpellType.frostBlast);
+			} else if (this.fireKeyPress) {
+				this.player.cast(SpellType.fireBlast);
+			} else if (this.fireballKeyPress) {
+				this.player.cast(SpellType.fireball);
+			} else if (this.channelMagicKeyPress) {
+				this.player.cast(SpellType.channelmagic);
+			}
 		}
 	}
 
@@ -262,7 +264,7 @@ export class Game {
 				case 'ArrowLeft':
 					this.leftKeyPress = true;
 					break;
-				
+
 			}
 
 		});
@@ -347,7 +349,7 @@ export class Game {
 		this.enemyHandler.enemies.push(new Archer(new Vector(2400, 700), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(2100, 1000), 50, 50, this.projectileHandler, this.animationHandler));
 		this.enemyHandler.enemies.push(new Archer(new Vector(3330, 1000), 50, 50, this.projectileHandler, this.animationHandler));
-		
+
 		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 45, 45, 100, 200);
 		this.collision.createGrid(this.level.gameSize, this.level.tiles);
 

@@ -44,12 +44,6 @@ export class DynamicRenderer {
         for (let renderCall of renderCalls) {
             if (renderCall.vertecies.length > 0) {
 
-                let copyMat = renderCall.matrices.slice(0, 9);
-                let testMat: number[] = [];
-                for(let i = 0; i < renderCall.indecies.length; i++) {
-                    testMat.push(...copyMat);
-                }
-
                 this.gl.enableVertexAttribArray(this.positionLocation);
                 this.gl.enableVertexAttribArray(this.textureCoordAttribute);
                 this.gl.enableVertexAttribArray(this.matrixAttributeLocation);

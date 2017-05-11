@@ -115,6 +115,24 @@ export class ParticleHandler {
         -Math.PI * 0.52, -Math.PI * 1.30
     ];
 
+    private shieldExplosionEffectSettings: number[] = [
+        4, 8,
+        1000, 1500,
+        -20, 20,
+        -0.2, 0.2,
+        -0.1,
+        -Math.PI * 0.52, Math.PI * 0.30
+    ];
+
+    private invertedShieldExplosionEffectSettings: number[] = [
+        4, 8,
+        1000, 1500,
+        -20, 20,
+        -0.2, 0.2,
+        -0.1,
+        -Math.PI * 0.52, -Math.PI * 1.30
+    ];
+
     constructor(tiles: Tile[]) {
         this.tiles = tiles;
     }
@@ -183,6 +201,21 @@ export class ParticleHandler {
         let effectParticles = this.createCenterCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
 
         this.fireEffectParticles.push(...effectParticles);
+    }
+
+    public createShieldExplosionEffect(position: Vector, inverse: boolean) {
+        position.y = position.y - 5;
+
+        let settings: number[] = [];
+        if (inverse) {
+            settings = this.invertedShieldExplosionEffectSettings;
+        } else {
+            settings = this.shieldExplosionEffectSettings;
+        }
+
+        let effectParticles = this.createCircleParticles(position, 40, 40, false, settings, 100);
+
+        this.shieldEffectParticles.push(...effectParticles);
     }
 
     public createShieldEffect(position: Vector, inverse: boolean) {

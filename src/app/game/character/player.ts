@@ -19,6 +19,7 @@ export class Player extends Character{
 	public damageAnimations: StickyAnimation[] = [];
 	public hp: number;
 	public mana: number;
+	public stunned = false;
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private particleHandler: ParticleHandler;
@@ -28,6 +29,8 @@ export class Player extends Character{
 	private dragForce: Drag = new Drag(this.drag);
 	private externalDrag = new Drag(this.externalDragForce);
 	private idleAnimation: Animation = new Animation();
+	private stunnedAnimation: Animation = new Animation();
+	private stunnedEffect: Animation = new Animation();
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
 	private jumping: boolean = false;
@@ -58,6 +61,19 @@ export class Player extends Character{
 		this.runningAnimation.textureNumber.push(200);
 		this.runningAnimation.textureNumber.push(201);
 		this.runningAnimation.textureNumber.push(202);
+
+		this.stunnedAnimation.textureNumber.push(296);
+		this.stunnedAnimation.textureNumber.push(294);
+		this.stunnedAnimation.textureNumber.push(296);
+		this.stunnedAnimation.textureNumber.push(295);
+		this.stunnedAnimation.timeToChange = 200;
+
+        this.stunnedEffect.textureNumber.push(297);
+        this.stunnedEffect.textureNumber.push(298);
+        this.stunnedEffect.textureNumber.push(299);
+		this.stunnedEffect.timeToChange = 200;
+
+		
 	}
 
 	public takeDamage(damage: number) {
@@ -136,6 +152,10 @@ export class Player extends Character{
 			this.spellHandler.castingShield = false;
 		}
 
+		if(this.stunned) {
+			renderCall = this.renderStunnedEffect(renderCall, camera);
+		}
+
 		return renderCall;
 	}
 
@@ -186,7 +206,14 @@ export class Player extends Character{
 
 		this.spellHandler.update(delta);
 
-		if(this.spellHandler.currentCast) {
+		if(this.stunned) {
+			this.stunnedAnimation.next(delta);
+			this.stunnedEffect.next(delta);
+			this.currentAnimation = this.stunnedAnimation;
+			if(this.stunnedAnimation.repetitions == 0) {
+				this.stunned = false;
+			}
+		} else if(this.spellHandler.currentCast) {
 			this.currentAnimation = this.spellHandler.currentCast.currentAnimation;
 		} else if (this.idleTime >= this.idleTimeChange) {
 			this.currentAnimation = this.idleAnimation;
@@ -236,12 +263,22 @@ export class Player extends Character{
 	}
 
 	public shieldExplosion() {
+		this.particleHandler.createShieldExplosionEffect(this.getCalculatedPos(this.position, 0), this.inverse);
+		this.stun();
 		if(this.inverse) {
 			this.externalVelocity.x += 0.5;
 		} else {
 			this.externalVelocity.x -= 0.5;
 		}
 	}
+
+	public getCalculatedPos(position: Vector, size: number) {
+        return new Vector(this.calcPos(position.x, size, 22), this.calcPos(position.y, size, 25))
+    }
+
+    public calcPos(value: number, size: number, offset: number) {
+        return value - (size / 2 - offset);
+    }
 
 	public jump() {
 		if (!this.jumping) {
@@ -253,6 +290,12 @@ export class Player extends Character{
 		this.spellHandler.cast(type);
 	}
 
+	private stun() {
+		this.stunned = true;
+		this.stunnedAnimation.repetitions = 20;
+		this.stunnedAnimation.reset();
+	}
+
 	private renderShield(renderCall: RenderCall, camera: Vector) {
 
 		if(this.inverse) {
@@ -262,6 +305,19 @@ export class Player extends Character{
 		}
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 300);
 		renderCall.color = this.renderHelper.getColor(renderCall.color, this.renderHelper.getIndeciesAttribute([0, 0.2, 1, 0.8]));
+		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+
+        return renderCall;
+	}
+
+	private renderStunnedEffect(renderCall: RenderCall, camera: Vector) {
+		if(this.inverse) {
+			renderCall.vertecies =  this.renderHelper.getInverseVertecies(this.position.x - camera.x, this.position.y - camera.y - 8, 32, 32, renderCall.vertecies);
+		} else {
+			renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x - camera.x + 13, this.position.y - camera.y - 8, 32, 32, renderCall.vertecies);
+		}
+		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, this.stunnedEffect.getCurrentFrame());
+		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 
         return renderCall;

@@ -344,6 +344,7 @@ export class ProjectileHandler {
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             if (!player.useMana(projectile.damage)) {
                 player.mana = 0;
+                player.shieldExplosion();
             };
         }
     }

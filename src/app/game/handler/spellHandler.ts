@@ -72,7 +72,7 @@ export class SpellHandler {
                 this.shieldCollidables.push(new Rectangle(x, y, 10, 10));
             }
 
-            this.particleHandler.createShieldEffect(this.getCalculatedPos(this.player.position, 0), this.player.inverse);
+            this.particleHandler.createShieldEffect(this.player.getCalculatedPos(this.player.position, 0), this.player.inverse);
         }
 
         this.updateBreak(delta);
@@ -138,6 +138,9 @@ export class SpellHandler {
                 this.currentCast = this.fireBlastCast;
             } else {
                 this.break = 500;
+                if(this.castingShield) {
+                    this.player.shieldExplosion();   
+                }
             }
         }
     }
@@ -149,6 +152,9 @@ export class SpellHandler {
                 this.currentCast = this.frostBlastCast;
             } else {
                 this.break = 500;
+                if(this.castingShield) {
+                    this.player.shieldExplosion();   
+                }
             }
         }
     }
@@ -160,6 +166,7 @@ export class SpellHandler {
             }
         } else {
             this.break = 500;
+            this.player.shieldExplosion();
         }
     }
 
@@ -215,20 +222,12 @@ export class SpellHandler {
 
         let onFireBallCast = (animation: Animation, size: number) => {
 
-            this.projectileHandler.createFireBall(this.getCalculatedPos(this.player.position, size), this.player.inverse, 0.6, size, 11, onFireBallUpdate);
+            this.projectileHandler.createFireBall(this.player.getCalculatedPos(this.player.position, size), this.player.inverse, 0.6, size, 11, onFireBallUpdate);
 
             return animation;
         };
 
         this.fireBallCast = new SpellCast(castAnimation, 3, onFireBallCast);
-    }
-
-    private getCalculatedPos(position: Vector, size: number) {
-        return new Vector(this.calcPos(position.x, size, 22), this.calcPos(position.y, size, 25))
-    }
-
-    private calcPos(value: number, size: number, offset: number) {
-        return value - (size / 2 - offset);
     }
 
 }

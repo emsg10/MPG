@@ -79,7 +79,7 @@ export class Enemy extends Character {
             this.actualSpeed = this.actualSpeed * 1.005;
         }
 
-        this.collisionData = this.collisionDetection.collisionDetection(tiles, this);
+        this.collisionData = this.collisionDetection.collisionDetection(tiles, [], this, this.toMove, delta);
 
         this.fall(delta);
 

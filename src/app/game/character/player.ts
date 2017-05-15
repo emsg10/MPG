@@ -1,8 +1,9 @@
-import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile } from '../model';
 import { RenderCall } from '../render/renderCall';
 import { RenderHelper } from '../render/renderHelper';
 import { Context } from '../';
 import { CollisionData } from '../collision';
+import { CollisionDetection } from '../collision/collisionDetection';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ParticleHandler } from '../handler/particleHandler';
@@ -20,6 +21,9 @@ export class Player extends Character{
 	public hp: number;
 	public mana: number;
 	public stunned = false;
+	public onLift = false;
+	public liftVelocity = new Vector(0, 0);
+	private collisionDetection = CollisionDetection.getInstance();
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
 	private particleHandler: ParticleHandler;
@@ -40,6 +44,7 @@ export class Player extends Character{
 	private manaRegen = 1;
 	private maxMana: number;
 	private externalVelocity: Vector = new Vector(0, 0);
+	
 
 	private debugHandler = DebugHandler.getInstance();
 
@@ -105,7 +110,7 @@ export class Player extends Character{
 	}
 
 	public getVelocity() {
-		return new Vector(this.velocity.x + this.externalVelocity.x, this.velocity.y + this.externalVelocity.y);
+		return new Vector(this.velocity.x + this.externalVelocity.x + this.liftVelocity.x, this.velocity.y + this.externalVelocity.y + this.liftVelocity.y);
 	}
 
 	public isMoving() {
@@ -159,7 +164,20 @@ export class Player extends Character{
 		return renderCall;
 	}
 
-	public update(collisionData: CollisionData, delta: number) {
+	public update(tiles: Tile[], dynamicTiles: DynamicTile[], delta: number) {
+
+		let collisionData = this.collisionDetection.collisionDetection(tiles, dynamicTiles, this, this.toMove, delta);
+
+		if(!this.onLift) {
+			this.fall(delta);
+		} else {
+			collisionData.groundCollision = true;
+			collisionData.normalY = -1;
+		}
+		
+		if(collisionData.liftCollision && collisionData.groundCollision && collisionData.normalY == -1) {
+			this.onLift = true;
+		}
 
 		if(this.deathType) {
 			if(this.deathType == DeathType.swordDeath) {
@@ -178,6 +196,8 @@ export class Player extends Character{
 
 			if (collisionData.normalY == -1) {
 				if (this.jumping) {
+					this.liftVelocity = new Vector(0, 0)
+					this.onLift = false;
 					this.idleTime = 0;
 					this.velocity.y = this.jumpSpeed;
 				}
@@ -220,8 +240,7 @@ export class Player extends Character{
 		} else {
 			this.currentAnimation = this.runningAnimation;
 		}
-
-		this.fall(delta);
+		
 		this.jumping = false;
 		this.moving = false;
 

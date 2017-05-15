@@ -3,13 +3,14 @@ import { RenderCall, ParticleRenderer, DynamicRenderCall } from './render';
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
-import { Vector, Rectangle, Asset, SpellType, Level, Tile, Animation } from './model';
+import { Vector, Rectangle, Asset, SpellType, Level, Tile, Animation, DynamicTile } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
 import { Observable } from 'rxjs';
 import { AnimationHandler } from './handler/animationHandler';
 import { ProjectileHandler } from './handler/projectileHandler';
+import { DynamicTileHandler } from './handler/dynamicTileHandler';
 import { ParticleHandler } from './handler/particleHandler';
 import { SimpleParticleRenderer } from './render/simpleParticleRenderer';
 import { SimpleParticleRenderCall } from './render/simpleParticleRenderCall';
@@ -53,6 +54,7 @@ export class Game {
 	private levelData: LevelData;
 	private animationHandler: AnimationHandler;
 	private projectileHandler: ProjectileHandler;
+	private dynamicTileHandler: DynamicTileHandler;
 	private UI: UI;
 	private enemyHandler: EnemyHandler;
 	private particleHandler: ParticleHandler;
@@ -73,6 +75,7 @@ export class Game {
 		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
+		this.dynamicTileHandler = new DynamicTileHandler();
 
 		this.UI = new UI(100, 200);
 		this.particleHandler = new ParticleHandler(this.levelData.tiles);
@@ -80,7 +83,7 @@ export class Game {
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
-		this.tileMap = new TileMap(this.context);
+		this.tileMap = new TileMap();
 
 		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
@@ -120,8 +123,8 @@ export class Game {
 						this.checkGoal();
 						this.checkKeys(delta);
 						this.collision.checkCoutOfBounds(this.player, this.levelData.gameSize);
-						let collisionData = this.collision.collisionDetection(this.level.tiles, this.player);
-						this.player.update(collisionData, delta);
+						this.player.update(this.level.tiles, this.dynamicTileHandler.dynamicTiles, delta);
+						this.dynamicTileHandler.update(this.player, delta);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player);
@@ -174,6 +177,7 @@ export class Game {
 			renderCall = this.player.createRenderCall(renderCall, this.camera.position)
 		}
 
+		this.dynamicTileHandler.createRenderCall(renderCall, this.camera.position);
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(renderCall, this.camera.position)
 		this.UI.createRenderCall(renderCall, this.camera.position);
@@ -341,6 +345,8 @@ export class Game {
 				enemies.push(new Swordman(new Vector(enemyData.area.x, enemyData.area.y), enemyData.area.width, enemyData.area.height, this.projectileHandler, this.animationHandler));
 			}
 		}
+
+		this.dynamicTileHandler.dynamicTiles = [new DynamicTile(new Tile(400, 1100, 100, 20, 7), new Vector(0, 0.2), true, 200)];
 
 		this.enemyHandler.enemies = enemies;
 		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1250), 50, 50, this.projectileHandler, this.animationHandler));

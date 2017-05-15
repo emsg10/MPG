@@ -446,9 +446,4 @@ export class ProjectileHandler {
 
         this.projectiles.push(projectile);
     }
-
-
-
-
-
 }

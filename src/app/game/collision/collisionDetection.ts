@@ -1,4 +1,4 @@
-import { Vector, Tile, Rectangle, Projectile } from '../model';
+import { Vector, Tile, Rectangle, Projectile, DynamicTile } from '../model';
 import { CollisionData, Grid } from './';
 import { Character } from '../character/character';
 import { Enemy } from '../character/enemy';
@@ -32,14 +32,14 @@ export class CollisionDetection {
 		}
 	}
 
-	public collisionDetection(tiles: Tile[], character: Character) {
+	public collisionDetection(tiles: Tile[], dynamicTiles: DynamicTile[], character: Character, frameVelocity: Vector, delta: number) {
 
-		let collisionData = this.checkCollision(tiles, character, character.toMove);
+		let collisionData = this.checkCollision(tiles, dynamicTiles, character, frameVelocity, delta);
 
 		if (collisionData.wallCollision) {
 			let position = new Vector(character.position.x, character.position.y);
 			collisionData.wallCollision = false;
-			collisionData = this.checkCollision(tiles, character, new Vector((character.toMove.x * (1 - collisionData.collisionTimeX)), -5));
+			collisionData = this.checkCollision(tiles, dynamicTiles, character, new Vector((character.toMove.x * (1 - collisionData.collisionTimeX)), -5), delta);
 			if (collisionData.wallCollision) {
 				character.position = position;
 			}
@@ -115,18 +115,32 @@ export class CollisionDetection {
 		return collisionData;
 	}
 
-	public checkCollision(tiles: Tile[], character: Character, frameVelocity: Vector) {
+	public checkCollision(tiles: Tile[], dynamicTiles: DynamicTile[], character: Character, frameVelocity: Vector, delta: number) {
 
 		let tilesToCheck = tiles;
 		let collisionData: CollisionData = new CollisionData();
+		let dynamicCollisionData = new CollisionData();
 		let rect1 = character.getCollisionArea();
 		let broadphasebox = this.getSweptBroadphaseBoxY(rect1, frameVelocity);
 
 		let possibleColls = this.grid.get(broadphasebox) as Tile[];
 
+		for (let dynamicTile of dynamicTiles) {
+			let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
+			dynamicCollisionData = this.checkDynamicTileY(dynamicTile, rect1, character, deltaVelocity, dynamicCollisionData, delta);
+		}
+
 		for (let tile of possibleColls) {
 			if (this.aabbCheck(broadphasebox, tile)) {
-				collisionData = this.aabbCollisionY(character.getCollisionArea(), tile, frameVelocity, collisionData, tile.tileTextureType);
+				collisionData = this.aabbCollisionY(rect1, tile, frameVelocity, collisionData);
+			}
+		}
+
+		if (dynamicCollisionData.groundCollision) {
+			if (collisionData.collisionTimeY > dynamicCollisionData.collisionTimeY) {
+				collisionData = dynamicCollisionData;
+				collisionData.liftCollision = true;
+				frameVelocity.y = dynamicCollisionData.velocityY;
 			}
 		}
 
@@ -135,11 +149,22 @@ export class CollisionDetection {
 		rect1 = character.getCollisionArea();
 		broadphasebox = this.getSweptBroadphaseBoxX(rect1, frameVelocity);
 
+		for (let dynamicTile of dynamicTiles) {
+			let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
+			dynamicCollisionData = this.checkDynamicTileX(dynamicTile, rect1, character, deltaVelocity, dynamicCollisionData, delta);
+		}
+
 		for (let tile of tilesToCheck) {
-			if (tile.tileTextureType != 0) {
-				if (this.aabbCheck(broadphasebox, tile)) {
-					collisionData = this.aabbCollisionX(character.getCollisionArea(), tile, frameVelocity, collisionData);
-				}
+			if (this.aabbCheck(broadphasebox, tile)) {
+				collisionData = this.aabbCollisionX(character.getCollisionArea(), tile, frameVelocity, collisionData);
+			}
+		}
+
+		if (dynamicCollisionData.wallCollision) {
+			if (collisionData.collisionTimeX > dynamicCollisionData.collisionTimeX) {
+				collisionData.wallCollision = dynamicCollisionData.wallCollision;
+				collisionData.collisionTimeX = dynamicCollisionData.collisionTimeX;
+				frameVelocity.x = dynamicCollisionData.velocityX;
 			}
 		}
 
@@ -196,6 +221,28 @@ export class CollisionDetection {
 		return false;
 	}
 
+	private checkDynamicTileY(dynamicTile: DynamicTile, characterCollisionArea: Rectangle, character: Character, frameVelocity: Vector, dynamicCollisionData: CollisionData, delta: number) {
+
+		let broadphasebox = this.getSweptBroadphaseBoxY(characterCollisionArea, frameVelocity);
+
+		if (this.aabbCheck(broadphasebox, dynamicTile.tile)) {
+			dynamicCollisionData = this.aabbCollisionY(characterCollisionArea, dynamicTile.tile, frameVelocity, dynamicCollisionData);
+		}
+
+		return dynamicCollisionData;
+	}
+
+	private checkDynamicTileX(dynamicTile: DynamicTile, characterCollisionArea: Rectangle, character: Character, frameVelocity: Vector, dynamicCollisionData: CollisionData, delta: number) {
+
+		let broadphasebox = this.getSweptBroadphaseBoxX(characterCollisionArea, frameVelocity);
+
+		if (this.aabbCheck(broadphasebox, dynamicTile.tile)) {
+			dynamicCollisionData = this.aabbCollisionX(characterCollisionArea, dynamicTile.tile, frameVelocity, dynamicCollisionData);
+		}
+
+		return dynamicCollisionData;
+	}
+
 	private getSweptBroadphaseBoxX(rect: Rectangle, velocity: Vector) {
 		let x = rect.x + velocity.x;
 		let y = rect.y;
@@ -214,7 +261,7 @@ export class CollisionDetection {
 		return new Rectangle(x, y, width, height);
 	}
 
-	private aabbCollisionY(rect1: Rectangle, rect2: Rectangle, velocity: Vector, collisionData: CollisionData, tileTextureType?: number) {
+	private aabbCollisionY(rect1: Rectangle, rect2: Rectangle, velocity: Vector, collisionData: CollisionData) {
 		let yInvEntry: number;
 		let yInvExit: number;
 
@@ -252,10 +299,7 @@ export class CollisionDetection {
 
 			if (collisionData.collisionTimeY > entryTime) {
 				collisionData.collisionTimeY = entryTime;
-			}
-
-			if (tileTextureType == 25 && velocity.y > 5) {
-				collisionData.fallDeath = true;
+				collisionData.velocityY = velocity.y;
 			}
 
 			if (velocity.y > 20) {
@@ -305,6 +349,7 @@ export class CollisionDetection {
 
 			if (collisionData.collisionTimeX > entryTime) {
 				collisionData.collisionTimeX = entryTime;
+				collisionData.velocityX = velocity.x;
 			}
 
 			collisionData.wallCollision = true;

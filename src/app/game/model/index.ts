@@ -24,6 +24,8 @@ import { InstantCast } from './casts/instantCast';
 import { ChannelCast } from './casts/channelCast';
 import { SpellCast } from './casts/spellCast';
 import { ParticleProjectile } from './animation/particleProjectile';
+import { DynamicTile } from './dynamicTile';
+import { DynamicTileData } from './dynamicTileData';
 
 export {
     ShaderType,
@@ -51,5 +53,7 @@ export {
     ChannelCast,
     SpellCast,
     ParticleProjectile,
-    StaticRotationAnimation
+    StaticRotationAnimation,
+    DynamicTile,
+    DynamicTileData
 };

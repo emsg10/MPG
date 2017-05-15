@@ -21,7 +21,7 @@ export class Player extends Character{
 	public hp: number;
 	public mana: number;
 	public stunned = false;
-	public onLift = false;
+	public lift: DynamicTile = null;
 	public liftVelocity = new Vector(0, 0);
 	private collisionDetection = CollisionDetection.getInstance();
 	private projectileHandler: ProjectileHandler;
@@ -168,15 +168,15 @@ export class Player extends Character{
 
 		let collisionData = this.collisionDetection.collisionDetection(tiles, dynamicTiles, this, this.toMove, delta);
 
-		if(!this.onLift) {
+		if(this.lift == null) {
 			this.fall(delta);
 		} else {
 			collisionData.groundCollision = true;
 			collisionData.normalY = -1;
 		}
 		
-		if(collisionData.liftCollision && collisionData.groundCollision && collisionData.normalY == -1) {
-			this.onLift = true;
+		if(collisionData.lift != null && collisionData.groundCollision && collisionData.normalY == -1) {
+			this.lift = collisionData.lift;
 		}
 
 		if(this.deathType) {
@@ -197,7 +197,7 @@ export class Player extends Character{
 			if (collisionData.normalY == -1) {
 				if (this.jumping) {
 					this.liftVelocity = new Vector(0, 0)
-					this.onLift = false;
+					this.lift = null;
 					this.idleTime = 0;
 					this.velocity.y = this.jumpSpeed;
 				}

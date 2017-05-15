@@ -17,7 +17,7 @@ export class DynamicTileHandler {
             let travelDistance = dynamicTile.velocity.y * delta;
             dynamicTile.update(delta, travelDistance);
 
-            if (player.onLift) {
+            if (player.lift == dynamicTile) {
                 if(dynamicTile.velocity.y < 0) {
                     player.position.y = dynamicTile.tile.y - player.height;
                 } else {
@@ -27,7 +27,7 @@ export class DynamicTileHandler {
                 player.liftVelocity = dynamicTile.velocity;
 
                 if(player.position.x > dynamicTile.tile.x + dynamicTile.tile.width || player.position.x + player.width < dynamicTile.tile.x) {
-                    player.onLift = false;
+                    player.lift = null;
                     player.liftVelocity = new Vector(0, 0);
                 }
             }

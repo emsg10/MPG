@@ -127,12 +127,12 @@ export class Game {
 						this.dynamicTileHandler.update(this.player, delta);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
-						this.projectileHandler.update(delta, this.level.tiles, this.player);
+						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
 						this.UI.update(this.player.hp, this.player.mana);
 						this.camera.update(this.player.position);
 					} else {
 						this.animationHandler.update(delta);
-						this.projectileHandler.update(delta, this.level.tiles, this.player);
+						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
 					}
 				}
 				this.particleHandler.update(delta, this.enemyHandler.enemies);
@@ -346,7 +346,9 @@ export class Game {
 			}
 		}
 
-		this.dynamicTileHandler.dynamicTiles = [new DynamicTile(new Tile(400, 1100, 100, 20, 7), new Vector(0, 0.2), true, 200)];
+		this.dynamicTileHandler.dynamicTiles = [];
+		this.dynamicTileHandler.dynamicTiles.push(new DynamicTile(new Tile(400, 1100, 100, 20, 7), new Vector(0, 0.2), true, 200));
+		this.dynamicTileHandler.dynamicTiles.push(new DynamicTile(new Tile(3130, 600, 80, 20, 7), new Vector(0, 0.2), true, 500));
 
 		this.enemyHandler.enemies = enemies;
 		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1250), 50, 50, this.projectileHandler, this.animationHandler));

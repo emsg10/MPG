@@ -12,7 +12,8 @@ import {
     RotationAnimation,
     CollisionProjectile,
     ProjectileType,
-    ParticleProjectile
+    ParticleProjectile,
+    DynamicTile
 } from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
@@ -77,7 +78,7 @@ export class ProjectileHandler {
         return arrow;
     }
 
-    public createDeadArrow(position: Vector, inverse: boolean, velocity: Vector) {
+    public createDeadArrow(position: Vector, inverse: boolean, velocity: Vector, push?: Vector) {
         let arrow: PhysicalProjectile;
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
         let collRect: Rectangle;
@@ -90,6 +91,10 @@ export class ProjectileHandler {
 
         let animation = this.animationHandler.createDeadArrow(rectangle, inverse, velocity);
         velocity.x = -velocity.x / 4;
+        if(push) {
+            velocity.x += push.x;
+            velocity.y += push.y;
+        }
         arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect);
         arrow.gravity = new Gravity(0.0003);
         arrow.drag = new Drag(0.0002);
@@ -222,12 +227,12 @@ export class ProjectileHandler {
         this.animationHandler.frozenArcher(area, inverse, color, onComplete);
     }
 
-    public update(delta: number, collidables: Rectangle[], player: Player) {
+    public update(delta: number, collidables: Rectangle[], player: Player, dynamicTiles: DynamicTile[]) {
         let removeProjectile: Projectile[] = [];
         let removeEnemyProjectile: Projectile[] = [];
 
         removeProjectile = this.updateFriendslyProjectiles(delta, collidables);
-        removeEnemyProjectile = this.updateEnemyProjectiles(delta, player, collidables);
+        removeEnemyProjectile = this.updateEnemyProjectiles(delta, player, collidables, dynamicTiles);
 
         for (let projectile of removeProjectile) {
             this.destroyProjectile(projectile, this.projectiles);
@@ -255,7 +260,7 @@ export class ProjectileHandler {
         return velocity;
     }
 
-    private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[]) {
+    private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[], dynamicTiles: DynamicTile[]) {
         let removeProjectiles: Projectile[] = [];
         let shieldCollidables: Rectangle[] = [];
         let playerCollisionArea = player.getCollisionArea();
@@ -264,17 +269,20 @@ export class ProjectileHandler {
 
         for (let projectile of this.enemyProjectiles) {
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, playerCollisionArea, shieldCollidables, removeProjectiles);
+            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, dynamicTiles, playerCollisionArea, shieldCollidables, removeProjectiles);
             removeProjectiles = this.checkStaticObjectCollisions(projectile, frameVelocity, collidables, removeProjectiles);
         }
 
         return removeProjectiles;
     }
 
-    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, playerCollisionArea: Rectangle, shieldCollidables: Rectangle[], removeProjectiles: Projectile[]) {
+    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, dynamicTiles: DynamicTile[], playerCollisionArea: Rectangle, shieldCollidables: Rectangle[], removeProjectiles: Projectile[]) {
         let collisionData: CollisionData;
         let shieldCollisionData: CollisionData;
+        let dynamicCollisionData: CollisionData = new CollisionData();
         let groundCollision: boolean;
+        let dynamicGroundCollision: boolean;
+        let liftVelocity: Vector;
         projectile.updateForces(delta);
 
         let velocity = player.getVelocity();
@@ -282,12 +290,26 @@ export class ProjectileHandler {
 
         collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
         shieldCollisionData = this.collisionDetection.checkProjectileCollisionY(shieldCollidables, projectile, deltaVelocity, false);
+        for(let dynamicTile of dynamicTiles) {  
+            let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
+            let colData = this.collisionDetection.checkProjectileCollisionY([dynamicTile.tile], projectile, deltaVelocity, false);
+
+            if(colData.collisionTimeY < dynamicCollisionData.collisionTimeY) {
+                dynamicCollisionData = colData;
+                liftVelocity = dynamicTile.velocity;
+            }
+        }
+
         projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
 
         groundCollision = shieldCollisionData.groundCollision;
+        dynamicGroundCollision = dynamicCollisionData.groundCollision;
 
         if (shieldCollisionData.groundCollision) {
             this.setShieldDamage(player, projectile);
+            removeProjectiles.push(projectile);
+        } else if(dynamicCollisionData.groundCollision) {
+            this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
             removeProjectiles.push(projectile);
         } else if (collisionData.groundCollision) {
             this.animationHandler.bloodAnimation_A(new Vector(projectile.collisionArea.x, projectile.collisionArea.y), 20);
@@ -298,6 +320,15 @@ export class ProjectileHandler {
         if (projectile.projectileType == ProjectileType.Arrow) {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, false);
             shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, false);
+            for(let dynamicTile of dynamicTiles) {  
+            let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
+            let colData = this.collisionDetection.checkProjectileCollisionX([dynamicTile.tile], projectile, deltaVelocity, false, false);
+
+            if(colData.collisionTimeX < dynamicCollisionData.collisionTimeX) {
+                dynamicCollisionData = colData;
+                liftVelocity = dynamicTile.velocity;
+            }
+        }
         } else {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, true);
             shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, true);
@@ -305,9 +336,12 @@ export class ProjectileHandler {
 
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
-        if (!groundCollision) {
+        if (!groundCollision || !dynamicGroundCollision) {
             if (shieldCollisionData.wallCollision) {
                 this.setShieldDamage(player, projectile);
+                removeProjectiles.push(projectile);
+            } else if(dynamicCollisionData.wallCollision) {
+                this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
                 removeProjectiles.push(projectile);
             } else if (collisionData.wallCollision) {
                 this.animationHandler.bloodAnimation_A(new Vector(projectile.area.x, projectile.area.y), 20);

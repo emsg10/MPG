@@ -139,7 +139,6 @@ export class CollisionDetection {
 		if (dynamicCollisionData.groundCollision) {
 			if (collisionData.collisionTimeY > dynamicCollisionData.collisionTimeY) {
 				collisionData = dynamicCollisionData;
-				collisionData.liftCollision = true;
 				frameVelocity.y = dynamicCollisionData.velocityY;
 			}
 		}
@@ -227,6 +226,9 @@ export class CollisionDetection {
 
 		if (this.aabbCheck(broadphasebox, dynamicTile.tile)) {
 			dynamicCollisionData = this.aabbCollisionY(characterCollisionArea, dynamicTile.tile, frameVelocity, dynamicCollisionData);
+			if(dynamicCollisionData.groundCollision) {
+				dynamicCollisionData.lift = dynamicTile;
+			}
 		}
 
 		return dynamicCollisionData;

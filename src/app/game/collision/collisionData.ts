@@ -1,3 +1,5 @@
+import { DynamicTile } from '../model';
+
 export class CollisionData {
 	normalX: number = 0;
 	normalY: number = 0;
@@ -8,6 +10,6 @@ export class CollisionData {
 	remainingTime: number = 0;
 	wallCollision: boolean = false;
 	groundCollision: boolean = false;
-	liftCollision: boolean = false;
+	lift: DynamicTile = null;
 	fallDeath: boolean = false;
 }

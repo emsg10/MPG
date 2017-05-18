@@ -29,6 +29,8 @@ export class Loader {
             this.assetsLoader.getSimpleParticleFragmentShader(),
             this.assetsLoader.getDynamicVertexShader(),
             this.assetsLoader.getDynamicFragmentShader(),
+            this.assetsLoader.getColorVertexShader(),
+            this.assetsLoader.getColorFragmentShader(),
             this.assetsLoader.getTileTexture(),
             this.assetsLoader.getParticleTexture(),
             this.assetsLoader.getGenericParticleTexture(),
@@ -42,11 +44,13 @@ export class Loader {
             this.asset.simpleParticleFragmentShader = data[5] as string;
             this.asset.dynamicVertexShader = data[6] as string;
             this.asset.dynamicFragmentShader = data[7] as string;
+            this.asset.colorVertexShader = data[8] as string;
+            this.asset.colorFragmentShader = data[9] as string;
 
-            this.asset.texture = data[8] as HTMLImageElement;
-            this.asset.particleTexture = data[9] as HTMLImageElement;
-            this.asset.genericParticleTexture = data[10] as HTMLImageElement;
-            this.level = data[11];
+            this.asset.texture = data[10] as HTMLImageElement;
+            this.asset.particleTexture = data[11] as HTMLImageElement;
+            this.asset.genericParticleTexture = data[12] as HTMLImageElement;
+            this.level = data[13];
 
             this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
             this.start = document.getElementById("start");

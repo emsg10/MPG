@@ -99,6 +99,24 @@ export class TextureMapper {
 	private texture156 = new Rectangle(768, 1024, 128, 128);
 	private texture157 = new Rectangle(896, 1024, 128, 128);
 
+	private texture160 = new Rectangle(1056, 1248, 32, 64);
+	private texture161 = new Rectangle(1088, 1248, 32, 64);
+
+	private texture162 = new Rectangle(992, 1248, 32, 64);
+	private texture163 = new Rectangle(1024, 1248, 32, 64);
+	
+	private texture165 = new Rectangle(1152, 1248, 32, 64);
+	private texture166 = new Rectangle(1184, 1248, 32, 64);
+	private texture167 = new Rectangle(1216, 1248, 32, 64);
+	private texture168 = new Rectangle(1280, 1248, 32, 64);
+	private texture169 = new Rectangle(1312, 1248, 32, 64);
+
+	private texture170 = new Rectangle(1344, 1248, 32, 64);
+	private texture171 = new Rectangle(1376, 1248, 32, 64);
+	private texture172 = new Rectangle(1408, 1248, 32, 64);
+	private texture173 = new Rectangle(1472, 1248, 32, 64);
+	private texture174 = new Rectangle(1504, 1248, 32, 64);
+
 	private texture200 = new Rectangle(28, 293, 28, 26);
 	private texture201 = new Rectangle(56, 293, 28, 26);
 	private texture202 = new Rectangle(84, 293, 28, 26);
@@ -331,6 +349,24 @@ export class TextureMapper {
 			case 155: return this.texture155;
 			case 156: return this.texture156;
 			case 157: return this.texture157;
+
+			case 160: return this.texture160;
+			case 161: return this.texture161;
+
+			case 162: return this.texture162;
+			case 163: return this.texture163;
+
+			case 165: return this.texture165;
+			case 166: return this.texture166;
+			case 167: return this.texture167;
+			case 168: return this.texture168;
+			case 169: return this.texture169;
+
+			case 170: return this.texture170;
+			case 171: return this.texture171;
+			case 172: return this.texture172;
+			case 173: return this.texture173;
+			case 174: return this.texture174;
 
 			case 200: return this.texture200;
 			case 201: return this.texture201;

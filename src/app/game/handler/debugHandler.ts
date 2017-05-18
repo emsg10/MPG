@@ -28,7 +28,6 @@ export class DebugHandler {
             renderCall.vertecies = this.renderHelper.getVertecies(rect.x - camera.x, rect.y - camera.y, rect.width, rect.height, renderCall.vertecies);
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 1);
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-            renderCall.color = this.renderHelper.getColor(renderCall.color, null);
 		}
         
         return renderCall;

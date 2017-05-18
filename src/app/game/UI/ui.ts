@@ -40,7 +40,6 @@ export class UI {
             renderCall.vertecies = this.renderHelper.getVertecies(bar.x, bar.y, bar.width, bar.height, renderCall.vertecies);
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, bar.textureNumber);
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-            renderCall.color = this.renderHelper.getColor(renderCall.color, null);
         }
 
         return renderCall;

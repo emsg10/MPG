@@ -263,7 +263,7 @@ export class ProjectileHandler {
     private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[], dynamicTiles: DynamicTile[]) {
         let removeProjectiles: Projectile[] = [];
         let shieldCollidables: Rectangle[] = [];
-        let playerCollisionArea = player.getCollisionArea();
+        let playerCollisionArea = player.getProjectileCollisionArea();
 
         shieldCollidables.push(...player.getShieldCollidables());
 
@@ -362,7 +362,7 @@ export class ProjectileHandler {
     private setDamageAnimation(player: Player, projectile: Projectile) {
         if (projectile.projectileType == ProjectileType.Arrow) {
             this.createStickyArrowAnimation(player, projectile);
-            player.takeDamage(20);
+            //player.takeDamage(20);
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             player.takeDamage(projectile.damage);
         }

@@ -50,6 +50,16 @@ export class AssetsLoader {
       .catch(this.handleError);
   }
 
+  public getColorVertexShader() {
+    return this.httpGet(this.shaderUrl + "/colorVertexShader.c")
+      .catch(this.handleError);
+  }
+
+  public getColorFragmentShader() {
+    return this.httpGet(this.shaderUrl + "/colorFragmentShader.c")
+      .catch(this.handleError);
+  }
+
   public getTexture(url: string) {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();
@@ -79,7 +89,7 @@ export class AssetsLoader {
       .catch(this.handleError);
   }
 
-  private httpGet(url: string) : Observable<string>{
+  private httpGet(url: string): Observable<string> {
     return Observable.create((observer: Observer<string>) => {
       let xmlHttp = new XMLHttpRequest();
       xmlHttp.onreadystatechange = () => {

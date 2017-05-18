@@ -39,7 +39,6 @@ export class DynamicTileHandler {
             renderCall.vertecies = this.renderHelper.getVertecies(dynamicTile.tile.x - camera.x, dynamicTile.tile.y - camera.y, dynamicTile.tile.width, dynamicTile.tile.height, renderCall.vertecies);
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, dynamicTile.tile.tileTextureType);
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-            renderCall.color = this.renderHelper.getColor(renderCall.color, null);
         }
     }
 

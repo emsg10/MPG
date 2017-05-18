@@ -1,5 +1,5 @@
 import { Vector, Sprite, Rectangle, Animation, SpellType, FrameAnimation, RotationAnimation, StaticRotationAnimation, Projectile } from '../model'
-import { RenderCall, DynamicRenderCall, RenderHelper, Matrix3, TextureMapper } from '../render';
+import { RenderCall, DynamicRenderCall, RenderHelper, Matrix3, TextureMapper, ColorRenderCall } from '../render';
 import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
 import { Player } from '../character/player';
@@ -533,7 +533,7 @@ export class AnimationHandler {
         }
     }
 
-    public createRenderCall(renderCall: RenderCall, camera: Vector) {
+    public createRenderCall(renderCall: ColorRenderCall, camera: Vector) {
 
         for (let animation of this.animations) {
             if (animation.delay <= 0) {

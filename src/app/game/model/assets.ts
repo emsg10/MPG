@@ -7,6 +7,8 @@ export class Asset {
 	public simpleParticleFragmentShader: string;
 	public dynamicVertexShader: string;
 	public dynamicFragmentShader: string;
+	public colorVertexShader: string;
+	public colorFragmentShader: string;
 	public texture: HTMLImageElement;
 	public particleTexture: HTMLImageElement;
 	public genericParticleTexture: HTMLImageElement;

@@ -3,7 +3,7 @@ import { Enemy } from '../character/enemy';
 import { Player } from '../character/player';
 import { Swordman } from '../character/swordman';
 import { Archer } from '../character/archer';
-import { RenderCall, RenderHelper } from '../render';
+import { RenderCall, RenderHelper, ColorRenderCall } from '../render';
 import { Context } from '../context';
 import { ProjectileHandler } from './projectileHandler';
 import { AnimationHandler } from './animationHandler';
@@ -38,7 +38,7 @@ export class EnemyHandler {
         }
     }
 
-    createRenderCall(renderCalls: RenderCall[], renderCall: RenderCall, camera: Vector) {
+    createRenderCall(renderCall: ColorRenderCall, camera: Vector) {
         for (let enemy of this.enemies) {
             if (enemy.inverse) {
                 renderCall.vertecies = this.renderHelper.getInverseVertecies(enemy.position.x - camera.x, enemy.position.y - camera.y, enemy.width, enemy.height, renderCall.vertecies);
@@ -50,7 +50,7 @@ export class EnemyHandler {
             renderCall.color = this.renderHelper.getColor(renderCall.color, enemy.color);
         }
 
-        return renderCalls;
+        return renderCall;
     }
 
     remove(enemy: Enemy) {

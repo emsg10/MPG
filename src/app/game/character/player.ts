@@ -1,6 +1,5 @@
 import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile } from '../model';
-import { RenderCall } from '../render/renderCall';
-import { RenderHelper } from '../render/renderHelper';
+import { RenderCall, ColorRenderCall, RenderHelper } from '../render';
 import { Context } from '../';
 import { CollisionData } from '../collision';
 import { CollisionDetection } from '../collision/collisionDetection';
@@ -32,19 +31,33 @@ export class Player extends Character{
 	private externalDragForce: number = 0.0005;
 	private dragForce: Drag = new Drag(this.drag);
 	private externalDrag = new Drag(this.externalDragForce);
-	private idleAnimation: Animation = new Animation();
+	
 	private stunnedAnimation: Animation = new Animation();
 	private stunnedEffect: Animation = new Animation();
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
 	private jumping: boolean = false;
+	private inJump = false;
 	private renderHelper = RenderHelper.getInstance();
 	private context: Context;
-	private runningAnimation = new Animation();
 	private manaRegen = 1;
 	private maxMana: number;
 	private externalVelocity: Vector = new Vector(0, 0);
-	
+
+	private lowerAnimation: Animation;
+	private upperAnimation: Animation;
+
+	private lowerIdleAnimation: Animation = new Animation();
+	private upperIdleAnimation: Animation = new Animation();
+
+	private lowerJumpAnimation = new Animation();
+	private upperJumpAnimation = new Animation();
+
+	private lowerRunningAnimation = new Animation();
+	private upperRunningAnimation = new Animation();
+
+	private lowerStillAnimation = new Animation();
+	private upperStillAnimation = new Animation();
 
 	private debugHandler = DebugHandler.getInstance();
 
@@ -55,28 +68,38 @@ export class Player extends Character{
 		this.animationHandler = animationHandler;
 		this.particleHandler = particleHandler;
 		this.spellHandler = new SpellHandler(this.animationHandler, this.projectileHandler, this.particleHandler, this);
-		this.currentAnimation = this.idleAnimation;
-		
+
+		this.lowerIdleAnimation.textureNumber.push(162);
+		this.upperIdleAnimation.textureNumber.push(163);
+	
+		this.upperRunningAnimation.textureNumber.push(170);
+		this.upperRunningAnimation.textureNumber.push(171);
+		this.upperRunningAnimation.textureNumber.push(172);
+        this.upperRunningAnimation.textureNumber.push(170);
+		this.upperRunningAnimation.textureNumber.push(173);
+		this.upperRunningAnimation.textureNumber.push(174);
+        this.upperRunningAnimation.timeToChange = 150;
+
+		this.lowerRunningAnimation.textureNumber.push(165);
+		this.lowerRunningAnimation.textureNumber.push(166);
+		this.lowerRunningAnimation.textureNumber.push(167);
+		this.lowerRunningAnimation.textureNumber.push(165);
+		this.lowerRunningAnimation.textureNumber.push(168);
+		this.lowerRunningAnimation.textureNumber.push(169);
+		this.lowerRunningAnimation.timeToChange = 150;
+
+		this.lowerJumpAnimation.textureNumber.push(160);
+		this.upperJumpAnimation.textureNumber.push(161);
+
+		this.lowerStillAnimation.textureNumber.push(165);
+		this.upperStillAnimation.textureNumber.push(170);
+
 		this.hp = hp;
 		this.mana = mana;
 		this.maxMana = this.mana;
 
-		this.idleAnimation.textureNumber.push(203);
-
-		this.runningAnimation.textureNumber.push(200);
-		this.runningAnimation.textureNumber.push(201);
-		this.runningAnimation.textureNumber.push(202);
-
-		this.stunnedAnimation.textureNumber.push(296);
-		this.stunnedAnimation.textureNumber.push(294);
-		this.stunnedAnimation.textureNumber.push(296);
-		this.stunnedAnimation.textureNumber.push(295);
-		this.stunnedAnimation.timeToChange = 200;
-
-        this.stunnedEffect.textureNumber.push(297);
-        this.stunnedEffect.textureNumber.push(298);
-        this.stunnedEffect.textureNumber.push(299);
-		this.stunnedEffect.timeToChange = 200;
+		this.lowerAnimation = this.lowerIdleAnimation;
+		this.upperAnimation = this.upperIdleAnimation;
 
 		
 	}
@@ -117,7 +140,7 @@ export class Player extends Character{
 		return this.velocity.x == 0;
 	}
 
-	public createRenderCall(renderCall: RenderCall, camera: Vector) {
+	public createRenderCall(renderCall: RenderCall, colorRenderCall: ColorRenderCall, camera: Vector) {
 
 		let call = new RenderCall();
 		let x: number = this.position.x - camera.x;
@@ -145,15 +168,14 @@ export class Player extends Character{
 			x1, y2
 		];
 
-		textureNumber = this.currentAnimation.getCurrentFrame();
+		textureNumber = this.upperAnimation.getCurrentFrame();
 
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies)
-		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
+		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
 
 		if(this.spellHandler.castingShield) {
-			renderCall = this.renderShield(renderCall, camera);
+			colorRenderCall = this.renderShield(colorRenderCall, camera);
 			this.spellHandler.castingShield = false;
 		}
 
@@ -161,7 +183,45 @@ export class Player extends Character{
 			renderCall = this.renderStunnedEffect(renderCall, camera);
 		}
 
+		this.renderLower(renderCall, camera);
+
 		return renderCall;
+	}
+
+	public renderLower(renderCall: RenderCall, camera: Vector) {
+		
+		let call = new RenderCall();
+		let x: number = this.position.x - camera.x;
+		let x1: number;
+		let x2: number;
+		let textureNumber: number;
+
+		if (this.inverse) {
+			x2 = x;
+			x1 = x + (this.width);
+		} else {
+			x2 = x + (this.width);
+			x1 = x;
+		}
+
+		let y1 = this.position.y - camera.y;
+		let y2 = this.position.y + (this.height) - camera.y;
+
+		call.vertecies = [
+			x1, y1,
+			x2, y2,
+			x2, y1,
+			x1, y1,
+			x2, y2,
+			x1, y2
+		];
+
+		textureNumber = this.lowerAnimation.getCurrentFrame();
+
+		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
+		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
+
 	}
 
 	public update(tiles: Tile[], dynamicTiles: DynamicTile[], delta: number) {
@@ -193,13 +253,15 @@ export class Player extends Character{
 
 		if (collisionData.groundCollision) {
 			this.velocity.y = 0;
-
+			
 			if (collisionData.normalY == -1) {
+				this.inJump = false;
 				if (this.jumping) {
 					this.liftVelocity = new Vector(0, 0)
 					this.lift = null;
 					this.idleTime = 0;
 					this.velocity.y = this.jumpSpeed;
+					this.inJump = true;
 				}
 			}
 		}
@@ -211,7 +273,6 @@ export class Player extends Character{
 
 		if (this.velocity.x != 0 || collisionData.wallCollision) {
 			this.idleTime = 0;
-			this.runningAnimation.next(delta);
 		} else {
 			this.idleTime += delta;
 		}
@@ -235,11 +296,26 @@ export class Player extends Character{
 			}
 		} else if(this.spellHandler.currentCast) {
 			this.currentAnimation = this.spellHandler.currentCast.currentAnimation;
+		} else if(this.inJump) {
+			this.lowerAnimation = this.lowerJumpAnimation;
+			this.upperAnimation = this.upperJumpAnimation;
 		} else if (this.idleTime >= this.idleTimeChange) {
-			this.currentAnimation = this.idleAnimation;
+			this.lowerAnimation = this.lowerIdleAnimation;
+			this.upperAnimation = this.upperIdleAnimation;
+		} else if(this.moving || this.velocity.x != 0) {
+			this.lowerRunningAnimation.frameIndex = this.upperRunningAnimation.frameIndex;
+			this.lowerRunningAnimation.lastChange = this.upperRunningAnimation.lastChange;
+
+			this.upperAnimation = this.upperRunningAnimation;
+			this.lowerAnimation = this.lowerRunningAnimation;
+
 		} else {
-			this.currentAnimation = this.runningAnimation;
+			this.upperAnimation = this.upperStillAnimation;
+			this.lowerAnimation = this.lowerStillAnimation;
 		}
+
+		this.lowerAnimation.next(delta);
+		this.upperAnimation.next(delta);
 		
 		this.jumping = false;
 		this.moving = false;
@@ -261,13 +337,13 @@ export class Player extends Character{
 	}
 
 	public getCollisionArea() {
-		var collisionArea = new Rectangle(this.position.x, this.position.y, 43, 42);
+		var collisionArea = new Rectangle(this.position.x + 8, this.position.y + 14, 32, 68);
 
 		return collisionArea;
 	}
 
 	public getProjectileCollisionArea() {
-		var collisionArea = new Rectangle(this.position.x + 10, this.position.y + 5, 43 - 10, 42 - 5);
+		var collisionArea = new Rectangle(this.position.x + 14, this.position.y + 14, 20, 72);
 
 		return collisionArea;
 	}
@@ -315,7 +391,7 @@ export class Player extends Character{
 		this.stunnedAnimation.reset();
 	}
 
-	private renderShield(renderCall: RenderCall, camera: Vector) {
+	private renderShield(renderCall: ColorRenderCall, camera: Vector) {
 
 		if(this.inverse) {
 			renderCall.vertecies =  this.renderHelper.getInverseVertecies(this.position.x - 15 - camera.x, this.position.y - camera.y - 20, 60, 80, renderCall.vertecies);
@@ -336,7 +412,6 @@ export class Player extends Character{
 			renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x - camera.x + 13, this.position.y - camera.y - 8, 32, 32, renderCall.vertecies);
 		}
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, this.stunnedEffect.getCurrentFrame());
-		renderCall.color = this.renderHelper.getColor(renderCall.color, null);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 
         return renderCall;

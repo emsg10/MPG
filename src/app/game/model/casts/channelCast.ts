@@ -4,6 +4,7 @@ export class ChannelCast extends Cast {
 
     public channeling: boolean = false;
     public currentValue: number;
+    public lowerCurrentAnimation: Animation;
     private onChannel: () => void;
     private onCancel: () => void;
     private defaultValue: number;
@@ -11,11 +12,12 @@ export class ChannelCast extends Cast {
     private growth: number;
     private delay: number;
 
-    constructor(channelAnimation: Animation, onChannel: () => void, onCancel: () => void, defaultValue: number, maxValue: number, growth: number) {
+    constructor(channelAnimation: Animation, lowerChannelAnimation: Animation, onChannel: () => void, onCancel: () => void, defaultValue: number, maxValue: number, growth: number) {
         super();
         this.onChannel = onChannel;
         this.onCancel = onCancel;
         this.currentAnimation = channelAnimation;
+        this.lowerCurrentAnimation = lowerChannelAnimation;
         this.defaultValue = defaultValue;
         this.maxValue = maxValue;
         this.growth = growth;

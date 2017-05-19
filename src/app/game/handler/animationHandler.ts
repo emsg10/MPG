@@ -313,9 +313,9 @@ export class AnimationHandler {
     }
 
     public fallDeath(position: Vector) {
-        this.bloodAnimation_A(new Vector(position.x, position.y), 50);
-        this.bloodAnimation_B_Right(new Vector(position.x + 5, position.y - 15), 100);
-        this.bloodAnimation_B_Left(new Vector(position.x - 55, position.y - 15), 100);
+        this.bloodAnimation_A(new Vector(position.x, position.y + 20), 50);
+        this.bloodAnimation_B_Right(new Vector(position.x + 5, position.y + 5), 100);
+        this.bloodAnimation_B_Left(new Vector(position.x - 55, position.y + 5), 100);
     }
 
     public fireDeathSwordman(area: Rectangle, inverse: boolean) {

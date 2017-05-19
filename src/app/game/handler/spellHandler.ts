@@ -7,8 +7,6 @@ import { Player } from '../character/player';
 export class SpellHandler {
 
     public currentCast: Cast;
-    public shieldCollidables: Rectangle[] = [];
-    public castingShield = false;
 
     private animationHandler: AnimationHandler;
     private projectileHandler: ProjectileHandler;
@@ -40,39 +38,14 @@ export class SpellHandler {
             if (this.currentCast.done) {
                 this.currentCast.cancel();
                 this.currentCast = null;
+                this.currentCast = null;
             }
         } else {
-            if (!this.castingShield) {
-                this.player.regenMana();
-            }
+           this.player.regenMana();
         }
 
         if (this.channelMagicCast.currentValue >= 100) {
             this.particleHandler.createMagicEffect(this.player.position, this.player.inverse);
-        }
-
-        if (this.castingShield) {
-            this.shieldCollidables = [];
-            let r = 35;
-            let posx = this.player.position.x + 20;
-            let posy = this.player.position.y + 13;
-
-            for (let i = 0; i < 10; i++) {
-                let angle: number;
-                let x: number;
-                if (this.player.inverse) {
-                    angle = Math.PI * (i * 0.1 + 0.6);
-                    x = posx - 5 + (30 * Math.cos(angle));
-                } else {
-                    angle = Math.PI * (i * 0.1 - 0.5);
-                    x = posx + (30 * Math.cos(angle));
-                }
-
-                let y = posy + (35 * Math.sin(angle));
-                this.shieldCollidables.push(new Rectangle(x, y, 10, 10));
-            }
-
-            this.particleHandler.createShieldEffect(this.player.getCalculatedPos(this.player.position, 0), this.player.inverse);
         }
 
         this.updateBreak(delta);
@@ -90,9 +63,6 @@ export class SpellHandler {
                 break;
 
             case SpellType.frostBlast: this.castFrostBlast();
-                break;
-
-            case SpellType.shield: this.castShield();
                 break;
 
             case SpellType.channelmagic: this.castChannelMagic();
@@ -138,9 +108,6 @@ export class SpellHandler {
                 this.currentCast = this.fireBlastCast;
             } else {
                 this.break = 500;
-                if(this.castingShield) {
-                    this.player.shieldExplosion();   
-                }
             }
         }
     }
@@ -152,28 +119,14 @@ export class SpellHandler {
                 this.currentCast = this.frostBlastCast;
             } else {
                 this.break = 500;
-                if(this.castingShield) {
-                    this.player.shieldExplosion();   
-                }
             }
-        }
-    }
-
-    private castShield() {
-        if (this.player.useMana(0.1)) {
-            if(this.break == 0) {
-                this.castingShield = true;
-            }
-        } else {
-            this.break = 500;
-            this.player.shieldExplosion();
         }
     }
 
     private initCasts() {
 
         let fireblastAnimation = new Animation();
-        fireblastAnimation.textureNumber.push(249);
+        fireblastAnimation.textureNumber.push(178);
         fireblastAnimation.repetitions = 1;
 
         let onFireCast = (animation: Animation) => {
@@ -185,7 +138,7 @@ export class SpellHandler {
         this.fireBlastCast = new InstantCast(fireblastAnimation, onFireCast);
 
         let frostBlastAnimation = new Animation();
-        frostBlastAnimation.textureNumber.push(249);
+        frostBlastAnimation.textureNumber.push(178);
         frostBlastAnimation.repetitions = 1;
 
         let onFrostCast = (animation: Animation) => {
@@ -197,7 +150,10 @@ export class SpellHandler {
         this.frostBlastCast = new InstantCast(frostBlastAnimation, onFrostCast);
 
         let channelAnimation = new Animation();
-        channelAnimation.textureNumber.push(204);
+        channelAnimation.textureNumber.push(175);
+
+        let channelLowerAnimation = new Animation();
+        channelLowerAnimation.textureNumber.push(162);
 
         let onChannelMagic = () => {
             this.particleHandler.createChannelMagic(this.player.position, this.player.inverse);
@@ -206,15 +162,15 @@ export class SpellHandler {
         let onCancelChannelMagic = () => {
         }
 
-        this.channelMagicCast = new ChannelCast(channelAnimation, onChannelMagic, onCancelChannelMagic, 40, 100, 0.03);
+        this.channelMagicCast = new ChannelCast(channelAnimation, channelLowerAnimation ,onChannelMagic, onCancelChannelMagic, 40, 100, 0.03);
 
         let castAnimation = new Animation();
-        castAnimation.textureNumber.push(205);
-        castAnimation.textureNumber.push(205);
-        castAnimation.textureNumber.push(208);
-        castAnimation.textureNumber.push(208);
-        castAnimation.repetitions = 4;
-        castAnimation.timeToChange = 120;
+        castAnimation.textureNumber.push(170);
+        castAnimation.textureNumber.push(176);
+        castAnimation.textureNumber.push(177);
+        castAnimation.textureNumber.push(176);
+        castAnimation.repetitions = 3;
+        castAnimation.timeToChange = 250;
 
         let onFireBallUpdate = (area: Rectangle, inverse: boolean, offsetX: number) => {
             this.particleHandler.createFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
@@ -227,7 +183,7 @@ export class SpellHandler {
             return animation;
         };
 
-        this.fireBallCast = new SpellCast(castAnimation, 3, onFireBallCast);
+        this.fireBallCast = new SpellCast(castAnimation, 2, onFireBallCast);
     }
 
 }

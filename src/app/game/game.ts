@@ -43,7 +43,6 @@ export class Game {
 	private channelMagicKeyPress: boolean;
 	private frostKeyPress: boolean;
 	private fireKeyPress: boolean;
-	private shieldKeyPress: boolean;
 	private started: boolean = false;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
@@ -218,10 +217,6 @@ export class Game {
 				this.player.jump();
 			}
 
-			if (this.shieldKeyPress) {
-				this.player.cast(SpellType.shield);
-			}
-
 			if (this.frostKeyPress) {
 				this.player.cast(SpellType.frostBlast);
 			} else if (this.fireKeyPress) {
@@ -262,9 +257,6 @@ export class Game {
 				case 'Numpad4':
 					this.fireKeyPress = true;
 					break;
-				case 'Numpad5':
-					this.shieldKeyPress = true;
-					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = true;
 					break;
@@ -304,9 +296,6 @@ export class Game {
 					break;
 				case 'Numpad4':
 					this.fireKeyPress = false;
-					break;
-				case 'Numpad5':
-					this.shieldKeyPress = false;
 					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = false;

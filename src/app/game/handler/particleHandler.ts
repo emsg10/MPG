@@ -33,8 +33,8 @@ export class ParticleHandler {
 
     private flameParticleSettings: number[] = [
         2, 5,
-        600, 800,
-        0.3, 0.4,
+        500, 700,
+        0.4, 0.5,
         -0.05, -0.03,
         0.1
     ];
@@ -190,53 +190,17 @@ export class ParticleHandler {
 
     public createChannelMagic(position: Vector, inverse: boolean) {
 
-        let positionOffset = new Vector(position.x, position.y + 25);
-
-        if (inverse) {
-            positionOffset.x += 20;
-        } else {
-            positionOffset.x += 25;
-        }
+        let positionOffset = new Vector(position.x + 25, position.y + 45);
 
         let effectParticles = this.createCenterCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
 
         this.fireEffectParticles.push(...effectParticles);
     }
 
-    public createShieldExplosionEffect(position: Vector, inverse: boolean) {
-        position.y = position.y - 5;
-
-        let settings: number[] = [];
-        if (inverse) {
-            settings = this.invertedShieldExplosionEffectSettings;
-        } else {
-            settings = this.shieldExplosionEffectSettings;
-        }
-
-        let effectParticles = this.createCircleParticles(position, 40, 40, false, settings, 100);
-
-        this.shieldEffectParticles.push(...effectParticles);
-    }
-
-    public createShieldEffect(position: Vector, inverse: boolean) {
-        position.y = position.y - 5;
-
-        let settings: number[] = [];
-        if (inverse) {
-            settings = this.invertedShieldEffectSettings;
-        } else {
-            settings = this.shieldEffectSettings;
-        }
-
-        let effectParticles = this.createCenterCircleParticles(position, 20, 20, settings, false, 0, 0, 100, 0, 2);
-
-        this.shieldEffectParticles.push(...effectParticles);
-    }
-
     public createMagicEffect(position: Vector, inverse: boolean) {
 
         let offSetX = this.rand(-10, 10) + 22;
-        let offSetY = this.rand(-5, 10) + 25;
+        let offSetY = this.rand(-5, 10) + 45;
         let positionOffset = new Vector(position.x + offSetX, position.y + offSetY);
 
         let effectParticles = this.createParticles(positionOffset, inverse, this.magicEffectSettings, 1);
@@ -247,12 +211,12 @@ export class ParticleHandler {
     public createFrostBlast(position: Vector, inverse: boolean) {
 
         let positionOffset = new Vector(position.x, position.y);
-        positionOffset.y += 25;
+        positionOffset.y += 45;
 
         if (inverse) {
-            positionOffset.x += 20;
+            positionOffset.x += 10;
         } else {
-            positionOffset.x += 25;
+            positionOffset.x += 40;
         }
 
         let particles = this.createParticles(positionOffset, inverse, this.frostParticleSettings, 10);
@@ -265,12 +229,12 @@ export class ParticleHandler {
     public createFireBlast(position: Vector, inverse: boolean) {
 
         let positionOffset = new Vector(position.x, position.y);
-        positionOffset.y += 25;
+        positionOffset.y += 45;
 
         if (inverse) {
-            positionOffset.x += 20;
+            positionOffset.x += 10;
         } else {
-            positionOffset.x += 25;
+            positionOffset.x += 40;
         }
 
         let particles = this.createParticles(positionOffset, inverse, this.flameParticleSettings, 10);

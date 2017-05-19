@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile, ChannelCast } from '../model';
 import { RenderCall, ColorRenderCall, RenderHelper } from '../render';
 import { Context } from '../';
 import { CollisionData } from '../collision';
@@ -174,11 +174,6 @@ export class Player extends Character{
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
 
-		if(this.spellHandler.castingShield) {
-			colorRenderCall = this.renderShield(colorRenderCall, camera);
-			this.spellHandler.castingShield = false;
-		}
-
 		if(this.stunned) {
 			renderCall = this.renderStunnedEffect(renderCall, camera);
 		}
@@ -287,6 +282,14 @@ export class Player extends Character{
 
 		this.spellHandler.update(delta);
 
+		if(this.inJump) {
+			this.lowerAnimation = this.lowerJumpAnimation;
+		} else if(this.moving || this.velocity.x != 0) {
+			this.lowerAnimation = this.lowerRunningAnimation;
+		} else  {
+			this.lowerAnimation = this.lowerStillAnimation;
+		}
+
 		if(this.stunned) {
 			this.stunnedAnimation.next(delta);
 			this.stunnedEffect.next(delta);
@@ -295,16 +298,19 @@ export class Player extends Character{
 				this.stunned = false;
 			}
 		} else if(this.spellHandler.currentCast) {
-			this.currentAnimation = this.spellHandler.currentCast.currentAnimation;
+			if(this.spellHandler.currentCast instanceof ChannelCast) {
+				this.lowerAnimation = this.spellHandler.currentCast.lowerCurrentAnimation;
+			}
+
+			this.upperAnimation = this.spellHandler.currentCast.currentAnimation;
 		} else if(this.inJump) {
-			this.lowerAnimation = this.lowerJumpAnimation;
 			this.upperAnimation = this.upperJumpAnimation;
 		} else if (this.idleTime >= this.idleTimeChange) {
 			this.lowerAnimation = this.lowerIdleAnimation;
 			this.upperAnimation = this.upperIdleAnimation;
 		} else if(this.moving || this.velocity.x != 0) {
-			this.lowerRunningAnimation.frameIndex = this.upperRunningAnimation.frameIndex;
-			this.lowerRunningAnimation.lastChange = this.upperRunningAnimation.lastChange;
+			this.upperRunningAnimation.frameIndex = this.lowerRunningAnimation.frameIndex;
+			this.upperRunningAnimation.lastChange = this.lowerRunningAnimation.lastChange;
 
 			this.upperAnimation = this.upperRunningAnimation;
 			this.lowerAnimation = this.lowerRunningAnimation;
@@ -348,27 +354,8 @@ export class Player extends Character{
 		return collisionArea;
 	}
 
-	public getShieldCollidables() {
-		if(this.spellHandler.castingShield) {
-			return this.spellHandler.shieldCollidables;
-		} else {
-			return [];
-		}
-		
-	}
-
-	public shieldExplosion() {
-		this.particleHandler.createShieldExplosionEffect(this.getCalculatedPos(this.position, 0), this.inverse);
-		this.stun();
-		if(this.inverse) {
-			this.externalVelocity.x += 0.7;
-		} else {
-			this.externalVelocity.x -= 0.7;
-		}
-	}
-
 	public getCalculatedPos(position: Vector, size: number) {
-        return new Vector(this.calcPos(position.x, size, 22), this.calcPos(position.y, size, 25))
+        return new Vector(this.calcPos(position.x, size, 25), this.calcPos(position.y, size, 43))
     }
 
     public calcPos(value: number, size: number, offset: number) {
@@ -389,20 +376,6 @@ export class Player extends Character{
 		this.stunned = true;
 		this.stunnedAnimation.repetitions = 20;
 		this.stunnedAnimation.reset();
-	}
-
-	private renderShield(renderCall: ColorRenderCall, camera: Vector) {
-
-		if(this.inverse) {
-			renderCall.vertecies =  this.renderHelper.getInverseVertecies(this.position.x - 15 - camera.x, this.position.y - camera.y - 20, 60, 80, renderCall.vertecies);
-		} else {
-			renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x - camera.x, this.position.y - camera.y - 20, 60, 80, renderCall.vertecies);
-		}
-		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 300);
-		renderCall.color = this.renderHelper.getColor(renderCall.color, this.renderHelper.getIndeciesAttribute([0, 0.2, 1, 0.8]));
-		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-
-        return renderCall;
 	}
 
 	private renderStunnedEffect(renderCall: RenderCall, camera: Vector) {

@@ -262,23 +262,19 @@ export class ProjectileHandler {
 
     private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[], dynamicTiles: DynamicTile[]) {
         let removeProjectiles: Projectile[] = [];
-        let shieldCollidables: Rectangle[] = [];
         let playerCollisionArea = player.getProjectileCollisionArea();
-
-        shieldCollidables.push(...player.getShieldCollidables());
 
         for (let projectile of this.enemyProjectiles) {
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, dynamicTiles, playerCollisionArea, shieldCollidables, removeProjectiles);
+            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, dynamicTiles, playerCollisionArea, removeProjectiles);
             removeProjectiles = this.checkStaticObjectCollisions(projectile, frameVelocity, collidables, removeProjectiles);
         }
 
         return removeProjectiles;
     }
 
-    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, dynamicTiles: DynamicTile[], playerCollisionArea: Rectangle, shieldCollidables: Rectangle[], removeProjectiles: Projectile[]) {
+    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, dynamicTiles: DynamicTile[], playerCollisionArea: Rectangle, removeProjectiles: Projectile[]) {
         let collisionData: CollisionData;
-        let shieldCollisionData: CollisionData;
         let dynamicCollisionData: CollisionData = new CollisionData();
         let groundCollision: boolean;
         let dynamicGroundCollision: boolean;
@@ -289,7 +285,6 @@ export class ProjectileHandler {
         let deltaVelocity = new Vector(frameVelocity.x - velocity.x * delta, frameVelocity.y - velocity.y * delta);
 
         collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
-        shieldCollisionData = this.collisionDetection.checkProjectileCollisionY(shieldCollidables, projectile, deltaVelocity, false);
         for(let dynamicTile of dynamicTiles) {  
             let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
             let colData = this.collisionDetection.checkProjectileCollisionY([dynamicTile.tile], projectile, deltaVelocity, false);
@@ -302,13 +297,9 @@ export class ProjectileHandler {
 
         projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
 
-        groundCollision = shieldCollisionData.groundCollision;
         dynamicGroundCollision = dynamicCollisionData.groundCollision;
 
-        if (shieldCollisionData.groundCollision) {
-            this.setShieldDamage(player, projectile);
-            removeProjectiles.push(projectile);
-        } else if(dynamicCollisionData.groundCollision) {
+        if(dynamicCollisionData.groundCollision) {
             this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
             removeProjectiles.push(projectile);
         } else if (collisionData.groundCollision) {
@@ -319,7 +310,6 @@ export class ProjectileHandler {
 
         if (projectile.projectileType == ProjectileType.Arrow) {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, false);
-            shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, false);
             for(let dynamicTile of dynamicTiles) {  
             let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
             let colData = this.collisionDetection.checkProjectileCollisionX([dynamicTile.tile], projectile, deltaVelocity, false, false);
@@ -331,16 +321,12 @@ export class ProjectileHandler {
         }
         } else {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, true);
-            shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, true);
         }
 
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
         if (!groundCollision || !dynamicGroundCollision) {
-            if (shieldCollisionData.wallCollision) {
-                this.setShieldDamage(player, projectile);
-                removeProjectiles.push(projectile);
-            } else if(dynamicCollisionData.wallCollision) {
+            if(dynamicCollisionData.wallCollision) {
                 this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
                 removeProjectiles.push(projectile);
             } else if (collisionData.wallCollision) {
@@ -365,21 +351,6 @@ export class ProjectileHandler {
             //player.takeDamage(20);
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             player.takeDamage(projectile.damage);
-        }
-    }
-
-    private setShieldDamage(player: Player, projectile: Projectile) {
-        if (projectile.projectileType == ProjectileType.Arrow) {
-            this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity);
-            if (!player.useMana(20)) {
-                player.mana = 0;
-                player.shieldExplosion();
-            }
-        } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
-            if (!player.useMana(projectile.damage)) {
-                player.mana = 0;
-                player.shieldExplosion();
-            };
         }
     }
 

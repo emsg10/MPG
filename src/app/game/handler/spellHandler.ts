@@ -170,7 +170,7 @@ export class SpellHandler {
         castAnimation.textureNumber.push(177);
         castAnimation.textureNumber.push(176);
         castAnimation.repetitions = 3;
-        castAnimation.timeToChange = 250;
+        castAnimation.timeToChange = 170;
 
         let onFireBallUpdate = (area: Rectangle, inverse: boolean, offsetX: number) => {
             this.particleHandler.createFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);

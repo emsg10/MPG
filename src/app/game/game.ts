@@ -21,6 +21,7 @@ import { Camera } from './camera';
 import { Archer } from './character/archer';
 import { DynamicRenderer } from './render/dynamicRenderer';
 import { UI } from './UI/ui';
+import { LoadHelper} from './service/loadHelper';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -31,10 +32,10 @@ export class Game {
 	private tileMap: TileMap;
 	private renderer: Renderer;
 	private colorRenderer: ColorRenderer;
-	private particelRenderer: ParticleRenderer;
 	private simpleParticleRenderer: SimpleParticleRenderer;
 	private dynamicRenderer: DynamicRenderer;
 	private collision: CollisionDetection = CollisionDetection.getInstance();
+	private loadHelper = LoadHelper.getInstance();
 	private player: Player;
 	private leftKeyPress: boolean;
 	private rightKeyPress: boolean;
@@ -63,33 +64,22 @@ export class Game {
 	private mouseRenderCall: RenderCall;
 	private levelCompleted = false;
 
-	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, levelData: LevelData) {
+	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: LevelData) {
 
 		this.startElement = startElement;
 		this.restartElement = restartElement;
-		this.levelData = levelData;
 
 		this.context = new Context(asset, this.canvasWidth, this.canvasHeight, canvas);
-		this.camera = new Camera(new Vector(0, 0), new Vector(this.canvasWidth, this.canvasHeight));
 		this.renderer = new Renderer(this.context);
 		this.colorRenderer = new ColorRenderer(this.context);
-		this.particelRenderer = new ParticleRenderer(this.context, this.particleHandler);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
-		this.dynamicTileHandler = new DynamicTileHandler();
+		this.levelData = level;
 
-		this.UI = new UI(100, 200);
-		this.particleHandler = new ParticleHandler(this.levelData.tiles);
-		this.animationHandler = new AnimationHandler(this.particleHandler);
-		this.projectileHandler = new ProjectileHandler(this.animationHandler);
-
-		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
-		this.tileMap = new TileMap();
-
-		this.textRenderer = new TextRenderer(this.context);
 		this.initKeyBindings();
-		this.initLoop();
 		this.reset(this.levelData, null);
+		this.initLoop();
+		
 	}
 
 	public reset(levelData: LevelData, mouseRenderCall: RenderCall) {
@@ -123,7 +113,7 @@ export class Game {
 					if (!this.player.dead && !this.levelCompleted) {
 						this.checkGoal();
 						this.checkKeys(delta);
-						this.collision.checkCoutOfBounds(this.player, this.levelData.gameSize);
+						this.collision.checkCoutOfBounds(this.player, new Vector(this.levelData.gameSize[0], this.levelData.gameSize[1]));
 						this.player.update(this.level.tiles, this.dynamicTileHandler.dynamicTiles, delta);
 						this.dynamicTileHandler.update(this.player, delta);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
@@ -167,7 +157,7 @@ export class Game {
 		//GAME
 		this.enemyHandler.createRenderCall(colorRenderCall, this.camera.position);
 		this.tileMap.createRenderCall(this.level.tiles, renderCall, this.camera.position);
-		this.tileMap.createGoalRenderCall(this.level.goal, renderCall, this.camera.position);
+		this.tileMap.createGoalRenderCall(this.level.end, renderCall, this.camera.position);
 
 		if (this.player.dead) {
 			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
@@ -197,12 +187,10 @@ export class Game {
 		this.colorRenderer.render(colorRenderCalls);
 		this.simpleParticleRenderer.render(simpleRenderCalls);
 		this.dynamicRenderer.render([dynamicRenderCall]);
-
-		//this.particelRenderer.render(this.particleHandler.getParticleRenderCalls());
 	}
 
 	private checkGoal() {
-		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.level.goal);
+		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.level.end);
 	}
 
 	private checkKeys(delta: number) {
@@ -321,40 +309,26 @@ export class Game {
 
 	private loadLevel(levelData: LevelData) {
 
-		let tiles: Tile[] = JSON.parse(JSON.stringify(levelData.tiles));
+		this.particleHandler = new ParticleHandler();
+		this.animationHandler = new AnimationHandler(this.particleHandler);
+		this.projectileHandler = new ProjectileHandler(this.animationHandler);
+		this.dynamicTileHandler = new DynamicTileHandler();
 
-		this.camera.position = new Vector(levelData.cameraPosition.x, levelData.cameraPosition.y);
-		this.level.tiles = tiles;
-		this.level.gameSize = levelData.gameSize;
-		this.level.playerPosition = new Vector(levelData.playerPosition.x, levelData.playerPosition.y);
-		this.level.goal = new Rectangle(levelData.goal.x, levelData.goal.y, levelData.goal.width, levelData.goal.height);
+		this.level = this.loadHelper.levelDataToLevel(this.levelData, this.projectileHandler, this.animationHandler);
+		this.particleHandler.tiles = this.level.tiles;
 
-		this.animationHandler.animations = [];
-		this.projectileHandler.clear();
+		this.camera = new Camera(new Vector(this.level.camera[0], this.level.camera[1]), new Vector(this.canvasWidth, this.canvasHeight));
 		this.levelCompleted = false;
 
-		let enemies: Enemy[] = [];
+		this.player = new Player(new Vector(this.level.player[0], this.level.player[1]), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 48, 85, 100, 200);
+		this.collision.createGrid(new Vector(this.level.gameSize[0], this.level.gameSize[1]), this.level.tiles);
+		this.UI = new UI(100, 200);
+		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
+		this.enemyHandler.enemies = this.level.enemies;
+		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
+		this.tileMap = new TileMap();
 
-		for (let enemyData of levelData.enemies) {
-			if (enemyData.type == EnemyType.swordman) {
-				enemies.push(new Swordman(new Vector(enemyData.area.x, enemyData.area.y), enemyData.area.width, enemyData.area.height, this.projectileHandler, this.animationHandler));
-			}
-		}
-
-		this.dynamicTileHandler.dynamicTiles = [];
-		this.dynamicTileHandler.dynamicTiles.push(new DynamicTile(new Tile(400, 1100, 100, 20, 7), new Vector(0, 0.2), true, 200));
-		this.dynamicTileHandler.dynamicTiles.push(new DynamicTile(new Tile(3130, 600, 80, 20, 7), new Vector(0, 0.2), true, 500));
-
-		this.enemyHandler.enemies = enemies;
-		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1250), 50, 50, this.projectileHandler, this.animationHandler));
-		this.enemyHandler.enemies.push(new Archer(new Vector(600, 1100), 50, 50, this.projectileHandler, this.animationHandler));
-		this.enemyHandler.enemies.push(new Archer(new Vector(600, 950), 50, 50, this.projectileHandler, this.animationHandler));
-		this.enemyHandler.enemies.push(new Archer(new Vector(2400, 700), 50, 50, this.projectileHandler, this.animationHandler));
-		this.enemyHandler.enemies.push(new Archer(new Vector(2100, 1000), 50, 50, this.projectileHandler, this.animationHandler));
-		this.enemyHandler.enemies.push(new Archer(new Vector(3330, 1000), 50, 50, this.projectileHandler, this.animationHandler));
-
-		this.player = new Player(new Vector(this.level.playerPosition.x, this.level.playerPosition.y), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 48, 85, 100, 200);
-		this.collision.createGrid(this.level.gameSize, this.level.tiles);
+		this.textRenderer = new TextRenderer(this.context);
 
 	}
 }

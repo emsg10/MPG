@@ -3,10 +3,12 @@ import { Tile, Vector } from './';
 export class DynamicTile {
 	public tile: Tile;
 	public velocity: Vector;
+	public verticalAxis: boolean;
 	private inverse: boolean = false;
-	private verticalAxis: boolean;
 	private distance: number = 0;
 	private maxDistance: number;
+	private initialDown: boolean;
+	private initialRight: boolean;
 
 	private initialPosition: Vector;
 
@@ -15,6 +17,20 @@ export class DynamicTile {
 		this.velocity = velocity;
 		this.verticalAxis = verticalAxis;
 		this.maxDistance = maxDistance;
+
+		if(this.velocity.y > 0) {
+			this.initialDown = true;
+		} else {
+			this.initialDown = false;
+		}
+
+		if(this.velocity.x > 0) {
+			this.initialRight = true;
+		} else {
+			this.initialRight = false;
+		}
+
+
 
 		this.initialPosition = new Vector(tile.x, tile.y);
 	}
@@ -35,7 +51,11 @@ export class DynamicTile {
 			if(this.inverse) {
 				this.tile.y = this.initialPosition.y;
 			} else {
-				this.tile.y = this.initialPosition.y + this.maxDistance;
+				if(this.initialDown) {
+					this.tile.y = this.initialPosition.y + this.maxDistance;
+				} else {
+					this.tile.y = this.initialPosition.y - this.maxDistance;
+				}
 			}
 			this.turn();
 		} else {
@@ -51,7 +71,11 @@ export class DynamicTile {
 			if(this.inverse) {
 				this.tile.x = this.initialPosition.x;
 			} else {
-				this.tile.x = this.initialPosition.x + this.maxDistance;
+				if(this.initialRight) {
+					this.tile.x = this.initialPosition.x + this.maxDistance;
+				} else {
+					this.tile.x = this.initialPosition.x - this.maxDistance;
+				}
 			}
 			this.turn();
 		} else {

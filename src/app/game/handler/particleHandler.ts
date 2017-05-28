@@ -19,10 +19,10 @@ export class ParticleHandler {
     public fireEffectParticles: Particle[] = [];
 
     public shieldEffectParticles: Particle[] = [];
+    public tiles: Tile[];
 
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
-    private tiles: Tile[];
     private gravity: Gravity = new Gravity(0.0001);
     private noGravity: Gravity = new Gravity(0);
 
@@ -133,8 +133,7 @@ export class ParticleHandler {
         -Math.PI * 0.52, -Math.PI * 1.30
     ];
 
-    constructor(tiles: Tile[]) {
-        this.tiles = tiles;
+    constructor() {
     }
 
     public createFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {

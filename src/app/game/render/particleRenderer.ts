@@ -37,7 +37,7 @@ export class ParticleRenderer {
 		this.context = context;
 		this.particleHandler = particleHandler;
 		this.gl = this.context.gl;
-		this.shaderProgram = this.context.particleProgram;
+		//this.shaderProgram = this.context.particleProgram;
 		this.gl.useProgram(this.shaderProgram);
 
 		this.gl.bindAttribLocation(this.shaderProgram, 0, "a_relativeTime");

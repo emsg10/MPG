@@ -1,15 +1,13 @@
-import { Tile, Vector, Rectangle, DynamicTileData } from '../../model'
-import { EnemyData } from './';
+import { Rectangle, DynamicTileData, RenderableData } from '../../model';
 
 export class LevelData {
 	
-	public tiles: Tile[];
+	public tiles: RenderableData[];
 	public dynamicTiles: DynamicTileData[];
-	public enemies: EnemyData[];
-	public playerPosition: Vector;
-	public cameraPosition: Vector;
-	public gameSize: Vector;
-	public goal: Rectangle;
-	constructor() {
-	}
+	public enemies: RenderableData[];
+	public player: [number, number];
+	public camera: [number, number];
+	public gameSize: [number, number];
+	public end: [number, number];
+	
 }

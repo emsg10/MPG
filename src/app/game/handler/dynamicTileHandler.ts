@@ -5,7 +5,7 @@ import { RenderHelper, RenderCall } from '../render';
 
 export class DynamicTileHandler {
 
-    public dynamicTiles: DynamicTile[];
+    public dynamicTiles: DynamicTile[] = [];
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
 
@@ -14,7 +14,15 @@ export class DynamicTileHandler {
 
     public update(player: Player, delta: number) {
         for (let dynamicTile of this.dynamicTiles) {
-            let travelDistance = dynamicTile.velocity.y * delta;
+
+            let travelDistance: number;
+
+            if(dynamicTile.verticalAxis) {
+                travelDistance = dynamicTile.velocity.y * delta;
+            } else {
+                travelDistance = dynamicTile.velocity.x * delta;
+            }
+            
             dynamicTile.update(delta, travelDistance);
 
             if (player.lift == dynamicTile) {

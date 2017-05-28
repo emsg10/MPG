@@ -1,69 +1,32 @@
 import { Observable, Observer } from 'rxjs';
 import { LoadHelper } from './loadHelper';
+import { TextureResource, TileAsset } from '../map/model/';
 
 export class AssetsLoader {
-  private shaderUrl = 'src/assets/shader';
-  private textureUrl = "src/assets/texture/tiles.png";
-  private particleTextureUrl = "src/assets/texture/particleSprites.png";
-  private genericParticleTextureUrl = "src/assets/texture/genericParticle.png";
-  private levelUrl = "src/app/game/map";
+  private shaderUrl = 'src/assets/shader/';
+  private textureUrl = "src/assets/texture/";
+  private levelUrl = "src/app/game/map/";
+
+  private textureResources: TextureResource[] = [
+    new TextureResource("1tile.png", [32, 32]),
+    new TextureResource("2tile.png", [32, 32]),
+    new TextureResource("3tile.png", [32, 32]),
+    new TextureResource("4tile.png", [32, 32]),
+    new TextureResource("5tile.png", [32, 32]),
+    new TextureResource("6tile.png", [32, 32])
+  ];
 
   constructor() { }
 
-  public getFragmentShader() {
-    return this.httpGet(this.shaderUrl + "/fragmentShader.c")
+  public getShader(fileName: string) {
+    return this.httpGet(this.shaderUrl + fileName)
       .catch(this.handleError);
   }
 
-  public getVertexShader() {
-    return this.httpGet(this.shaderUrl + "/vertexShader.c")
-      .catch(this.handleError);
-  }
-
-  public getParticleVertexShader() {
-    return this.httpGet(this.shaderUrl + "/particleVertexShader.c")
-      .catch(this.handleError);
-  }
-
-  public getParticleFragmentShader() {
-    return this.httpGet(this.shaderUrl + "/particleFragmentShader.c")
-      .catch(this.handleError);
-  }
-
-  public getSimpleParticleVertexShader() {
-    return this.httpGet(this.shaderUrl + "/simpleParticleVertexShader.c")
-      .catch(this.handleError);
-  }
-
-  public getSimpleParticleFragmentShader() {
-    return this.httpGet(this.shaderUrl + "/simpleParticleFragmentShader.c")
-      .catch(this.handleError);
-  }
-
-  public getDynamicVertexShader() {
-    return this.httpGet(this.shaderUrl + "/dynamicVertexShader.c")
-      .catch(this.handleError);
-  }
-
-  public getDynamicFragmentShader() {
-    return this.httpGet(this.shaderUrl + "/dynamicFragmentShader.c")
-      .catch(this.handleError);
-  }
-
-  public getColorVertexShader() {
-    return this.httpGet(this.shaderUrl + "/colorVertexShader.c")
-      .catch(this.handleError);
-  }
-
-  public getColorFragmentShader() {
-    return this.httpGet(this.shaderUrl + "/colorFragmentShader.c")
-      .catch(this.handleError);
-  }
-
-  public getTexture(url: string) {
+  public getTexture(fileName: string) {
     return Observable.create((observer: Observer<any>) => {
       var texture = new Image();
-      texture.src = url;
+      texture.src = this.textureUrl + fileName;
       texture.onload = function () {
         observer.next(texture);
         observer.complete();
@@ -71,21 +34,9 @@ export class AssetsLoader {
     });
   }
 
-  public getParticleTexture() {
-    return this.getTexture(this.particleTextureUrl);
-  }
-
-  public getGenericParticleTexture() {
-    return this.getTexture(this.genericParticleTextureUrl);
-  }
-
-  public getTileTexture() {
-    return this.getTexture(this.textureUrl);
-  }
-
   public getLevel(level: string) {
-    return this.httpGet(this.levelUrl + "/" + level + ".json")
-      .map(this.extractData)
+    return this.httpGet(this.levelUrl + level + ".json")
+      .map(this.extractLevel)
       .catch(this.handleError);
   }
 
@@ -108,15 +59,38 @@ export class AssetsLoader {
     });
   }
 
-  private extractData(responseText: string) {
+  public getTileTextures(name: string): Observable<Map<number, TileAsset>> {
+    return Observable.create((obs: Observer<Map<number, TileAsset>>) => {
+      let textures = new Map<number, TileAsset>();
+      let count = 0;
+      for (let textureResource of this.textureResources) {
+        let texture = new Image();
+        texture.src = this.textureUrl + textureResource.name;
+        texture.onload = () => {
+          count++;
+          let key = +textureResource.name.split(name)[0];
+          textures.set(key, new TileAsset(key, texture, textureResource.size));
+
+          if (count >= this.textureResources.length) {
+            obs.next(textures);
+            obs.complete();
+          }
+        }
+      }
+    });
+  }
+
+  private extractLevel(responseText: string) {
     let loadHelper = LoadHelper.getInstance();
     let body = JSON.parse(responseText);
 
-    if (loadHelper.checkLevelType(body)) {
-      return body;
-    } else {
-      throw new Error("Invalid data type");
+    try {
+      let valid = loadHelper.validateLevelData(body)
+    } catch (e) {
+      console.log("Invalid level: " + e);
     }
+
+    return body;
   }
 
   private handleError(error: any) {

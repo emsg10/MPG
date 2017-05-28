@@ -26,6 +26,7 @@ import { SpellCast } from './casts/spellCast';
 import { ParticleProjectile } from './animation/particleProjectile';
 import { DynamicTile } from './dynamicTile';
 import { DynamicTileData } from './dynamicTileData';
+import { RenderableData } from './renderable-data';
 
 export {
     ShaderType,
@@ -55,5 +56,6 @@ export {
     ParticleProjectile,
     StaticRotationAnimation,
     DynamicTile,
-    DynamicTileData
+    DynamicTileData,
+    RenderableData
 };

@@ -1,10 +1,10 @@
 import { Observable, Subscription, Observer } from 'rxjs';
 import { ShaderType, Asset } from './model';
+import { TileAsset } from './map/model';
 
 export class Context
 {
 	public shaderProgram: WebGLProgram;
-	public particleProgram: WebGLProgram;
 	public simpleParticleProgram: WebGLProgram;
 	public dynamicVertecyProgram: WebGLProgram;
 	public colorShaderProgram: WebGLProgram;
@@ -12,6 +12,7 @@ export class Context
 	public glTexture: WebGLTexture;
 	public frostParticelTexture: WebGLTexture;
 	public genericParticleTexture: WebGLTexture;
+	public tileTextures = new Map<number, WebGLTexture>();
 
 	constructor(asset: Asset, width: number, height: number, canvas: HTMLCanvasElement){
 		this.initContext(width, height, canvas);
@@ -34,9 +35,6 @@ export class Context
 	private initShaders(asset: Asset) {
 		let vertexShader = this.compileShader(asset.vertexShader, ShaderType.Vertex);
 		let fragmentShader = this.compileShader(asset.fragmentShader, ShaderType.Fragment);
-
-		let particleVertexShader = this.compileShader(asset.particleVertexShader, ShaderType.Vertex);
-		let particleFragmentShader = this.compileShader(asset.particleFragmentShader, ShaderType.Fragment);
 
 		let simpleParticleVertexShader = this.compileShader(asset.simpleParticleVertexShader, ShaderType.Vertex);
 		let simpleParticleFragmentShader = this.compileShader(asset.simpleParticleFragmentShader, ShaderType.Fragment);
@@ -71,14 +69,6 @@ export class Context
 			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.simpleParticleProgram));
 		}
 
-		this.particleProgram = this.gl.createProgram();
-		this.gl.attachShader(this.particleProgram, particleVertexShader);
-		this.gl.attachShader(this.particleProgram, particleFragmentShader);
-		this.gl.linkProgram(this.particleProgram);
-		if (!this.gl.getProgramParameter(this.particleProgram, this.gl.LINK_STATUS)) {
-			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.particleProgram));
-		}
-
 		this.shaderProgram = this.gl.createProgram();
 		this.gl.attachShader(this.shaderProgram, vertexShader);
 		this.gl.attachShader(this.shaderProgram, fragmentShader);
@@ -87,10 +77,33 @@ export class Context
 			alert("Unable to initialize the shader program: " + this.gl.getProgramInfoLog(this.shaderProgram));
 		}
 
-		this.initTextures(this.gl, asset);
+		this.initAssetTextures(this.gl, asset)
 	}
 
-	private initTextures(gl: WebGLRenderingContext, asset: Asset) {
+	private initAssetTextures(gl: WebGLRenderingContext, asset: Asset) {
+
+
+		this.initTextures(gl, asset.tileAssets);
+		this.initBaseTextures(gl, asset);
+
+	}
+
+	private initTextures(gl: WebGLRenderingContext, textureMap: Map<number, TileAsset>) {
+		textureMap.forEach((tileAsset: TileAsset, key: number) => {
+
+			let texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tileAsset.image);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+			this.tileTextures.set(key, texture);
+		});
+	}
+
+	private initBaseTextures(gl: WebGLRenderingContext, asset: Asset) {
 
 		this.glTexture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, this.glTexture);

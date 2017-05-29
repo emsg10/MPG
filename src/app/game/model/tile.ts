@@ -4,14 +4,14 @@ export class Tile
 	public y: number;
 	public width: number;
 	public height: number;
-	public tileTextureType: number;
+	public key: number;
 
-	constructor(x: number, y: number, width: number, height: number, textureType: number){
+	constructor(x: number, y: number, width: number, height: number, key: number){
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.tileTextureType = textureType;
+		this.key = key;
 	}
 
 }

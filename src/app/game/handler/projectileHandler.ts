@@ -348,7 +348,7 @@ export class ProjectileHandler {
     private setDamageAnimation(player: Player, projectile: Projectile) {
         if (projectile.projectileType == ProjectileType.Arrow) {
             this.createStickyArrowAnimation(player, projectile);
-            //player.takeDamage(20);
+            player.takeDamage(20);
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             player.takeDamage(projectile.damage);
         }

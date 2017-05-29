@@ -61,8 +61,8 @@ export class Game {
 	private particleHandler: ParticleHandler;
 	private debugHandler = DebugHandler.getInstance();
 	private camera: Camera;
-	private mouseRenderCall: RenderCall;
 	private levelCompleted = false;
+	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 
 	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: LevelData) {
 
@@ -77,18 +77,14 @@ export class Game {
 		this.levelData = level;
 
 		this.initKeyBindings();
-		this.reset(this.levelData, null);
+		this.reset(this.levelData);
 		this.initLoop();
 		
 	}
 
-	public reset(levelData: LevelData, mouseRenderCall: RenderCall) {
-		if (!(mouseRenderCall && this.started)) {
-			this.loadLevel(levelData);
-			this.started = false;
-		}
-
-		this.mouseRenderCall = mouseRenderCall;
+	public reset(levelData: LevelData) {
+		this.loadLevel(levelData);
+		this.started = false;
 	}
 
 	private initLoop() {
@@ -139,7 +135,7 @@ export class Game {
 		this.context.clear([0, 0, 0, 0.95]);
 		let dynamicRenderCall = new DynamicRenderCall();
 		let renderCall = new RenderCall();
-		let renderCalls: RenderCall[] = [];
+		this.renderCalls.clear();
 		let colorRenderCall = new ColorRenderCall();
 		let colorRenderCalls: ColorRenderCall[] = [];
 
@@ -147,45 +143,40 @@ export class Game {
 
 		//this.debugHandler.debugRects = [this.player.getProjectileCollisionArea()];
 
-		//EDITOR
-		if (!this.started) {
-			if (this.mouseRenderCall) {
-				renderCalls.push(this.mouseRenderCall);
-			}
-		}
-
 		//GAME
-		this.enemyHandler.createRenderCall(colorRenderCall, this.camera.position);
-		this.tileMap.createRenderCall(this.level.tiles, renderCall, this.camera.position);
-		this.tileMap.createGoalRenderCall(this.level.end, renderCall, this.camera.position);
+		this.tileMap.createRenderCall(this.renderCalls);
+		this.enemyHandler.createRenderCall(colorRenderCall);
+		this.tileMap.createGoalRenderCall(this.level.end, renderCall);
 
 		if (this.player.dead) {
-			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall);
+			this.textRenderer.createTextRenderCall(400, 64, 50, renderCall, this.camera.position);
 
 			for (let stickyAnimation of this.player.damageAnimations) {
 				this.animationHandler.remove(stickyAnimation.animation);
 			}
 			this.player.damageAnimations = [];
 		} else if (this.levelCompleted) {
-			this.textRenderer.createTextRenderCall(800, 96, 51, renderCall);
+			this.textRenderer.createTextRenderCall(800, 96, 51, renderCall, this.camera.position);
 		} else {
-			renderCall = this.player.createRenderCall(renderCall, colorRenderCall, this.camera.position)
+			renderCall = this.player.createRenderCall(renderCall)
 		}
 
-		this.dynamicTileHandler.createRenderCall(renderCall, this.camera.position);
+		
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
-		this.animationHandler.createRenderCall(colorRenderCall, this.camera.position)
+		this.animationHandler.createRenderCall(colorRenderCall)
 		this.UI.createRenderCall(renderCall, this.camera.position);
-		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls, this.camera.position);
+		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls);
 
-		this.debugHandler.createRenderCall(renderCall, this.camera.position);
+		this.debugHandler.createRenderCall(renderCall);
 
-		renderCalls.push(renderCall);
+		this.dynamicTileHandler.createRenderCall(this.renderCalls);
+		
+		this.renderCalls.set(-1, renderCall);
 		colorRenderCalls.push(colorRenderCall);
 
-		this.renderer.render(renderCalls);
-		this.colorRenderer.render(colorRenderCalls);
-		this.simpleParticleRenderer.render(simpleRenderCalls);
+		this.renderer.render(this.renderCalls, this.camera.position);
+		this.colorRenderer.render(colorRenderCalls, this.camera.position);
+		this.simpleParticleRenderer.render(simpleRenderCalls, this.camera.position);
 		this.dynamicRenderer.render([dynamicRenderCall]);
 	}
 
@@ -302,9 +293,8 @@ export class Game {
 		});
 
 		this.restartElement.addEventListener("click", (event: MouseEvent) => {
-			this.reset(this.levelData, null);
+			this.reset(this.levelData);
 		});
-
 	}
 
 	private loadLevel(levelData: LevelData) {
@@ -317,7 +307,7 @@ export class Game {
 		this.level = this.loadHelper.levelDataToLevel(this.levelData, this.projectileHandler, this.animationHandler);
 		this.particleHandler.tiles = this.level.tiles;
 
-		this.camera = new Camera(new Vector(this.level.camera[0], this.level.camera[1]), new Vector(this.canvasWidth, this.canvasHeight));
+		this.camera = new Camera([this.level.camera[0], this.level.camera[1]], [this.canvasWidth, this.canvasHeight]);
 		this.levelCompleted = false;
 
 		this.player = new Player(new Vector(this.level.player[0], this.level.player[1]), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 48, 85, 100, 200);
@@ -326,9 +316,9 @@ export class Game {
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
 		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
-		this.tileMap = new TileMap();
+		this.tileMap = new TileMap(this.level.tiles);
 
 		this.textRenderer = new TextRenderer(this.context);
-
 	}
+
 }

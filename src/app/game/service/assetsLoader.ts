@@ -1,20 +1,14 @@
 import { Observable, Observer } from 'rxjs';
 import { LoadHelper } from './loadHelper';
+import { Constants } from './constants';
 import { TextureResource, TileAsset } from '../map/model/';
 
 export class AssetsLoader {
   private shaderUrl = 'src/assets/shader/';
   private textureUrl = "src/assets/texture/";
   private levelUrl = "src/app/game/map/";
-
-  private textureResources: TextureResource[] = [
-    new TextureResource("1tile.png", [32, 32]),
-    new TextureResource("2tile.png", [32, 32]),
-    new TextureResource("3tile.png", [32, 32]),
-    new TextureResource("4tile.png", [32, 32]),
-    new TextureResource("5tile.png", [32, 32]),
-    new TextureResource("6tile.png", [32, 32])
-  ];
+  private constants = Constants.getInstance();
+  
 
   constructor() { }
 
@@ -63,7 +57,7 @@ export class AssetsLoader {
     return Observable.create((obs: Observer<Map<number, TileAsset>>) => {
       let textures = new Map<number, TileAsset>();
       let count = 0;
-      for (let textureResource of this.textureResources) {
+      for (let textureResource of this.constants.textureResources) {
         let texture = new Image();
         texture.src = this.textureUrl + textureResource.name;
         texture.onload = () => {
@@ -71,7 +65,7 @@ export class AssetsLoader {
           let key = +textureResource.name.split(name)[0];
           textures.set(key, new TileAsset(key, texture, textureResource.size));
 
-          if (count >= this.textureResources.length) {
+          if (count >= this.constants.textureResources.length) {
             obs.next(textures);
             obs.complete();
           }

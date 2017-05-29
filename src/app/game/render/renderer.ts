@@ -15,7 +15,8 @@ export class Renderer {
 
 	private positionLocation: number;
 	private textureCoordAttribute: number;
-	private resolutionLocation : WebGLUniformLocation;
+	private resolutionLocation: WebGLUniformLocation;
+	private cameraLocation: WebGLUniformLocation;
 
 	private projectionMatrix: number[];
 
@@ -32,8 +33,9 @@ export class Renderer {
 
 		this.positionLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
 		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
-		
+
 		this.resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
+		this.cameraLocation = this.gl.getUniformLocation(this.shaderProgram, "u_camera");
 
 		this.resolution = new Vector(this.context.gl.canvas.width, this.context.gl.canvas.height);
 
@@ -42,10 +44,10 @@ export class Renderer {
 		this.indeciesBuffer = this.gl.createBuffer();
 	}
 
-	public render(renderCalls: RenderCall[]) {
+	public render(renderCalls: Map<number, RenderCall>, camera: [number, number]) {
 		this.gl.useProgram(this.shaderProgram);
-		for(let renderCall of renderCalls) {
-			
+
+		renderCalls.forEach((renderCall: RenderCall, key: number) => {
 			this.gl.enableVertexAttribArray(this.positionLocation);
 			this.gl.enableVertexAttribArray(this.textureCoordAttribute);
 
@@ -57,7 +59,7 @@ export class Renderer {
 
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(renderCall.indecies), this.gl.STATIC_DRAW);
-			
+
 			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
 			this.gl.vertexAttribPointer(this.positionLocation, 2, this.gl.FLOAT, false, 0, 0);
 
@@ -65,17 +67,22 @@ export class Renderer {
 			this.gl.vertexAttribPointer(this.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.uniform2f(this.resolutionLocation, this.resolution.x, this.resolution.y);
+			this.gl.uniform2f(this.cameraLocation, camera[0], camera[1]);
 
 			this.gl.activeTexture(this.gl.TEXTURE0);
-			this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
-			
+			if (key != -1) {
+				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.tileTextures.get(key));
+			} else {
+				this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);
+			}
+
 			this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indeciesBuffer);
 			this.gl.drawElements(this.gl.TRIANGLES, renderCall.indecies.length, this.gl.UNSIGNED_SHORT, 0)
 
 			this.gl.disableVertexAttribArray(this.positionLocation);
 			this.gl.disableVertexAttribArray(this.textureCoordAttribute);
-		}
+		});
 	}
 
-	
+
 }

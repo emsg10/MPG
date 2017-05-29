@@ -272,11 +272,11 @@ export class ParticleHandler {
         this.updateParticles(this.fireParticles, this.gravity, delta, enemies, SpellType.fireBlast);
     }
 
-    public createRenderCalls(renderCalls: SimpleParticleRenderCall[], camera: Vector) {
+    public createRenderCalls(renderCalls: SimpleParticleRenderCall[]) {
         let fireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         let allFireParticles = this.fireParticles.concat(this.fireEffectParticles)
 
-        renderCalls.push(this.addParticles(fireRenderCall, allFireParticles, camera, this.fireColor));
+        renderCalls.push(this.addParticles(fireRenderCall, allFireParticles, this.fireColor));
 
         let frostRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         let frostEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
@@ -286,16 +286,16 @@ export class ParticleHandler {
         shieldEffectRenderCall.textureType = TextureType.particleTexture;
 
 
-        renderCalls.push(this.addParticles(frostEffectRenderCall, this.frostEffectParticles, camera, this.frostEffectColor));
-        renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, camera, this.frostColor));
-        renderCalls.push(this.addParticles(shieldEffectRenderCall, this.shieldEffectParticles, camera, this.shieldColor))
+        renderCalls.push(this.addParticles(frostEffectRenderCall, this.frostEffectParticles, this.frostEffectColor));
+        renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, this.frostColor));
+        renderCalls.push(this.addParticles(shieldEffectRenderCall, this.shieldEffectParticles, this.shieldColor))
 
         return renderCalls;
     }
 
-    private addParticles(renderCall: SimpleParticleRenderCall, particles: Particle[], camera: Vector, color: number[]) {
+    private addParticles(renderCall: SimpleParticleRenderCall, particles: Particle[], color: number[]) {
         for (let particle of particles) {
-            renderCall.vertecies.push(...[particle.area.x - camera.x, particle.area.y - camera.y]);
+            renderCall.vertecies.push(...[particle.area.x, particle.area.y]);
             renderCall.pointSize.push(particle.area.width);
             renderCall.color = color;
             renderCall.itemCount = particles.length;

@@ -509,14 +509,14 @@ export class AnimationHandler {
         }
     }
 
-    public createDynamicRenderCall(renderCall: DynamicRenderCall, camera: Vector) {
+    public createDynamicRenderCall(renderCall: DynamicRenderCall, camera: [number, number]) {
 
 
         for (let animation of this.dynamicAnimations) {
             if (animation instanceof RotationAnimation || animation instanceof StaticRotationAnimation) {
 
-                let x = animation.areaToRender.x - camera.x;
-                let y = animation.areaToRender.y - camera.y;
+                let x = animation.areaToRender.x - camera[0];
+                let y = animation.areaToRender.y - camera[1];
                 let width = animation.areaToRender.width;
                 let height = animation.areaToRender.height;
 
@@ -533,12 +533,12 @@ export class AnimationHandler {
         }
     }
 
-    public createRenderCall(renderCall: ColorRenderCall, camera: Vector) {
+    public createRenderCall(renderCall: ColorRenderCall) {
 
         for (let animation of this.animations) {
             if (animation.delay <= 0) {
-                let x = animation.areaToRender.x - camera.x;
-                let y = animation.areaToRender.y - camera.y;
+                let x = animation.areaToRender.x;
+                let y = animation.areaToRender.y;
                 let width = animation.areaToRender.width;
                 let height = animation.areaToRender.height;
 

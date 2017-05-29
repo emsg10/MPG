@@ -31,7 +31,7 @@ export class LoadHelper {
 
 
 		level.tiles = levelData.tiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) });
-		level.dynamicTiles = levelData.dynamicTiles.map(it => {
+		level.dynamicTiles =  levelData.dynamicTiles.map(it => {
 
 			let velocity: Vector;
 			if (it.vertical) {
@@ -49,6 +49,10 @@ export class LoadHelper {
 			}
 
 			return new DynamicTile(new Tile(it.tile.x, it.tile.y, it.tile.width, it.tile.height, it.key), velocity, it.vertical, it.distance)
+		});
+
+		level.dynamicTiles.sort((a: DynamicTile, b: DynamicTile) => {
+			return a.tile.key - b.tile.key;
 		});
 
 		level.enemies = levelData.enemies.map(it => {

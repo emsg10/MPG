@@ -1,5 +1,5 @@
 import { TextureMapper } from './textureMapper';
-import { Vector, Rectangle } from '../model';
+import { Vector, Rectangle, Tile } from '../model';
 import { Matrix3 } from './matrix3';
 
 export class RenderHelper {
@@ -141,6 +141,27 @@ export class RenderHelper {
 		var rect = this.textureMapper.mapTexture(textureType);
 
 		let textureCoordinates = this.getCoords(rect, RenderHelper.textureSize);
+
+		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoordinates);
+
+		return currentTextureCoordinates;
+	}
+
+	public getTiledTextureCoordinates(tile: Tile, currentTextureCoordinates: number[], size: [number, number]) {
+
+		let x1 = 0;
+		let x2 = tile.width / size[0];
+		let y1 = 0;
+		let y2 = tile.height / size[1];
+
+		let textureCoordinates = [
+			x1, y1,
+			x2, y2,
+			x2, y1,
+			x1, y1,
+			x2, y2,
+			x1, y2
+		];
 
 		currentTextureCoordinates.push.apply(currentTextureCoordinates, textureCoordinates);
 

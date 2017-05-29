@@ -1,14 +1,19 @@
+import { RenderHelper } from '../render';
+import { Constants } from '../service/constants';
 import { Tile, Vector } from './';
 
 export class DynamicTile {
 	public tile: Tile;
 	public velocity: Vector;
 	public verticalAxis: boolean;
+	public textureCoordinates: number[];
 	private inverse: boolean = false;
 	private distance: number = 0;
 	private maxDistance: number;
 	private initialDown: boolean;
 	private initialRight: boolean;
+	private renderHelper = RenderHelper.getInstance();
+	private constants = Constants.getInstance();
 
 	private initialPosition: Vector;
 
@@ -30,7 +35,7 @@ export class DynamicTile {
 			this.initialRight = false;
 		}
 
-
+		this.textureCoordinates = this.renderHelper.getTiledTextureCoordinates(this.tile, [], this.constants.tileSize);
 
 		this.initialPosition = new Vector(tile.x, tile.y);
 	}

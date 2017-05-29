@@ -14,6 +14,7 @@ export class SimpleParticleRenderer {
 	private sizeAttributeLocation: number;
 	private positionLocation: number;
 	private resolutionLocation: WebGLUniformLocation;
+	private cameraLocation: WebGLUniformLocation;
 	private colorUniformLocation: WebGLUniformLocation;
 
 	constructor(context: Context) {
@@ -28,13 +29,14 @@ export class SimpleParticleRenderer {
 		this.positionLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
 		this.sizeAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, "a_pointSize");
 		this.resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
+		this.cameraLocation = this.gl.getUniformLocation(this.shaderProgram, "u_camera");
 		this.colorUniformLocation = this.gl.getUniformLocation(this.shaderProgram, "u_color");
 
 		this.vertexBuffer = this.gl.createBuffer();
 		this.pointSizeBuffer = this.gl.createBuffer();
 	}
 
-	public render(renderCalls: SimpleParticleRenderCall[]) {
+	public render(renderCalls: SimpleParticleRenderCall[], camera: [number, number]) {
 		this.gl.useProgram(this.shaderProgram);
 		for (let renderCall of renderCalls) {
 
@@ -43,6 +45,7 @@ export class SimpleParticleRenderer {
 				this.gl.enableVertexAttribArray(this.sizeAttributeLocation);
 
 				this.gl.uniform2f(this.resolutionLocation, this.context.gl.canvas.width, this.context.gl.canvas.height);
+				this.gl.uniform2f(this.cameraLocation, camera[0], camera[1]);
 				this.gl.uniform4f(this.colorUniformLocation, renderCall.color[0], renderCall.color[1], renderCall.color[2], renderCall.color[3]);
 
 				if (renderCall.textureType == TextureType.particleTexture) {

@@ -140,10 +140,10 @@ export class Player extends Character{
 		return this.velocity.x == 0;
 	}
 
-	public createRenderCall(renderCall: RenderCall, colorRenderCall: ColorRenderCall, camera: Vector) {
+	public createRenderCall(renderCall: RenderCall) {
 
 		let call = new RenderCall();
-		let x: number = this.position.x - camera.x;
+		let x: number = this.position.x;
 		let x1: number;
 		let x2: number;
 		let textureNumber: number;
@@ -156,8 +156,8 @@ export class Player extends Character{
 			x1 = x;
 		}
 
-		let y1 = this.position.y - camera.y;
-		let y2 = this.position.y + (this.height) - camera.y;
+		let y1 = this.position.y;
+		let y2 = this.position.y + (this.height);
 
 		call.vertecies = [
 			x1, y1,
@@ -175,18 +175,18 @@ export class Player extends Character{
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
 
 		if(this.stunned) {
-			renderCall = this.renderStunnedEffect(renderCall, camera);
+			renderCall = this.renderStunnedEffect(renderCall);
 		}
 
-		this.renderLower(renderCall, camera);
+		this.renderLower(renderCall);
 
 		return renderCall;
 	}
 
-	public renderLower(renderCall: RenderCall, camera: Vector) {
+	public renderLower(renderCall: RenderCall) {
 		
 		let call = new RenderCall();
-		let x: number = this.position.x - camera.x;
+		let x: number = this.position.x;
 		let x1: number;
 		let x2: number;
 		let textureNumber: number;
@@ -199,8 +199,8 @@ export class Player extends Character{
 			x1 = x;
 		}
 
-		let y1 = this.position.y - camera.y;
-		let y2 = this.position.y + (this.height) - camera.y;
+		let y1 = this.position.y;
+		let y2 = this.position.y + (this.height);
 
 		call.vertecies = [
 			x1, y1,
@@ -378,11 +378,11 @@ export class Player extends Character{
 		this.stunnedAnimation.reset();
 	}
 
-	private renderStunnedEffect(renderCall: RenderCall, camera: Vector) {
+	private renderStunnedEffect(renderCall: RenderCall) {
 		if(this.inverse) {
-			renderCall.vertecies =  this.renderHelper.getInverseVertecies(this.position.x - camera.x, this.position.y - camera.y - 8, 32, 32, renderCall.vertecies);
+			renderCall.vertecies =  this.renderHelper.getInverseVertecies(this.position.x, this.position.y - 8, 32, 32, renderCall.vertecies);
 		} else {
-			renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x - camera.x + 13, this.position.y - camera.y - 8, 32, 32, renderCall.vertecies);
+			renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x + 13, this.position.y - 8, 32, 32, renderCall.vertecies);
 		}
 		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, this.stunnedEffect.getCurrentFrame());
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);

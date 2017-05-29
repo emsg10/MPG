@@ -34,10 +34,10 @@ export class UI {
         this.manaBar.content.width = this.manaBar.content.maxWidth * manaFactor;
     }
 
-    public createRenderCall(renderCall: RenderCall, camera: Vector) {
+    public createRenderCall(renderCall: RenderCall, camera: [number, number]) {
 
         for (let bar of this.bars) {
-            renderCall.vertecies = this.renderHelper.getVertecies(bar.x, bar.y, bar.width, bar.height, renderCall.vertecies);
+            renderCall.vertecies = this.renderHelper.getVertecies(bar.x + camera[0], bar.y + camera[1], bar.width, bar.height, renderCall.vertecies);
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, bar.textureNumber);
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
         }

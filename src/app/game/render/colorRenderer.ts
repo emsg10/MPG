@@ -12,13 +12,12 @@ export class ColorRenderer {
 	private textureCoordBuffer: WebGLBuffer;
 	private indeciesBuffer: WebGLBuffer;
 	private colorBuffer: WebGLBuffer;
-	private rotationBuffer: WebGLBuffer;
 
 	private colorAttributeLocation: number;
 	private positionLocation: number;
 	private textureCoordAttribute: number;
 	private resolutionLocation : WebGLUniformLocation;
-	private rotationLocation : WebGLUniformLocation;
+	private cameraLocation: WebGLUniformLocation;
 
 	private projectionMatrix: number[];
 
@@ -39,6 +38,7 @@ export class ColorRenderer {
 		this.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "a_texture_coord");
 		
 		this.resolutionLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
+		this.cameraLocation = this.gl.getUniformLocation(this.shaderProgram, "u_camera");
 
 		this.resolution = new Vector(this.context.gl.canvas.width, this.context.gl.canvas.height);
 
@@ -46,10 +46,9 @@ export class ColorRenderer {
 		this.vertexBuffer = this.gl.createBuffer();
 		this.textureCoordBuffer = this.gl.createBuffer();
 		this.indeciesBuffer = this.gl.createBuffer();
-		this.rotationBuffer = this.gl.createBuffer();
 	}
 
-	public render(renderCalls: ColorRenderCall[]) {
+	public render(renderCalls: ColorRenderCall[], camera: [number, number]) {
 		this.gl.useProgram(this.shaderProgram);
 		for(let renderCall of renderCalls) {
 			
@@ -79,6 +78,7 @@ export class ColorRenderer {
 			this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
 
 			this.gl.uniform2f(this.resolutionLocation, this.resolution.x, this.resolution.y);
+			this.gl.uniform2f(this.cameraLocation, camera[0], camera[1]);
 
 			this.gl.activeTexture(this.gl.TEXTURE0);
 			this.gl.bindTexture(this.gl.TEXTURE_2D, this.context.glTexture);

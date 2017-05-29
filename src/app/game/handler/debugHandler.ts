@@ -22,10 +22,10 @@ export class DebugHandler {
 		return DebugHandler.instance;
 	}
 
-    createRenderCall(renderCall: RenderCall, camera: Vector) {
+    createRenderCall(renderCall: RenderCall) {
 
         for(let rect of this.debugRects) {
-            renderCall.vertecies = this.renderHelper.getVertecies(rect.x - camera.x, rect.y - camera.y, rect.width, rect.height, renderCall.vertecies);
+            renderCall.vertecies = this.renderHelper.getVertecies(rect.x, rect.y, rect.width, rect.height, renderCall.vertecies);
             renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, 1);
 			renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		}

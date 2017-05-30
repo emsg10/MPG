@@ -240,7 +240,7 @@ export class TextureMapper {
 
 	private texture500 = new Rectangle(0, 1536, 96, 64);
 
-	private texture550 = new Rectangle(128, 320, 86, 126);
+	private texture550 = new Rectangle(1088, 0, 128, 64);
 
 	constrcuctor() {
 		if (TextureMapper.instance) {

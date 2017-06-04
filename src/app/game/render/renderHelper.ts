@@ -147,7 +147,7 @@ export class RenderHelper {
 		return currentTextureCoordinates;
 	}
 
-	public getTiledTextureCoordinates(tile: Tile, currentTextureCoordinates: number[], size: [number, number]) {
+	public getTiledTextureCoordinates(tile: Rectangle, currentTextureCoordinates: number[], size: [number, number]) {
 
 		let x1 = 0;
 		let x2 = tile.width / size[0];

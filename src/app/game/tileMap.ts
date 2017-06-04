@@ -6,27 +6,30 @@ import { Constants } from './service/constants';
 export class TileMap {
 
 	public renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
+	public decorativeRenderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 
 	private renderHelper = RenderHelper.getInstance();
 	private constants = Constants.getInstance();
 	private tileMap: Map<number, Tile[]> = new Map<number, Tile[]>();
+	private decorativeTileMap: Map<number, Tile[]> = new Map<number, Tile[]>();
 
-	constructor(public tiles: Tile[]) {
-		this.createStaticRenderCalls();
+	constructor(public tiles: Tile[], public decorativeTiles: Tile[]) {
+		this.createStaticRenderCalls(this.tiles, this.tileMap, this.renderCalls);
+		this.createStaticRenderCalls(this.decorativeTiles, this.decorativeTileMap, this.decorativeRenderCalls);
 	}
 
-	private createStaticRenderCalls() {
+	private createStaticRenderCalls(tiles: Tile[], tileMap: Map<number, Tile[]>, renderCalls: Map<number, RenderCall>) {
 
-		for (let tile of this.tiles) {
-			let set = this.tileMap.get(tile.key);
+		for (let tile of tiles) {
+			let set = tileMap.get(tile.key);
 			if (set) {
 				set.push(tile);
 			} else {
-				this.tileMap.set(tile.key, [tile]);
+				tileMap.set(tile.key, [tile]);
 			}
 		}
 
-		this.tileMap.forEach((tiles: Tile[], key: number) => {
+		tileMap.forEach((tiles: Tile[], key: number) => {
 			let renderCall = new RenderCall();
 			renderCall.key = key;
 
@@ -36,7 +39,7 @@ export class TileMap {
 				renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 			}
 
-			this.renderCalls.set(renderCall.key, renderCall);
+			renderCalls.set(renderCall.key, renderCall);
 		});
 	}
 
@@ -52,6 +55,23 @@ export class TileMap {
 	public createRenderCall(renderCalls: Map<number, RenderCall>) {
 
 		this.renderCalls.forEach((renderCall: RenderCall, key: number) => {
+			let set = renderCalls.get(key);
+
+			if (!set) {
+				renderCalls.set(key, new RenderCall());
+				set = renderCalls.get(key);
+			}
+
+			set.vertecies.push.apply(set.vertecies, renderCall.vertecies);
+			set.indecies.push.apply(set.indecies, renderCall.indecies);
+			set.textureCoords.push.apply(set.textureCoords, renderCall.textureCoords);
+		});
+
+	}
+
+	public createDecorativeRenderCall(renderCalls: Map<number, RenderCall>) {
+
+		this.decorativeRenderCalls.forEach((renderCall: RenderCall, key: number) => {
 			let set = renderCalls.get(key);
 
 			if (!set) {

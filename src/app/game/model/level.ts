@@ -3,6 +3,7 @@ import { Enemy } from '../character/enemy';
 
 export class Level {
     public tiles: Tile[] = [];
+	public decorativeTiles: Tile[] = [];
 	public dynamicTiles: DynamicTile[] = [];
 	public enemies: Enemy[] = [];
 	public player: [number, number];

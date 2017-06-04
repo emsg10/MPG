@@ -1,5 +1,5 @@
-import { Context, TileMap, Renderer } from './';
-import { RenderCall, ParticleRenderer, DynamicRenderCall, ColorRenderCall, ColorRenderer } from './render';
+import { Context, TileMap } from './';
+import { RenderCall, ParticleRenderer, DynamicRenderCall, ColorRenderCall, ColorRenderer, Renderer } from './render';
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
@@ -21,6 +21,7 @@ import { Camera } from './camera';
 import { Archer } from './character/archer';
 import { DynamicRenderer } from './render/dynamicRenderer';
 import { UI } from './UI/ui';
+import { SceneHandler } from './UI/sceneHandler';
 import { LoadHelper} from './service/loadHelper';
 
 export class Game {
@@ -44,7 +45,6 @@ export class Game {
 	private channelMagicKeyPress: boolean;
 	private frostKeyPress: boolean;
 	private fireKeyPress: boolean;
-	private started: boolean = false;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
 	private intevalTimer: any;
@@ -63,14 +63,15 @@ export class Game {
 	private camera: Camera;
 	private levelCompleted = false;
 	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
+	private decorativeRenderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
+	private sceneHandler: SceneHandler;
+	
 
-	constructor(private asset: Asset, startElement: HTMLElement, restartElement: HTMLElement, canvas: HTMLCanvasElement, level: LevelData) {
-
-		this.startElement = startElement;
-		this.restartElement = restartElement;
+	constructor(private asset: Asset, canvas: HTMLCanvasElement, level: LevelData) {
 
 		this.context = new Context(asset, this.canvasWidth, this.canvasHeight, canvas);
 		this.renderer = new Renderer(this.context);
+		this.sceneHandler = new SceneHandler(this.renderer, [this.canvasWidth, this.canvasHeight], canvas);
 		this.colorRenderer = new ColorRenderer(this.context);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
@@ -84,7 +85,6 @@ export class Game {
 
 	public reset(levelData: LevelData) {
 		this.loadLevel(levelData);
-		this.started = false;
 	}
 
 	private initLoop() {
@@ -105,7 +105,7 @@ export class Game {
 				this.lastUpdate = nextGameTick;
 				//this.debugHandler.debugRects = [];
 
-				if (this.started) {
+				if (this.sceneHandler.started) {
 					if (!this.player.dead && !this.levelCompleted) {
 						this.checkGoal();
 						this.checkKeys(delta);
@@ -117,14 +117,20 @@ export class Game {
 						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
 						this.UI.update(this.player.hp, this.player.mana);
 						this.camera.update(this.player.position);
+						this.particleHandler.update(delta, this.enemyHandler.enemies);
 					} else {
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
 					}
-				}
-				this.particleHandler.update(delta, this.enemyHandler.enemies);
 
-				this.render();
+					this.render();
+				} else {
+					this.sceneHandler.update();
+					this.sceneHandler.render();
+				}
+				
+
+				
 
 				nextGameTick += skipTicks;
 			}
@@ -136,6 +142,7 @@ export class Game {
 		let dynamicRenderCall = new DynamicRenderCall();
 		let renderCall = new RenderCall();
 		this.renderCalls.clear();
+		this.decorativeRenderCalls.clear();
 		let colorRenderCall = new ColorRenderCall();
 		let colorRenderCalls: ColorRenderCall[] = [];
 
@@ -144,7 +151,6 @@ export class Game {
 		//this.debugHandler.debugRects = [this.player.getProjectileCollisionArea()];
 
 		//GAME
-		this.tileMap.createRenderCall(this.renderCalls);
 		this.enemyHandler.createRenderCall(colorRenderCall);
 		this.tileMap.createGoalRenderCall(this.level.end, renderCall);
 
@@ -170,10 +176,15 @@ export class Game {
 		this.debugHandler.createRenderCall(renderCall);
 
 		this.dynamicTileHandler.createRenderCall(this.renderCalls);
-		
-		this.renderCalls.set(-1, renderCall);
-		colorRenderCalls.push(colorRenderCall);
 
+		this.tileMap.createDecorativeRenderCall(this.decorativeRenderCalls);
+		
+		colorRenderCalls.push(colorRenderCall);
+		this.renderCalls.set(-1, renderCall);
+		this.tileMap.createRenderCall(this.renderCalls);
+		
+
+		this.renderer.render(this.decorativeRenderCalls, this.camera.position);
 		this.renderer.render(this.renderCalls, this.camera.position);
 		this.colorRenderer.render(colorRenderCalls, this.camera.position);
 		this.simpleParticleRenderer.render(simpleRenderCalls, this.camera.position);
@@ -287,14 +298,6 @@ export class Game {
 					break;
 			}
 		});
-
-		this.startElement.addEventListener("click", (event: MouseEvent) => {
-			this.started = true;
-		});
-
-		this.restartElement.addEventListener("click", (event: MouseEvent) => {
-			this.reset(this.levelData);
-		});
 	}
 
 	private loadLevel(levelData: LevelData) {
@@ -316,7 +319,7 @@ export class Game {
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
 		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
-		this.tileMap = new TileMap(this.level.tiles);
+		this.tileMap = new TileMap(this.level.tiles, this.level.decorativeTiles);
 
 		this.textRenderer = new TextRenderer(this.context);
 	}

@@ -8,7 +8,7 @@ export class AssetsLoader {
   private textureUrl = "src/assets/texture/";
   private levelUrl = "src/app/game/map/";
   private constants = Constants.getInstance();
-  
+
 
   constructor() { }
 
@@ -54,10 +54,18 @@ export class AssetsLoader {
   }
 
   public getTileTextures(name: string): Observable<Map<number, TileAsset>> {
+    return this.getTextures(name, this.constants.tileResources);
+  }
+
+  public getUiTextures(name: string) {
+    return this.getTextures(name, this.constants.uiResources);
+  }
+
+  private getTextures(name: string, textureResources: TextureResource[]) {
     return Observable.create((obs: Observer<Map<number, TileAsset>>) => {
       let textures = new Map<number, TileAsset>();
       let count = 0;
-      for (let textureResource of this.constants.textureResources) {
+      for (let textureResource of textureResources) {
         let texture = new Image();
         texture.src = this.textureUrl + textureResource.name;
         texture.onload = () => {
@@ -65,7 +73,7 @@ export class AssetsLoader {
           let key = +textureResource.name.split(name)[0];
           textures.set(key, new TileAsset(key, texture, textureResource.size));
 
-          if (count >= this.constants.textureResources.length) {
+          if (count >= textureResources.length) {
             obs.next(textures);
             obs.complete();
           }

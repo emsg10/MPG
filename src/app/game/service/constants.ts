@@ -16,7 +16,7 @@ export class Constants {
         return Constants.instance;
     }
 
-    public textureResources: TextureResource[] = [
+    public tileResources: TextureResource[] = [
         new TextureResource("1tile.png", [32, 32]),
         new TextureResource("2tile.png", [32, 32]),
         new TextureResource("3tile.png", [32, 32]),
@@ -36,6 +36,11 @@ export class Constants {
         new TextureResource("17tile.png", [32, 32]),
         new TextureResource("18tile.png", [32, 32]),
         new TextureResource("19tile.png", [32, 32])
+    ];
+
+    public uiResources: TextureResource[] = [
+        new TextureResource("100ui.png", [256, 128]),
+        new TextureResource("101ui.png", [512, 512]),
     ];
 
     public tileSize: [number, number] = [32, 32];

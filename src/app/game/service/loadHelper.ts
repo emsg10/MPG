@@ -31,6 +31,7 @@ export class LoadHelper {
 
 
 		level.tiles = levelData.tiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) });
+		level.decorativeTiles = levelData.decorativeTiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) }); 
 		level.dynamicTiles =  levelData.dynamicTiles.map(it => {
 
 			let velocity: Vector;
@@ -77,6 +78,7 @@ export class LoadHelper {
 			&& this.checkPropertyExists(levelData, "dynamicTiles")
 			&& this.checkPropertyExists(levelData, "enemies")
 			&& this.checkPropertyExists(levelData, "tiles")
+			&& this.checkPropertyExists(levelData, "decorativeTiles")
 			&& this.checkDoubleNumberTouple(levelData, "player")
 			&& this.checkDoubleNumberTouple(levelData, "gameSize")
 			&& this.checkDoubleNumberTouple(levelData, "end"));

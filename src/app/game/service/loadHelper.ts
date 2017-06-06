@@ -31,7 +31,13 @@ export class LoadHelper {
 
 
 		level.tiles = levelData.tiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) });
-		level.decorativeTiles = levelData.decorativeTiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) }); 
+		level.decorativeTiles = levelData.decorativeTiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) });
+	
+		if(levelData.background.length > 0) {
+			let background = levelData.background[0];
+			level.decorativeTiles.unshift(new Tile(background.area.x, background.area.y, background.area.width, background.area.height, background.key));
+		}
+
 		level.dynamicTiles =  levelData.dynamicTiles.map(it => {
 
 			let velocity: Vector;
@@ -79,6 +85,7 @@ export class LoadHelper {
 			&& this.checkPropertyExists(levelData, "enemies")
 			&& this.checkPropertyExists(levelData, "tiles")
 			&& this.checkPropertyExists(levelData, "decorativeTiles")
+			&& this.checkPropertyExists(levelData, "backGround")
 			&& this.checkDoubleNumberTouple(levelData, "player")
 			&& this.checkDoubleNumberTouple(levelData, "gameSize")
 			&& this.checkDoubleNumberTouple(levelData, "end"));

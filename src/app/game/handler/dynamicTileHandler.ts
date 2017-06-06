@@ -2,12 +2,14 @@ import { DynamicTile, Vector } from '../model';
 import { Player } from '../character/player';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { RenderHelper, RenderCall } from '../render';
+import { Constants } from '../service/constants';
 
 export class DynamicTileHandler {
 
     public dynamicTiles: DynamicTile[];
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
+    private constants = Constants.getInstance();
 
     constructor() {
     }
@@ -45,20 +47,22 @@ export class DynamicTileHandler {
     }
 
     public createRenderCall(renderCalls: Map<number, RenderCall>) {
+
         for (let dynamicTile of this.dynamicTiles) {
 
-            let renderCall = renderCalls.get(dynamicTile.tile.key);
+            let set = renderCalls.get(dynamicTile.tile.key);
 
-            if(!renderCall) {
-                renderCall = new RenderCall();
-                renderCall.key = dynamicTile.tile.key;
-                renderCalls.set(renderCall.key, renderCall);
+            if(!set) {
+                renderCalls.set(dynamicTile.tile.key, new RenderCall());
+				set = renderCalls.get(dynamicTile.tile.key);
             }
 
-            renderCall.vertecies = this.renderHelper.getVertecies(dynamicTile.tile.x, dynamicTile.tile.y, dynamicTile.tile.width, dynamicTile.tile.height, renderCall.vertecies);
-            renderCall.textureCoords.push.apply(renderCall.textureCoords, dynamicTile.textureCoordinates);
-            renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+            set.vertecies = this.renderHelper.getVertecies(dynamicTile.tile.x, dynamicTile.tile.y, dynamicTile.tile.width, dynamicTile.tile.height, set.vertecies);
+            set.textureCoords = this.renderHelper.getTiledTextureCoordinates(dynamicTile.tile, set.textureCoords, this.constants.tileSize);
+            set.indecies = this.renderHelper.getIndecies(set.indecies);
         }
+
+        return renderCalls;
     }
 
 }

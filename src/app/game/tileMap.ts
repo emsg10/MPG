@@ -54,6 +54,8 @@ export class TileMap {
 
 	public createRenderCall(renderCalls: Map<number, RenderCall>) {
 
+		renderCalls = this.createDecorativeRenderCall(renderCalls);
+
 		this.renderCalls.forEach((renderCall: RenderCall, key: number) => {
 			let set = renderCalls.get(key);
 
@@ -83,6 +85,8 @@ export class TileMap {
 			set.indecies.push.apply(set.indecies, renderCall.indecies);
 			set.textureCoords.push.apply(set.textureCoords, renderCall.textureCoords);
 		});
+
+		return renderCalls;
 
 	}
 }

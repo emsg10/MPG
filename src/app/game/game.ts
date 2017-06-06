@@ -63,8 +63,8 @@ export class Game {
 	private camera: Camera;
 	private levelCompleted = false;
 	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
-	private decorativeRenderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 	private sceneHandler: SceneHandler;
+	private collisionAreaEnd: Rectangle;
 	
 
 	constructor(private asset: Asset, canvas: HTMLCanvasElement, level: LevelData) {
@@ -142,7 +142,6 @@ export class Game {
 		let dynamicRenderCall = new DynamicRenderCall();
 		let renderCall = new RenderCall();
 		this.renderCalls.clear();
-		this.decorativeRenderCalls.clear();
 		let colorRenderCall = new ColorRenderCall();
 		let colorRenderCalls: ColorRenderCall[] = [];
 
@@ -175,16 +174,15 @@ export class Game {
 
 		this.debugHandler.createRenderCall(renderCall);
 
-		this.dynamicTileHandler.createRenderCall(this.renderCalls);
-
-		this.tileMap.createDecorativeRenderCall(this.decorativeRenderCalls);
-		
 		colorRenderCalls.push(colorRenderCall);
-		this.renderCalls.set(-1, renderCall);
-		this.tileMap.createRenderCall(this.renderCalls);
 		
+		this.tileMap.createRenderCall(this.renderCalls);
+		this.renderCalls = this.dynamicTileHandler.createRenderCall(this.renderCalls);
 
-		this.renderer.render(this.decorativeRenderCalls, this.camera.position);
+		this.renderCalls.set(-1, renderCall);
+
+		
+		
 		this.renderer.render(this.renderCalls, this.camera.position);
 		this.colorRenderer.render(colorRenderCalls, this.camera.position);
 		this.simpleParticleRenderer.render(simpleRenderCalls, this.camera.position);
@@ -192,7 +190,7 @@ export class Game {
 	}
 
 	private checkGoal() {
-		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.level.end);
+		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.collisionAreaEnd);
 	}
 
 	private checkKeys(delta: number) {
@@ -308,6 +306,7 @@ export class Game {
 		this.dynamicTileHandler = new DynamicTileHandler();
 
 		this.level = this.loadHelper.levelDataToLevel(this.levelData, this.projectileHandler, this.animationHandler);
+		this.collisionAreaEnd = new Rectangle(this.level.end.x + (this.level.end.width/2), this.level.end.y + (this.level.end.height/2), 1, 1);
 		this.particleHandler.tiles = this.level.tiles;
 
 		this.camera = new Camera([this.level.camera[0], this.level.camera[1]], [this.canvasWidth, this.canvasHeight], this.level.gameSize);

@@ -226,6 +226,10 @@ export class Player extends Character{
 		if(this.lift == null) {
 			this.fall(delta);
 		} else {
+			if(collisionData.groundCollision) {
+				this.liftVelocity = new Vector(0, 0)
+				this.lift = null;
+			}
 			collisionData.groundCollision = true;
 			collisionData.normalY = -1;
 		}

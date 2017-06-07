@@ -36,15 +36,6 @@ export class CollisionDetection {
 
 		let collisionData = this.checkCollision(tiles, dynamicTiles, character, frameVelocity, delta);
 
-		if (collisionData.wallCollision) {
-			let position = new Vector(character.position.x, character.position.y);
-			collisionData.wallCollision = false;
-			collisionData = this.checkCollision(tiles, dynamicTiles, character, new Vector((character.toMove.x * (1 - collisionData.collisionTimeX)), -5), delta);
-			if (collisionData.wallCollision) {
-				character.position = position;
-			}
-		}
-
 		return collisionData;
 	}
 
@@ -137,10 +128,8 @@ export class CollisionDetection {
 		}
 
 		if (dynamicCollisionData.groundCollision) {
-			if (collisionData.collisionTimeY > dynamicCollisionData.collisionTimeY) {
-				collisionData = dynamicCollisionData;
-				frameVelocity.y = dynamicCollisionData.velocityY;
-			}
+			collisionData = dynamicCollisionData;
+			frameVelocity.y = dynamicCollisionData.velocityY;
 		}
 
 		character.position.y += frameVelocity.y * collisionData.collisionTimeY;
@@ -160,11 +149,9 @@ export class CollisionDetection {
 		}
 
 		if (dynamicCollisionData.wallCollision) {
-			if (collisionData.collisionTimeX > dynamicCollisionData.collisionTimeX) {
-				collisionData.wallCollision = dynamicCollisionData.wallCollision;
-				collisionData.collisionTimeX = dynamicCollisionData.collisionTimeX;
-				frameVelocity.x = dynamicCollisionData.velocityX;
-			}
+			collisionData.wallCollision = dynamicCollisionData.wallCollision;
+			collisionData.collisionTimeX = dynamicCollisionData.collisionTimeX;
+			frameVelocity.x = dynamicCollisionData.velocityX;
 		}
 
 		character.position.x += frameVelocity.x * collisionData.collisionTimeX;
@@ -226,7 +213,7 @@ export class CollisionDetection {
 
 		if (this.aabbCheck(broadphasebox, dynamicTile.tile)) {
 			dynamicCollisionData = this.aabbCollisionY(characterCollisionArea, dynamicTile.tile, frameVelocity, dynamicCollisionData);
-			if(dynamicCollisionData.groundCollision) {
+			if (dynamicCollisionData.groundCollision) {
 				dynamicCollisionData.lift = dynamicTile;
 			}
 		}

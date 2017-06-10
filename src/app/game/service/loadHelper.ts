@@ -33,8 +33,8 @@ export class LoadHelper {
 		level.tiles = levelData.tiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) });
 		level.decorativeTiles = levelData.decorativeTiles.map(it => { return new Tile(it.area.x, it.area.y, it.area.width, it.area.height, it.key) });
 	
-		if(levelData.background.length > 0) {
-			let background = levelData.background[0];
+		if(levelData.background) {
+			let background = levelData.background;
 			level.decorativeTiles.unshift(new Tile(background.area.x, background.area.y, background.area.width, background.area.height, background.key));
 		}
 

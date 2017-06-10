@@ -4,7 +4,7 @@ export class LevelData {
 	
 	public tiles: RenderableData[];
 	public decorativeTiles: RenderableData[];
-	public background: RenderableData[];
+	public background: RenderableData;
 	public dynamicTiles: DynamicTileData[];
 	public enemies: RenderableData[];
 	public player: [number, number];

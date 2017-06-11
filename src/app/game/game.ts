@@ -71,7 +71,7 @@ export class Game {
 
 		this.context = new Context(asset, this.canvasWidth, this.canvasHeight, canvas);
 		this.renderer = new Renderer(this.context);
-		this.sceneHandler = new SceneHandler(this.renderer, [this.canvasWidth, this.canvasHeight], canvas);
+		this.sceneHandler = new SceneHandler(this.renderer, [this.canvasWidth, this.canvasHeight], canvas, this);
 		this.colorRenderer = new ColorRenderer(this.context);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
@@ -298,14 +298,14 @@ export class Game {
 		});
 	}
 
-	private loadLevel(levelData: LevelData) {
+	public loadLevel(levelData: LevelData) {
 
 		this.particleHandler = new ParticleHandler();
 		this.animationHandler = new AnimationHandler(this.particleHandler);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 		this.dynamicTileHandler = new DynamicTileHandler();
 
-		this.level = this.loadHelper.levelDataToLevel(this.levelData, this.projectileHandler, this.animationHandler);
+		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler);
 		this.collisionAreaEnd = new Rectangle(this.level.end.x + (this.level.end.width/2), this.level.end.y + (this.level.end.height/2), 1, 1);
 		this.particleHandler.tiles = this.level.tiles;
 

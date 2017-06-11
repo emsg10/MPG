@@ -15,8 +15,7 @@ export class Loader {
     private game: Game;
 
     private canvas: HTMLCanvasElement;
-    private start: HTMLElement;
-    private restart: HTMLElement;
+    private importLink: HTMLElement;
 
     constructor() {
 

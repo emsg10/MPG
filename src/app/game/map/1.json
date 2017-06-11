@@ -1,1 +1,572 @@
-{"tiles":[{"area":{"x":448,"y":224,"width":416,"height":32},"key":1},{"area":{"x":416,"y":384,"width":416,"height":32},"key":1},{"area":{"x":352,"y":608,"width":416,"height":32},"key":1},{"area":{"x":608,"y":544,"width":416,"height":32},"key":26}],"decorativeTiles":[],"enemies":[{"area":{"x":576,"y":512,"width":56,"height":59},"key":50}],"dynamicTiles":[],"background":{"area":{"x":0,"y":0,"width":2400,"height":2400},"key":26},"player":[544,128],"camera":[0,0],"gameSize":[2400,1600],"end":[864,288],"name":"level1"}
+{
+    "tiles": [
+        {
+            "area": {
+                "x": 64,
+                "y": 1376,
+                "width": 1152,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 1824,
+                "y": 1376,
+                "width": 352,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 2048,
+                "y": 1184,
+                "width": 32,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 1184,
+                "y": 1088,
+                "width": 768,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 64,
+                "y": 448,
+                "width": 896,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 32,
+                "y": 256,
+                "width": 96,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 64,
+                "y": 1408,
+                "width": 1152,
+                "height": 192
+            },
+            "key": 8
+        },
+        {
+            "area": {
+                "x": 32,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 1792,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 2144,
+                "y": 1280,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 2016,
+                "y": 1184,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 1152,
+                "y": 1088,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 32,
+                "y": 448,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 128,
+                "y": 320,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 224,
+                "y": 384,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 0,
+                "y": 256,
+                "width": 32,
+                "height": 32
+            },
+            "key": 21
+        },
+        {
+            "area": {
+                "x": 32,
+                "y": 1408,
+                "width": 32,
+                "height": 192
+            },
+            "key": 23
+        },
+        {
+            "area": {
+                "x": 1792,
+                "y": 1408,
+                "width": 32,
+                "height": 192
+            },
+            "key": 23
+        },
+        {
+            "area": {
+                "x": 1152,
+                "y": 1120,
+                "width": 32,
+                "height": 32
+            },
+            "key": 23
+        },
+        {
+            "area": {
+                "x": 32,
+                "y": 480,
+                "width": 32,
+                "height": 672
+            },
+            "key": 23
+        },
+        {
+            "area": {
+                "x": 1216,
+                "y": 1408,
+                "width": 32,
+                "height": 192
+            },
+            "key": 24
+        },
+        {
+            "area": {
+                "x": 2176,
+                "y": 1408,
+                "width": 32,
+                "height": 192
+            },
+            "key": 24
+        },
+        {
+            "area": {
+                "x": 1952,
+                "y": 1120,
+                "width": 32,
+                "height": 32
+            },
+            "key": 24
+        },
+        {
+            "area": {
+                "x": 960,
+                "y": 480,
+                "width": 32,
+                "height": 640
+            },
+            "key": 24
+        },
+        {
+            "area": {
+                "x": 1216,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 2176,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 2176,
+                "y": 1280,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 2080,
+                "y": 1184,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 1952,
+                "y": 1088,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 960,
+                "y": 448,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 160,
+                "y": 320,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 256,
+                "y": 384,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 128,
+                "y": 256,
+                "width": 32,
+                "height": 32
+            },
+            "key": 22
+        },
+        {
+            "area": {
+                "x": 1824,
+                "y": 1408,
+                "width": 352,
+                "height": 192
+            },
+            "key": 7
+        },
+        {
+            "area": {
+                "x": 1184,
+                "y": 1120,
+                "width": 768,
+                "height": 32
+            },
+            "key": 7
+        },
+        {
+            "area": {
+                "x": 64,
+                "y": 1120,
+                "width": 1088,
+                "height": 32
+            },
+            "key": 7
+        },
+        {
+            "area": {
+                "x": 64,
+                "y": 480,
+                "width": 896,
+                "height": 640
+            },
+            "key": 7
+        },
+        {
+            "area": {
+                "x": 2176,
+                "y": 1312,
+                "width": 32,
+                "height": 32
+            },
+            "key": 25
+        },
+        {
+            "area": {
+                "x": 2144,
+                "y": 1312,
+                "width": 32,
+                "height": 32
+            },
+            "key": 25
+        },
+        {
+            "area": {
+                "x": 1152,
+                "y": 1152,
+                "width": 832,
+                "height": 32
+            },
+            "key": 25
+        },
+        {
+            "area": {
+                "x": 32,
+                "y": 1152,
+                "width": 1120,
+                "height": 32
+            },
+            "key": 25
+        },
+        {
+            "area": {
+                "x": 128,
+                "y": 352,
+                "width": 64,
+                "height": 32
+            },
+            "key": 25
+        },
+        {
+            "area": {
+                "x": 224,
+                "y": 416,
+                "width": 64,
+                "height": 32
+            },
+            "key": 25
+        }
+    ],
+    "background": {
+        "area": {
+            "x": 0,
+            "y": 0,
+            "width": 2400,
+            "height": 2400
+        },
+        "key": 26
+    },
+    "decorativeTiles": [
+        {
+            "area": {
+                "x": 2016,
+                "y": 1216,
+                "width": 96,
+                "height": 32
+            },
+            "key": 25
+        }
+    ],
+    "enemies": [
+        {
+            "area": {
+                "x": 1152,
+                "y": 1312,
+                "width": 56,
+                "height": 59
+            },
+            "key": 50
+        },
+        {
+            "area": {
+                "x": 384,
+                "y": 384,
+                "width": 56,
+                "height": 59
+            },
+            "key": 50
+        },
+        {
+            "area": {
+                "x": 736,
+                "y": 384,
+                "width": 56,
+                "height": 59
+            },
+            "key": 50
+        },
+        {
+            "area": {
+                "x": 1408,
+                "y": 1024,
+                "width": 50,
+                "height": 50
+            },
+            "key": 51
+        },
+        {
+            "area": {
+                "x": 1632,
+                "y": 1024,
+                "width": 50,
+                "height": 50
+            },
+            "key": 51
+        },
+        {
+            "area": {
+                "x": 256,
+                "y": 320,
+                "width": 50,
+                "height": 50
+            },
+            "key": 51
+        },
+        {
+            "area": {
+                "x": 160,
+                "y": 256,
+                "width": 50,
+                "height": 50
+            },
+            "key": 51
+        }
+    ],
+    "dynamicTiles": [
+        {
+            "tile": {
+                "x": 1280,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "inverse": false,
+            "vertical": false,
+            "distance": 448,
+            "velocity": 0.1,
+            "key": 20
+        },
+        {
+            "tile": {
+                "x": 1024,
+                "y": 1088,
+                "width": 96,
+                "height": 32
+            },
+            "inverse": true,
+            "vertical": true,
+            "distance": 640,
+            "velocity": 0.1,
+            "key": 20
+        },
+        {
+            "tile": {
+                "x": 1248,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "inverse": false,
+            "vertical": false,
+            "distance": 448,
+            "velocity": 0.1,
+            "key": 21
+        },
+        {
+            "tile": {
+                "x": 992,
+                "y": 1088,
+                "width": 32,
+                "height": 32
+            },
+            "inverse": true,
+            "vertical": true,
+            "distance": 640,
+            "velocity": 0.1,
+            "key": 21
+        },
+        {
+            "tile": {
+                "x": 1312,
+                "y": 1376,
+                "width": 32,
+                "height": 32
+            },
+            "inverse": false,
+            "vertical": false,
+            "distance": 448,
+            "velocity": 0.1,
+            "key": 22
+        },
+        {
+            "tile": {
+                "x": 1120,
+                "y": 1088,
+                "width": 32,
+                "height": 32
+            },
+            "inverse": true,
+            "vertical": true,
+            "distance": 640,
+            "velocity": 0.1,
+            "key": 22
+        }
+    ],
+    "player": [
+        75,
+        1292
+    ],
+    "camera": [
+        12,
+        800
+    ],
+    "gameSize": [
+        2400,
+        1600
+    ],
+    "end": [
+        0,
+        128
+    ]
+}

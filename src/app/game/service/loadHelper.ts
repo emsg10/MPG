@@ -85,7 +85,7 @@ export class LoadHelper {
 			&& this.checkPropertyExists(levelData, "enemies")
 			&& this.checkPropertyExists(levelData, "tiles")
 			&& this.checkPropertyExists(levelData, "decorativeTiles")
-			&& this.checkPropertyExists(levelData, "backGround")
+			&& this.checkPropertyExists(levelData, "background")
 			&& this.checkDoubleNumberTouple(levelData, "player")
 			&& this.checkDoubleNumberTouple(levelData, "gameSize")
 			&& this.checkDoubleNumberTouple(levelData, "end"));
@@ -93,7 +93,8 @@ export class LoadHelper {
 	}
 
 	private checkDoubleNumberTouple(levelData: LevelData, property: string) {
-		return (this.checkPropertyExists(levelData, property) && levelData[property].length == 2 && this.isNumber(levelData[property][0]) && this.isNumber(levelData[property][1]))
+		let value = (this.checkPropertyExists(levelData, property) && levelData[property].length == 2 && this.isNumber(levelData[property][0]) && this.isNumber(levelData[property][1]));
+		return value;
 	}
 
 	private isNumber(number: string) {
@@ -101,7 +102,8 @@ export class LoadHelper {
 	}
 
 	private checkPropertyExists(levelData: LevelData, property: string) {
-		return (levelData[property] != null);
+		let value = (levelData[property] !== undefined)
+		return value;
 	}
 
 }

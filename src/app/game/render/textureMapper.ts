@@ -123,6 +123,12 @@ export class TextureMapper {
 
 	private texture179 = new Rectangle(1248, 32, 164, 27);
 	private texture180 = new Rectangle(1248, 96, 32, 32);
+	private texture181 = new Rectangle(1248, 64, 164, 27);
+	private texture182 = new Rectangle(1248, 0, 164, 27);
+	private texture183 = new Rectangle(1440, 0, 164, 27);
+	private texture184 = new Rectangle(1440, 32, 164, 27);
+	private texture185 = new Rectangle(1440, 64, 164, 27);
+	private texture186 = new Rectangle(1440, 96, 164, 27);
 
 	private texture200 = new Rectangle(28, 293, 28, 26);
 	private texture201 = new Rectangle(56, 293, 28, 26);
@@ -380,6 +386,13 @@ export class TextureMapper {
 			case 178: return this.texture178;
 			case 179: return this.texture179;
 			case 180: return this.texture180;
+
+			case 181: return this.texture181;
+			case 182: return this.texture182;
+			case 183: return this.texture183;
+			case 184: return this.texture184;
+			case 185: return this.texture185;
+			case 186: return this.texture186;
 
 			case 200: return this.texture200;
 			case 201: return this.texture201;

@@ -1,3 +1,4 @@
 export enum SceneIndex {
-    StartManu = 1
+    StartMenu = 1,
+    LoadMenu = 2
 }

@@ -7,7 +7,9 @@ import { Clickable } from './clickable';
 import { Rectangle } from '../model';
 import { LevelData } from '../map/model';
 import { LoadHelper } from '../service/loadHelper';
+import { LocalStorageHelper } from '../service/localStorageHelper';
 import { Game } from '../game';
+import { AssetsLoader } from '../service/assetsLoader';
 
 export class SceneHandler {
 
@@ -17,6 +19,7 @@ export class SceneHandler {
     private mousePosition: [number, number] = [-100, 0];
     private renderHelper = RenderHelper.getInstance();
     private click = false;
+    private clicked = false;
     private importClicked = false;
 
     private fileUploadButton = document.getElementById("fileupload");
@@ -25,6 +28,8 @@ export class SceneHandler {
     private modal = document.getElementById("modal");
 
     private loadHelper = LoadHelper.getInstance();
+    private localStorageHelper = LocalStorageHelper.getInstance();
+    private assetLoader = new AssetsLoader();
 
     constructor(private renderer: Renderer, private canvasSize: [number, number], private canvas: HTMLElement, private game: Game) {
 
@@ -32,6 +37,9 @@ export class SceneHandler {
             this,
             renderer,
             canvasSize,
+            100,
+            [512, 512],
+            true,
             [
                 this.createNewGameButton(),
                 this.createContinueButton(),
@@ -45,12 +53,17 @@ export class SceneHandler {
             this,
             renderer,
             canvasSize,
+            100,
+            [512, 512],
+            true,
             [
                 this.createToStartMenuBack()
             ]
         );
 
         this.scenes.set(SceneIndex.LoadMenu, loadMenu);
+
+        this.loadLevelSelectionScreen();
 
         this.createEventListerners();
     }
@@ -59,7 +72,8 @@ export class SceneHandler {
 
         let currentScene = this.scenes.get(this.currentScene);
 
-        if (this.click) {
+        if (this.click && !this.clicked) {
+            this.clicked = true;
             currentScene.click(this.mousePosition);
         }
 
@@ -84,6 +98,23 @@ export class SceneHandler {
         return renderCalls;
     }
 
+    private loadLevelSelectionScreen() {
+        let levelSelectionMenu = new Menu(
+            this,
+            this.renderer,
+            this.canvasSize,
+            100,
+            [512, 512],
+            false,
+            [
+                ...this.createLevelMenuButtons(),
+                this.createToStartMenuBackFromLevelMenu()
+            ]
+        );
+
+        this.scenes.set(SceneIndex.LevelSelectionMenu, levelSelectionMenu);
+    }
+
     private createEventListerners() {
         window.addEventListener("mousemove", (event: MouseEvent) => {
             let relativeElement = this.canvas.getBoundingClientRect();
@@ -98,6 +129,7 @@ export class SceneHandler {
         });
 
         window.addEventListener("mouseup", (event: MouseEvent) => {
+            this.clicked = false;
             this.click = false;
         });
 
@@ -128,6 +160,12 @@ export class SceneHandler {
         });
     }
 
+    public levelCompleted(level: string) {
+        this.started = false;
+        this.localStorageHelper.setCurrentProgress((+level + 1));
+        this.loadLevelSelectionScreen();
+    }
+
     private createLoadButton() {
 
         let onClick = () => {
@@ -148,7 +186,7 @@ export class SceneHandler {
 
     private createContinueButton() {
         let onClick = () => {
-
+            this.currentScene = SceneIndex.LevelSelectionMenu;
         }
 
         return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50), 179, 181, 184, onClick);
@@ -164,4 +202,57 @@ export class SceneHandler {
 
         return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50), 179, 181, 186, onClick);
     }
+
+    private createToStartMenuBackFromLevelMenu() {
+        let onClick = () => {
+            this.currentScene = SceneIndex.StartMenu;
+        }
+
+        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 700, 300, 50), 179, 181, 186, onClick);
+    }
+
+    private createLevelMenuButtons() {
+        let progress = this.localStorageHelper.getCurrentProgress();
+        let clickables: Clickable[] = [];
+
+        let collumns = 5;
+        for (let i = 0; i < 10; i++) {
+            let y = Math.floor(i / collumns);
+            let x = i % collumns;
+            let disabled = !(progress.completedLevels >= i);
+            clickables.push(this.createLevelButton(x, y, i, disabled));
+        }
+
+        return clickables;
+    }
+
+    private createLevelButton(x: number, y: number, level: number, disabled: boolean) {
+
+        let onClick: () => void;
+
+        if (disabled) {
+            onClick = () => {
+
+            }
+        } else {
+            onClick = () => {
+                this.assetLoader.getLevel(level.toString()).subscribe(it => {
+                    this.game.loadLevel(it);
+                    this.started = true;
+                });
+            }
+        }
+
+
+        let buttonTexture: number;
+        if (disabled) {
+            buttonTexture = 187;
+        } else {
+            buttonTexture = 550;
+        }
+
+        return new Clickable(new Rectangle(100 + (x * 200), 100 + (y * 200), 200, 100), buttonTexture, buttonTexture, 188 + level, onClick);
+    }
+
+
 }

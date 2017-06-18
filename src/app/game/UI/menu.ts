@@ -8,8 +8,8 @@ import { SceneIndex } from './sceneIndex';
 
 export class Menu extends Scene {
 
-    constructor(protected sceneHandler: SceneHandler, protected renderer: Renderer, protected canvasSize: [number, number], private clickables: Clickable[]) {
-        super(sceneHandler, renderer, canvasSize);
+    constructor(protected sceneHandler: SceneHandler, protected renderer: Renderer, protected canvasSize: [number, number], protected background: number, protected tileSize: [number, number], protected menu: boolean, private clickables: Clickable[]) {
+        super(sceneHandler, renderer, canvasSize, background, tileSize, menu);
         this.createRenderCalls();
     }
 

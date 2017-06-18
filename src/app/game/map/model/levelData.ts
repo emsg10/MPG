@@ -2,6 +2,7 @@ import { Rectangle, DynamicTileData, RenderableData } from '../../model';
 
 export class LevelData {
 	
+	public name: string;
 	public tiles: RenderableData[];
 	public decorativeTiles: RenderableData[];
 	public background: RenderableData;

@@ -80,6 +80,7 @@ export class Game {
 		this.initKeyBindings();
 		this.reset(this.levelData);
 		this.initLoop();
+
 		
 	}
 
@@ -121,6 +122,7 @@ export class Game {
 					} else {
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
+						this.particleHandler.update(delta, this.enemyHandler.enemies);
 					}
 
 					this.render();
@@ -181,8 +183,6 @@ export class Game {
 
 		this.renderCalls.set(-1, renderCall);
 
-		
-		
 		this.renderer.render(this.renderCalls, this.camera.position);
 		this.colorRenderer.render(colorRenderCalls, this.camera.position);
 		this.simpleParticleRenderer.render(simpleRenderCalls, this.camera.position);
@@ -191,6 +191,9 @@ export class Game {
 
 	private checkGoal() {
 		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.collisionAreaEnd);
+		if(this.levelCompleted) {
+			this.sceneHandler.levelCompleted(this.level.name);
+		}	
 	}
 
 	private checkKeys(delta: number) {

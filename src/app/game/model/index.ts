@@ -27,6 +27,7 @@ import { ParticleProjectile } from './animation/particleProjectile';
 import { DynamicTile } from './dynamicTile';
 import { DynamicTileData } from './dynamicTileData';
 import { RenderableData } from './renderable-data';
+import { Progress } from './progress';
 
 export {
     ShaderType,
@@ -57,5 +58,6 @@ export {
     StaticRotationAnimation,
     DynamicTile,
     DynamicTileData,
-    RenderableData
+    RenderableData,
+    Progress
 };

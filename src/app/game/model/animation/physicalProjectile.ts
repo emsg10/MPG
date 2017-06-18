@@ -9,6 +9,7 @@ export class PhysicalProjectile extends Projectile {
     public gravity: Gravity = new Gravity(this.gravityStrength);
     private dragStrength = 0.0005;
     public drag: Drag = new Drag(this.dragStrength);
+    public extendedOnGroundCollision: () => void;
 
     private angle: boolean;
 
@@ -34,6 +35,10 @@ export class PhysicalProjectile extends Projectile {
             } else {
                 this.animation.angle = Math.PI * 2;
             }
+        }
+
+        if(this.extendedOnGroundCollision) {
+            this.extendedOnGroundCollision();
         }
     }
 }

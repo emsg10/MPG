@@ -161,11 +161,11 @@ export class AnimationHandler {
 
     public player_sword_death_corpse(position: Vector, inverse: boolean) {
         let animation = new Animation();
-        animation.textureNumber.push(236);
+        animation.textureNumber.push(306);
+        animation.timeToChange = 150;
+        animation.delay = 6;
 
-        animation.delay = 4;
-
-        animation.areaToRender = new Rectangle(position.x, position.y, 45, 45);
+        animation.areaToRender = new Rectangle(position.x, position.y, 90, 90);
 
         animation.inverse = inverse;
 
@@ -176,16 +176,18 @@ export class AnimationHandler {
 
     public player_sword_death_animation(position: Vector, inverse: boolean) {
         let animation = new Animation();
-        animation.textureNumber.push(233);
-        animation.textureNumber.push(234);
-        animation.textureNumber.push(235);
-        animation.textureNumber.push(236);
+        animation.textureNumber.push(301);
+        animation.textureNumber.push(302);
+        animation.textureNumber.push(303);
+        animation.textureNumber.push(304);
+        animation.textureNumber.push(305);
+        animation.textureNumber.push(306);
         animation.inverse = inverse;
-        animation.areaToRender = new Rectangle(position.x, position.y, 45, 45);
+        animation.timeToChange = 150;
+        animation.repetitions = 6;
+        animation.areaToRender = new Rectangle(position.x, position.y, 90, 90);
 
         this.animations.push(animation);
-
-        animation.repetitions = 4;
 
         return animation;
     }

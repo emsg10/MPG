@@ -104,7 +104,7 @@ export class TextureMapper {
 
 	private texture162 = new Rectangle(992, 1248, 32, 64);
 	private texture163 = new Rectangle(1024, 1248, 32, 64);
-	
+
 	private texture165 = new Rectangle(1152, 1248, 32, 64);
 	private texture166 = new Rectangle(1184, 1248, 32, 64);
 	private texture167 = new Rectangle(1216, 1248, 32, 64);
@@ -129,6 +129,20 @@ export class TextureMapper {
 	private texture184 = new Rectangle(1440, 32, 164, 27);
 	private texture185 = new Rectangle(1440, 64, 164, 27);
 	private texture186 = new Rectangle(1440, 96, 164, 27);
+
+	private texture187 = new Rectangle(1088, 96, 128, 64);
+
+	private texture188 = new Rectangle(1088, 192, 128, 64);
+	private texture189 = new Rectangle(1088, 256, 128, 64);
+	private texture190 = new Rectangle(1088, 320, 128, 64);
+	private texture191 = new Rectangle(1088, 384, 128, 64);
+	private texture192 = new Rectangle(1088, 448, 128, 64);
+	private texture193 = new Rectangle(1088, 512, 128, 64);
+	private texture194 = new Rectangle(1088, 576, 128, 64);
+	private texture195 = new Rectangle(1088, 640, 128, 64);
+	private texture196 = new Rectangle(1088, 704, 128, 64);
+	private texture197 = new Rectangle(1088, 768, 128, 64);
+
 
 	private texture200 = new Rectangle(28, 293, 28, 26);
 	private texture201 = new Rectangle(56, 293, 28, 26);
@@ -247,6 +261,14 @@ export class TextureMapper {
 
 	private texture300 = new Rectangle(32, 1664, 128, 128);
 
+	private texture301 = new Rectangle(1344, 1184, 64, 64);
+	private texture302 = new Rectangle(1408, 1184, 64, 64);
+	private texture303 = new Rectangle(1472, 1184, 64, 64);
+	private texture304 = new Rectangle(1536, 1184, 64, 64);
+	private texture305 = new Rectangle(1600, 1184, 64, 64);
+	private texture306 = new Rectangle(1664, 1184, 64, 64);
+
+
 	private texture500 = new Rectangle(0, 1536, 96, 64);
 
 	private texture550 = new Rectangle(1088, 0, 128, 64);
@@ -269,38 +291,38 @@ export class TextureMapper {
 
 		switch (textureType) {
 			case 0: return this.texture0;
-			case 1: return this.texture1; 
-			case 2: return this.texture2; 
-			case 3: return this.texture3; 
-			case 4: return this.texture4; 
-			case 5: return this.texture5; 
-			case 6: return this.texture6; 
-			case 7: return this.texture7; 
-			case 8: return this.texture8; 
-			case 9: return this.texture9; 
+			case 1: return this.texture1;
+			case 2: return this.texture2;
+			case 3: return this.texture3;
+			case 4: return this.texture4;
+			case 5: return this.texture5;
+			case 6: return this.texture6;
+			case 7: return this.texture7;
+			case 8: return this.texture8;
+			case 9: return this.texture9;
 			case 10: return this.texture10;
-			case 11: return this.texture11; 
-			case 12: return this.texture12; 
-			case 13: return this.texture13; 
-			case 14: return this.texture14; 
-			case 15: return this.texture15; 
-			case 16: return this.texture16; 
-			case 17: return this.texture17; 
-			case 18: return this.texture18; 
-			case 19: return this.texture19; 
-			case 20: return this.texture20; 
-			case 21: return this.texture21; 
-			case 22: return this.texture22; 
-			case 23: return this.texture23; 
-			case 24: return this.texture24; 
-			case 25: return this.texture25; 
-			case 26: return this.texture26; 
+			case 11: return this.texture11;
+			case 12: return this.texture12;
+			case 13: return this.texture13;
+			case 14: return this.texture14;
+			case 15: return this.texture15;
+			case 16: return this.texture16;
+			case 17: return this.texture17;
+			case 18: return this.texture18;
+			case 19: return this.texture19;
+			case 20: return this.texture20;
+			case 21: return this.texture21;
+			case 22: return this.texture22;
+			case 23: return this.texture23;
+			case 24: return this.texture24;
+			case 25: return this.texture25;
+			case 26: return this.texture26;
 
 			case 50: return this.texture50;
-			case 51: return this.texture51; 
-			case 52: return this.texture52; 
-			case 53: return this.texture53; 
-			case 54: return this.texture54; 
+			case 51: return this.texture51;
+			case 52: return this.texture52;
+			case 53: return this.texture53;
+			case 54: return this.texture54;
 
 			case 100: return this.texture100;
 			case 101: return this.texture101;
@@ -393,6 +415,18 @@ export class TextureMapper {
 			case 184: return this.texture184;
 			case 185: return this.texture185;
 			case 186: return this.texture186;
+			case 187: return this.texture187;
+			case 188: return this.texture188;
+			case 189: return this.texture189;
+			case 190: return this.texture190;
+			case 191: return this.texture191;
+			case 192: return this.texture192;
+			case 193: return this.texture193;
+			case 194: return this.texture194;
+			case 195: return this.texture195;
+			case 196: return this.texture196;
+			case 197: return this.texture197;
+
 
 			case 200: return this.texture200;
 			case 201: return this.texture201;
@@ -510,6 +544,13 @@ export class TextureMapper {
 			case 299: return this.texture299;
 
 			case 300: return this.texture300;
+
+			case 301: return this.texture301;
+			case 302: return this.texture302;
+			case 303: return this.texture303;
+			case 304: return this.texture304;
+			case 305: return this.texture305;
+			case 306: return this.texture306;
 
 			case 500: return this.texture500;
 

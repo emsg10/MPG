@@ -24,6 +24,7 @@ export class LoadHelper {
 
 		let level = new Level();
 
+		level.name = levelData.name;
 		level.end = new Rectangle(levelData.end[0], levelData.end[1], 256, 128);
 		level.player = [levelData.player[0], levelData.player[1]];
 		level.gameSize = [levelData.gameSize[0], levelData.gameSize[1]];

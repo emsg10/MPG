@@ -91,7 +91,7 @@ export class ProjectileHandler {
 
         let animation = this.animationHandler.createDeadArrow(rectangle, inverse, velocity);
         velocity.x = -velocity.x / 4;
-        if(push) {
+        if (push) {
             velocity.x += push.x;
             velocity.y += push.y;
         }
@@ -136,9 +136,14 @@ export class ProjectileHandler {
     }
 
     public createSwordman_death(position: Vector, inverse: boolean, velocity: Vector) {
-        let projectile: Projectile;
+        let projectile: PhysicalProjectile;
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.swordman_head(position, inverse), 0.3)
+         projectile.extendedOnGroundCollision = () => {
+            let currentFrame = projectile.animation.getCurrentFrame();
+            projectile.animation.textureNumber = [currentFrame];
+            projectile.animation.frameIndex = 0;
+        }
         this.animationHandler.bloodAnimation_C(new Vector(position.x - 10, position.y - 20), 75);
         this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
         this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
@@ -150,18 +155,23 @@ export class ProjectileHandler {
 
     public createPlayerSword_death(position: Vector, inverse: boolean) {
 
-        let projectile: Projectile;
+        let projectile: PhysicalProjectile;
         let projectileCorpse: Projectile;
         let velocity = new Vector(0, 0);
+        let x = position.x;
 
-        projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_animation(position, inverse), 1)
-        projectileCorpse = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.player_sword_death_corpse(position, inverse), 1)
+        if(inverse) {
+            x -= 45;
+        }
+
+        projectile = new PhysicalProjectile(velocity, new Rectangle(x, position.y - 6, 45, 85), this.animationHandler.player_sword_death_animation(position, inverse), 1)
+
+        projectileCorpse = new PhysicalProjectile(velocity, new Rectangle(x, position.y - 6, 45, 85), this.animationHandler.player_sword_death_corpse(position, inverse), 1)
         if (inverse) {
             this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
         } else {
             this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
         }
-
 
         this.projectiles.push(projectile);
         this.projectiles.push(projectileCorpse);
@@ -285,11 +295,11 @@ export class ProjectileHandler {
         let deltaVelocity = new Vector(frameVelocity.x - velocity.x * delta, frameVelocity.y - velocity.y * delta);
 
         collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
-        for(let dynamicTile of dynamicTiles) {  
+        for (let dynamicTile of dynamicTiles) {
             let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
             let colData = this.collisionDetection.checkProjectileCollisionY([dynamicTile.tile], projectile, deltaVelocity, false);
 
-            if(colData.collisionTimeY < dynamicCollisionData.collisionTimeY) {
+            if (colData.collisionTimeY < dynamicCollisionData.collisionTimeY) {
                 dynamicCollisionData = colData;
                 liftVelocity = dynamicTile.velocity;
             }
@@ -299,7 +309,7 @@ export class ProjectileHandler {
 
         dynamicGroundCollision = dynamicCollisionData.groundCollision;
 
-        if(dynamicCollisionData.groundCollision) {
+        if (dynamicCollisionData.groundCollision) {
             this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
             removeProjectiles.push(projectile);
         } else if (collisionData.groundCollision) {
@@ -310,15 +320,15 @@ export class ProjectileHandler {
 
         if (projectile.projectileType == ProjectileType.Arrow) {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, false);
-            for(let dynamicTile of dynamicTiles) {  
-            let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
-            let colData = this.collisionDetection.checkProjectileCollisionX([dynamicTile.tile], projectile, deltaVelocity, false, false);
+            for (let dynamicTile of dynamicTiles) {
+                let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
+                let colData = this.collisionDetection.checkProjectileCollisionX([dynamicTile.tile], projectile, deltaVelocity, false, false);
 
-            if(colData.collisionTimeX < dynamicCollisionData.collisionTimeX) {
-                dynamicCollisionData = colData;
-                liftVelocity = dynamicTile.velocity;
+                if (colData.collisionTimeX < dynamicCollisionData.collisionTimeX) {
+                    dynamicCollisionData = colData;
+                    liftVelocity = dynamicTile.velocity;
+                }
             }
-        }
         } else {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, true);
         }
@@ -326,7 +336,7 @@ export class ProjectileHandler {
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
         if (!groundCollision || !dynamicGroundCollision) {
-            if(dynamicCollisionData.wallCollision) {
+            if (dynamicCollisionData.wallCollision) {
                 this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
                 removeProjectiles.push(projectile);
             } else if (collisionData.wallCollision) {
@@ -400,9 +410,6 @@ export class ProjectileHandler {
 
         if (projectile instanceof PhysicalProjectile) {
             if (collisionData.groundCollision) {
-                let currentFrame = projectile.animation.getCurrentFrame();
-                projectile.animation.textureNumber = [currentFrame];
-                projectile.animation.frameIndex = 0;
                 projectile.onGroundCollision();
             }
         }

@@ -33,7 +33,7 @@ export class Loader {
             this.assetsLoader.getTexture("genericParticle.png"),
             this.assetsLoader.getTileTextures("tile"),
             this.assetsLoader.getUiTextures("ui"),
-            this.assetsLoader.getLevel("1")
+            this.assetsLoader.getLevel("0")
         ).subscribe(data => {
             this.asset.vertexShader = data[0] as string;
             this.asset.fragmentShader = data[1] as string;

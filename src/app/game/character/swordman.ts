@@ -6,6 +6,7 @@ import { TextureMapper } from '../render/textureMapper';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { DeathType } from './deathType';
+import { State } from './state';
 
 export class Swordman extends Enemy {
 
@@ -16,7 +17,10 @@ export class Swordman extends Enemy {
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;
     private hitOffset = 40;
-    private hitting = false;
+    protected hitting = false;
+    protected trackingSpeed = 0.2;
+    protected idleSpeed = 0.1;
+    protected minDistance = 5;
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
         super(position, width, height);
@@ -25,12 +29,12 @@ export class Swordman extends Enemy {
         this.maxSpeed = 0.1;
         this.actualSpeed = this.maxSpeed;
 
-        this.runningAnimation.textureNumber.push(228);
-        this.runningAnimation.textureNumber.push(227);
-        this.runningAnimation.textureNumber.push(229);
-        this.runningAnimation.textureNumber.push(227);
+        this.idleAnimation.textureNumber.push(228);
+        this.idleAnimation.textureNumber.push(227);
+        this.idleAnimation.textureNumber.push(229);
+        this.idleAnimation.textureNumber.push(227);
 
-        this.runningAnimation.timeToChange = 150;
+        this.idleAnimation.timeToChange = 150;
 
         this.hitAnimation.textureNumber.push(231);
         this.hitAnimation.textureNumber.push(231);
@@ -43,17 +47,18 @@ export class Swordman extends Enemy {
         this.trackingAnimation.textureNumber.push(211);
         this.trackingAnimation.textureNumber.push(210);
 
-        this.currentAnimation = this.runningAnimation;
     }
 
     public takeDamage(damage: number, type: SpellType) {
         super.takeDamage(damage, type);
-        if (!this.tracking) {
-            this.startTracking();
+        
+        if(this.currentState == State.Idle) {
+            this.currentState = State.Tracking;
         }
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
+        this.npcAction(delta, player, tiles);
         super.update(delta, tiles, player);
 
         if (this.currentAnimation == this.hitAnimation) {
@@ -67,20 +72,41 @@ export class Swordman extends Enemy {
         this.setHitAnimation();
         this.checkHitCollisionAreas(player);
 
-        this.npcAction(delta, player, tiles);
+        
     }
 
     private checkHitCollisionAreas(player: Player) {
         if (this.hitAnimation) {
             if (this.hitAnimation.frameIndex == 1 && !this.hitting) {
                 this.hitting = true;
-                this.projectileHandler.createSwordHit(this.position, this.width, this.inverse);
+                this.projectileHandler.createCollisionProjectile(this.position, this.width, this.inverse, 30, new Vector(0.5, 0.6));
             }
 
             if (this.hitAnimation.frameIndex == 0) {
                 this.hitting = false;
             }
         }
+    }
+
+    protected idle(delta: number, player: Player, tiles: Tile[]) {
+        super.idle(delta, player, tiles);
+        this.patrol(delta);
+    }
+
+    protected idleToTrackingTransition(delta: number) {
+        this.currentState = State.Tracking;
+        this.maxSpeed = this.trackingSpeed;
+        this.actualSpeed = this.maxSpeed;
+    }
+
+    protected trackingToInRangeTransition(delta: number) {
+        this.currentState = State.InHitRange;
+    }
+
+    protected trackingToIdleTransition(delta: number) {
+        this.maxSpeed = this.idleSpeed;
+        this.actualSpeed = this.maxSpeed;
+        this.currentState = State.Idle;
     }
 
     protected inRange(player: Player, offset: number) {
@@ -97,7 +123,8 @@ export class Swordman extends Enemy {
 
     }
 
-    protected hit(player: Player) {
+    protected hit(delta: number, player: Player, tiles: Tile[]) {
+        super.hit(delta, player, tiles);
         if (this.meeleAnimation) {
             if (this.meeleAnimation.repetitions <= 0) {
                 this.createHit(player);

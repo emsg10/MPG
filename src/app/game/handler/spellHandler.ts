@@ -7,6 +7,8 @@ import { Player } from '../character/player';
 export class SpellHandler {
 
     public currentCast: Cast;
+    public shieldCollidables: Rectangle[] = [];
+    public castingShield = false;
 
     private animationHandler: AnimationHandler;
     private projectileHandler: ProjectileHandler;
@@ -20,12 +22,15 @@ export class SpellHandler {
     private channelMagicCast: ChannelCast;
 
     private break: number = 0;
+    private refShieldCollidables: Rectangle[] = [];
 
     constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler, particleHandler: ParticleHandler, player: Player) {
         this.animationHandler = animationHandler;
         this.projectileHandler = projectileHandler;
         this.particleHandler = particleHandler;
         this.player = player;
+
+        this.createShieldCollidables();
 
         this.initCasts();
     }
@@ -38,14 +43,25 @@ export class SpellHandler {
             if (this.currentCast.done) {
                 this.currentCast.cancel();
                 this.currentCast = null;
-                this.currentCast = null;
             }
         } else {
-           this.player.regenMana();
+            if (!this.castingShield) {
+                this.player.regenMana();
+            }
         }
 
         if (this.channelMagicCast.currentValue >= 100) {
             this.particleHandler.createMagicEffect(this.player.position, this.player.inverse);
+        }
+
+        if (this.castingShield) {
+
+            this.shieldCollidables = [];
+            for (let collidable of this.refShieldCollidables) {
+                this.shieldCollidables.push(new Rectangle(collidable.x + this.player.position.x, collidable.y + this.player.position.y, collidable.width, collidable.height));
+            }
+
+            this.particleHandler.createShieldEffect(this.player.getCalculatedPos(this.player.position, 0), this.player.inverse);
         }
 
         this.updateBreak(delta);
@@ -65,8 +81,38 @@ export class SpellHandler {
             case SpellType.frostBlast: this.castFrostBlast();
                 break;
 
+            case SpellType.shield: this.castShield();
+                break;
+
             case SpellType.channelmagic: this.castChannelMagic();
                 break;
+        }
+    }
+
+    private createShieldCollidables() {
+        this.refShieldCollidables = [];
+        let posx = 17;
+        let posy = 40;
+
+        for (let i = 0; i < 20; i++) {
+            let angle: number;
+            let x: number;
+            angle = Math.PI * (i * 0.1 + 0.6);
+            x = posx + (30 * Math.cos(angle));
+
+            let y = posy + (40 * Math.sin(angle));
+            this.refShieldCollidables.push(new Rectangle(x, y, 12, 12));
+        }
+    }
+
+    private castShield() {
+        if (this.player.useMana(0.1)) {
+            if (this.break == 0) {
+                this.castingShield = true;
+            }
+        } else {
+            this.break = 500;
+            this.player.shieldExplosion(this.player.inverse);
         }
     }
 
@@ -85,6 +131,11 @@ export class SpellHandler {
                 this.fireBallCast.size = this.channelMagicCast.currentValue;
                 this.channelMagicCast.resetValue();
                 this.currentCast = this.fireBallCast;
+            } else {
+                this.break = 500;
+                if (this.castingShield) {
+                    this.player.shieldExplosion(this.player.inverse);
+                }
             }
         }
     }
@@ -108,6 +159,9 @@ export class SpellHandler {
                 this.currentCast = this.fireBlastCast;
             } else {
                 this.break = 500;
+                if (this.castingShield) {
+                    this.player.shieldExplosion(this.player.inverse);
+                }
             }
         }
     }
@@ -119,6 +173,9 @@ export class SpellHandler {
                 this.currentCast = this.frostBlastCast;
             } else {
                 this.break = 500;
+                if (this.castingShield) {
+                    this.player.shieldExplosion(this.player.inverse);
+                }
             }
         }
     }
@@ -162,7 +219,7 @@ export class SpellHandler {
         let onCancelChannelMagic = () => {
         }
 
-        this.channelMagicCast = new ChannelCast(channelAnimation, channelLowerAnimation ,onChannelMagic, onCancelChannelMagic, 40, 100, 0.03);
+        this.channelMagicCast = new ChannelCast(channelAnimation, channelLowerAnimation, onChannelMagic, onCancelChannelMagic, 40, 100, 0.03);
 
         let castAnimation = new Animation();
         castAnimation.textureNumber.push(170);

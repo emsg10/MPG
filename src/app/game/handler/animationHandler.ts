@@ -192,6 +192,24 @@ export class AnimationHandler {
         return animation;
     }
 
+    public shadow_Death(area: Rectangle, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(132);
+        animation.textureNumber.push(130);
+        animation.textureNumber.push(127);
+        animation.textureNumber.push(124);
+        animation.textureNumber.push(119);
+
+        animation.repetitions = 4;
+        animation.inverse = inverse;
+        animation.timeToChange = 100;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
     public swordman_corpse(position: Vector, inverse: boolean) {
         let animation = new Animation();
         animation.textureNumber.push(219);

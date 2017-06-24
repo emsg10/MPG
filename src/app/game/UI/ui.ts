@@ -9,36 +9,39 @@ export class UI {
     private bars: Bar[] = [];
     private hpBar: ProgressBar = new ProgressBar();
     private manaBar: ProgressBar = new ProgressBar();
-
+    private hudTextureCoords = this.renderHelper.getTextureCoordinates([], 198);
+    
     constructor(maxHp: number, maxMana: number) {
         
-        this.hpBar.bar = new Bar(10, 10, 150, 30, 150, 52);
-        this.hpBar.content = new Bar(10, 10, 150, 30, 150, 54);
+        this.hpBar.bar = new Bar(new Rectangle(100, 8, 298, 16), 298, new Rectangle(1632, 96, 200, 12), 200);
         this.hpBar.maxValue = maxHp;
-        this.manaBar.bar = new Bar(180, 10, 150, 30, 150, 52);
-        this.manaBar.content = new Bar(180, 10, 150, 30, 150, 53);
+        this.manaBar.bar = new Bar(new Rectangle(100, 34, 298, 16), 298, new Rectangle(1632, 128, 200, 12), 200);
         this.manaBar.maxValue = maxMana;
         
         this.bars.push(this.hpBar.bar);
-        this.bars.push(this.hpBar.content);
         this.bars.push(this.manaBar.bar);
-        this.bars.push(this.manaBar.content);
-
     }
 
     public update(hp: number, mana: number) {
         let hpFactor = hp/this.hpBar.maxValue;
-        this.hpBar.content.width = this.hpBar.content.maxWidth * hpFactor;
+        this.hpBar.bar.area.width = (hpFactor * this.hpBar.bar.maxWidth);
+        this.hpBar.bar.textureArea.width = (hpFactor * this.hpBar.bar.maxTextureWidth);
 
         let manaFactor = mana/this.manaBar.maxValue;
-        this.manaBar.content.width = this.manaBar.content.maxWidth * manaFactor;
+        this.manaBar.bar.area.width = (manaFactor * this.manaBar.bar.maxWidth);
+        this.manaBar.bar.textureArea.width = (manaFactor * this.manaBar.bar.maxTextureWidth);
+
     }
 
     public createRenderCall(renderCall: RenderCall, camera: [number, number]) {
 
+        renderCall.vertecies = this.renderHelper.getVertecies(0 + camera[0], 0 + camera[1], 405, 96, renderCall.vertecies);
+        renderCall.textureCoords.push.apply(renderCall.textureCoords, this.hudTextureCoords);
+        renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
+
         for (let bar of this.bars) {
-            renderCall.vertecies = this.renderHelper.getVertecies(bar.x + camera[0], bar.y + camera[1], bar.width, bar.height, renderCall.vertecies);
-            renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, bar.textureNumber);
+            renderCall.vertecies = this.renderHelper.getVertecies(bar.area.x + camera[0], bar.area.y + camera[1], bar.area.width, bar.area.height, renderCall.vertecies);
+            renderCall.textureCoords.push.apply(renderCall.textureCoords, this.renderHelper.getMainTextureCoords(bar.textureArea));
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
         }
 

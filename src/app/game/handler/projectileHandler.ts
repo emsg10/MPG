@@ -90,13 +90,13 @@ export class ProjectileHandler {
         }
 
         let animation = this.animationHandler.createDeadArrow(rectangle, inverse, velocity);
-        velocity.x = -velocity.x / 4;
+        velocity.x = -velocity.x/2;
         if (push) {
             velocity.x += push.x;
             velocity.y += push.y;
         }
         arrow = new PhysicalProjectile(velocity, rectangle, animation, 1, collRect);
-        arrow.gravity = new Gravity(0.0003);
+        arrow.gravity = new Gravity(0.0006);
         arrow.drag = new Drag(0.0002);
 
         arrow.projectileType = ProjectileType.None;
@@ -119,27 +119,27 @@ export class ProjectileHandler {
         this.projectiles.push(fireBall);
     }
 
-    public createSwordHit(position: Vector, offset: number, inverse: boolean) {
+    public createCollisionProjectile(position: Vector, offset: number, inverse: boolean, damage: number, velocity: Vector) {
         let rect: Rectangle;
-        let velocity: Vector;
         if (inverse) {
             rect = new Rectangle(position.x, position.y - 10, 10, 10);
-            velocity = new Vector(-0.5, 0.6);
+            velocity.x = -velocity.x;
         } else {
             rect = new Rectangle(position.x + offset, position.y - 10, 10, 10);
-            velocity = new Vector(0.5, 0.6);
         }
-        let collisionProjectile = new CollisionProjectile(velocity, rect, 40, this.animationHandler.voidAnimation(), 30);
+        let collisionProjectile = new CollisionProjectile(velocity, rect, 40, this.animationHandler.voidAnimation(), damage);
         collisionProjectile.projectileType = ProjectileType.Sword;
 
         this.enemyProjectiles.push(collisionProjectile);
+
+        return collisionProjectile;
     }
 
     public createSwordman_death(position: Vector, inverse: boolean, velocity: Vector) {
         let projectile: PhysicalProjectile;
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.swordman_head(position, inverse), 0.3)
-         projectile.extendedOnGroundCollision = () => {
+        projectile.extendedOnGroundCollision = () => {
             let currentFrame = projectile.animation.getCurrentFrame();
             projectile.animation.textureNumber = [currentFrame];
             projectile.animation.frameIndex = 0;
@@ -160,7 +160,7 @@ export class ProjectileHandler {
         let velocity = new Vector(0, 0);
         let x = position.x;
 
-        if(inverse) {
+        if (inverse) {
             x -= 45;
         }
 
@@ -175,6 +175,20 @@ export class ProjectileHandler {
 
         this.projectiles.push(projectile);
         this.projectiles.push(projectileCorpse);
+    }
+
+    public createShadow_death(area: Rectangle, inverse: boolean) {
+
+        let projectile: PhysicalProjectile;
+        let projectileCorpse: Projectile;
+        let velocity = new Vector(0, 0);
+        let x = area.x;
+
+        
+
+        projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.shadow_Death(area, inverse), 0.8)
+
+        this.projectiles.push(projectile);
     }
 
     public createFrozenSwordManDeath(area: Rectangle, inverse: boolean, color: number[]) {
@@ -272,19 +286,23 @@ export class ProjectileHandler {
 
     private updateEnemyProjectiles(delta: number, player: Player, collidables: Rectangle[], dynamicTiles: DynamicTile[]) {
         let removeProjectiles: Projectile[] = [];
+        let shieldCollidables: Rectangle[] = [];
         let playerCollisionArea = player.getProjectileCollisionArea();
+
+        shieldCollidables.push(...player.getShieldCollidables());
 
         for (let projectile of this.enemyProjectiles) {
             let frameVelocity = new Vector(projectile.velocity.x * delta, projectile.velocity.y * delta);
-            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, dynamicTiles, playerCollisionArea, removeProjectiles);
+            removeProjectiles = this.updateAndCollCheckEnemyProjectile(projectile, frameVelocity, delta, player, dynamicTiles, playerCollisionArea, shieldCollidables, removeProjectiles);
             removeProjectiles = this.checkStaticObjectCollisions(projectile, frameVelocity, collidables, removeProjectiles);
         }
 
         return removeProjectiles;
     }
 
-    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, dynamicTiles: DynamicTile[], playerCollisionArea: Rectangle, removeProjectiles: Projectile[]) {
+    private updateAndCollCheckEnemyProjectile(projectile: Projectile, frameVelocity: Vector, delta: number, player: Player, dynamicTiles: DynamicTile[], playerCollisionArea: Rectangle, shieldCollidables: Rectangle[], removeProjectiles: Projectile[]) {
         let collisionData: CollisionData;
+        let shieldCollisionData: CollisionData;
         let dynamicCollisionData: CollisionData = new CollisionData();
         let groundCollision: boolean;
         let dynamicGroundCollision: boolean;
@@ -295,6 +313,8 @@ export class ProjectileHandler {
         let deltaVelocity = new Vector(frameVelocity.x - velocity.x * delta, frameVelocity.y - velocity.y * delta);
 
         collisionData = this.collisionDetection.checkProjectileCollisionY([playerCollisionArea], projectile, deltaVelocity, false);
+        shieldCollisionData = this.collisionDetection.checkProjectileCollisionY(shieldCollidables, projectile, deltaVelocity, false);
+
         for (let dynamicTile of dynamicTiles) {
             let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
             let colData = this.collisionDetection.checkProjectileCollisionY([dynamicTile.tile], projectile, deltaVelocity, false);
@@ -308,8 +328,12 @@ export class ProjectileHandler {
         projectile.update(0, collisionData.collisionTimeY * frameVelocity.y, delta);
 
         dynamicGroundCollision = dynamicCollisionData.groundCollision;
+        groundCollision = shieldCollisionData.groundCollision;
 
-        if (dynamicCollisionData.groundCollision) {
+        if (shieldCollisionData.groundCollision) {
+            this.setShieldDamage(player, projectile);
+            removeProjectiles.push(projectile);
+        } else if (dynamicCollisionData.groundCollision) {
             this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
             removeProjectiles.push(projectile);
         } else if (collisionData.groundCollision) {
@@ -320,6 +344,7 @@ export class ProjectileHandler {
 
         if (projectile.projectileType == ProjectileType.Arrow) {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, false);
+            shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, false);
             for (let dynamicTile of dynamicTiles) {
                 let deltaVelocity = new Vector(frameVelocity.x - dynamicTile.velocity.x * delta, frameVelocity.y - dynamicTile.velocity.y * delta);
                 let colData = this.collisionDetection.checkProjectileCollisionX([dynamicTile.tile], projectile, deltaVelocity, false, false);
@@ -331,12 +356,16 @@ export class ProjectileHandler {
             }
         } else {
             collisionData = this.collisionDetection.checkProjectileCollisionX([playerCollisionArea], projectile, deltaVelocity, false, true);
+            shieldCollisionData = this.collisionDetection.checkProjectileCollisionX(shieldCollidables, projectile, deltaVelocity, false, true);
         }
 
         projectile.update(collisionData.collisionTimeX * frameVelocity.x, 0, delta);
 
         if (!groundCollision || !dynamicGroundCollision) {
-            if (dynamicCollisionData.wallCollision) {
+            if (shieldCollisionData.wallCollision) {
+                this.setShieldDamage(player, projectile);
+                removeProjectiles.push(projectile);
+            } else if (dynamicCollisionData.wallCollision) {
                 this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity, liftVelocity);
                 removeProjectiles.push(projectile);
             } else if (collisionData.wallCollision) {
@@ -443,6 +472,30 @@ export class ProjectileHandler {
         }
 
         return removeProjectiles;
+    }
+
+    private setShieldDamage(player: Player, projectile: Projectile) {
+        if (projectile.projectileType == ProjectileType.Arrow) {
+            this.createDeadArrow(new Vector(projectile.area.x, projectile.area.y), projectile.animation.inverse, projectile.velocity);
+            if (!player.useMana(20)) {
+                if(projectile.area.x > player.position.x) {
+                    player.shieldExplosion(false);
+                } else {
+                    player.shieldExplosion(true);
+                }
+                player.mana = 0;
+                
+            }
+        } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
+            if (!player.useMana(projectile.damage)) {
+                player.mana = 0;
+                if(projectile.area.x > player.position.x) {
+                    player.shieldExplosion(true);
+                } else {
+                    player.shieldExplosion(false);
+                }
+            };
+        }
     }
 
     private destroyAnimation(projectile: Projectile) {

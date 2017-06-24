@@ -18,11 +18,11 @@ import { DebugHandler } from './handler/debugHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
 import { Camera } from './camera';
-import { Archer } from './character/archer';
+import { Archer, Shadow } from './character';
 import { DynamicRenderer } from './render/dynamicRenderer';
 import { UI } from './UI/ui';
 import { SceneHandler } from './UI/sceneHandler';
-import { LoadHelper} from './service/loadHelper';
+import { LoadHelper } from './service/loadHelper';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -45,6 +45,7 @@ export class Game {
 	private channelMagicKeyPress: boolean;
 	private frostKeyPress: boolean;
 	private fireKeyPress: boolean;
+	private shieldPress: boolean;
 	private lastUpdate: number;
 	private textRenderer: TextRenderer;
 	private intevalTimer: any;
@@ -65,7 +66,7 @@ export class Game {
 	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 	private sceneHandler: SceneHandler;
 	private collisionAreaEnd: Rectangle;
-	
+
 
 	constructor(private asset: Asset, canvas: HTMLCanvasElement, level: LevelData) {
 
@@ -77,11 +78,11 @@ export class Game {
 		this.dynamicRenderer = new DynamicRenderer(this.context);
 		this.levelData = level;
 
+
+
 		this.initKeyBindings();
 		this.reset(this.levelData);
 		this.initLoop();
-
-		
 	}
 
 	public reset(levelData: LevelData) {
@@ -130,9 +131,9 @@ export class Game {
 					this.sceneHandler.update();
 					this.sceneHandler.render();
 				}
-				
 
-				
+
+
 
 				nextGameTick += skipTicks;
 			}
@@ -149,7 +150,7 @@ export class Game {
 
 		let simpleRenderCalls: SimpleParticleRenderCall[] = [];
 
-		//this.debugHandler.debugRects = [this.player.getProjectileCollisionArea()];
+		// this.debugHandler.debugRects = this.player.getShieldCollidables();
 
 		//GAME
 		this.enemyHandler.createRenderCall(colorRenderCall);
@@ -168,7 +169,7 @@ export class Game {
 			renderCall = this.player.createRenderCall(renderCall)
 		}
 
-		
+
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(colorRenderCall)
 		this.UI.createRenderCall(renderCall, this.camera.position);
@@ -177,7 +178,7 @@ export class Game {
 		this.debugHandler.createRenderCall(renderCall);
 
 		colorRenderCalls.push(colorRenderCall);
-		
+
 		this.tileMap.createRenderCall(this.renderCalls);
 		this.renderCalls = this.dynamicTileHandler.createRenderCall(this.renderCalls);
 
@@ -191,9 +192,9 @@ export class Game {
 
 	private checkGoal() {
 		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.collisionAreaEnd);
-		if(this.levelCompleted) {
+		if (this.levelCompleted) {
 			this.sceneHandler.levelCompleted(this.level.name);
-		}	
+		}
 	}
 
 	private checkKeys(delta: number) {
@@ -206,6 +207,10 @@ export class Game {
 
 			if (this.jumpKeyPress) {
 				this.player.jump();
+			}
+
+			if(this.shieldPress) {
+				this.player.cast(SpellType.shield);
 			}
 
 			if (this.frostKeyPress) {
@@ -248,6 +253,9 @@ export class Game {
 				case 'Numpad4':
 					this.fireKeyPress = true;
 					break;
+				case 'Numpad5':
+					this.shieldPress = true;
+					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = true;
 					break;
@@ -288,6 +296,9 @@ export class Game {
 				case 'Numpad4':
 					this.fireKeyPress = false;
 					break;
+				case 'Numpad5':
+					this.shieldPress = false;
+					break;
 				case 'ArrowUp':
 					this.jumpKeyPress = false;
 					break;
@@ -309,7 +320,7 @@ export class Game {
 		this.dynamicTileHandler = new DynamicTileHandler();
 
 		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler);
-		this.collisionAreaEnd = new Rectangle(this.level.end.x + (this.level.end.width/2), this.level.end.y + (this.level.end.height/2), 1, 1);
+		this.collisionAreaEnd = new Rectangle(this.level.end.x + (this.level.end.width / 2), this.level.end.y + (this.level.end.height / 2), 1, 1);
 		this.particleHandler.tiles = this.level.tiles;
 
 		this.camera = new Camera([this.level.camera[0], this.level.camera[1]], [this.canvasWidth, this.canvasHeight], this.level.gameSize);
@@ -320,6 +331,10 @@ export class Game {
 		this.UI = new UI(100, 200);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
+
+		let shadow = new Shadow(new Vector(400, 200), 80, 80, this.projectileHandler, this.animationHandler);
+		this.enemyHandler.enemies.push(shadow);
+
 		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
 		this.tileMap = new TileMap(this.level.tiles, this.level.decorativeTiles);
 

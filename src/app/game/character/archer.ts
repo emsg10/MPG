@@ -7,6 +7,7 @@ import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { DebugHandler } from '../handler/debugHandler';
 import { DeathType } from './deathType';
+import { State } from './';
 
 export class Archer extends Enemy {
 
@@ -29,10 +30,10 @@ export class Archer extends Enemy {
         this.maxSpeed = 0.1;
         this.actualSpeed = this.maxSpeed;
 
-        this.runningAnimation.textureNumber.push(267);
-        this.runningAnimation.textureNumber.push(266);
-        this.runningAnimation.textureNumber.push(267);
-        this.runningAnimation.textureNumber.push(265);
+        this.idleAnimation.textureNumber.push(267);
+        this.idleAnimation.textureNumber.push(266);
+        this.idleAnimation.textureNumber.push(267);
+        this.idleAnimation.textureNumber.push(265);
 
         this.hitAnimation.textureNumber.push(262);
         this.hitAnimation.textureNumber.push(264);
@@ -40,22 +41,23 @@ export class Archer extends Enemy {
         this.hitAnimation.textureNumber.push(264);
 
         this.trackingAnimation.textureNumber.push(267);
+        this.trackingAnimation.textureNumber.push(266);
+        this.trackingAnimation.textureNumber.push(267);
+        this.trackingAnimation.textureNumber.push(265);
+        this.trackingAnimation.timeToChange = 175;
 
         this.hitAnimation.timeToChange = 300;
 
         this.currentAnimation = this.hitAnimation;
 
-        this.runningAnimation.timeToChange = 175;
-
-        this.currentAnimation = this.runningAnimation;
+        this.idleAnimation.timeToChange = 175;
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
+        this.npcAction(delta, player, tiles);
         super.update(delta, tiles, player);
 
         this.currentAnimation.next(delta);
-
-        this.npcAction(delta, player, tiles);
     }
 
     public getCollisionArea() {
@@ -64,7 +66,13 @@ export class Archer extends Enemy {
         return collisionArea;
     }
 
-    protected hit(player: Player) {
+    protected idle(delta: number, player: Player, tiles: Tile[]) {
+        super.idle(delta, player, tiles);
+        this.patrol(delta);
+    }
+
+    protected hit(delta: number, player: Player, tiles: Tile[]) {
+        super.hit(delta, player, tiles);
         this.shooting = true;
 
         if(this.hitAnimation.frameIndex == 3) {
@@ -78,6 +86,18 @@ export class Archer extends Enemy {
         } else {
             this.shoot = false;
         }
+    }
+
+    protected idleToTrackingTransition(delta: number) {
+        this.currentState = State.Tracking;
+    }
+
+    protected trackingToInRangeTransition(delta: number) {
+        this.currentState = State.InHitRange;
+    }
+
+    protected trackingToIdleTransition(delta: number) {
+        this.currentState = State.Idle;
     }
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
@@ -98,10 +118,6 @@ export class Archer extends Enemy {
         } else {
             return false;
         }
-    }
-
-    protected startTracking() {
-        this.tracking = true;
     }
 
     private getDeltaPosition(player: Player) {

@@ -168,6 +168,10 @@ export class RenderHelper {
 		return currentTextureCoordinates;
 	}
 
+	public getMainTextureCoords(rect: Rectangle) {
+		return this.getCoords(rect, RenderHelper.textureSize);
+	}
+
 	private getCoords(rect: Rectangle, size: number) {
 		let x1 = rect.x / size;
 		let y1 = rect.y / size;

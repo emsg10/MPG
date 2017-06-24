@@ -1,6 +1,7 @@
 import { Vector, Tile, Rectangle, Animation, SpellType } from '../model'
 import { Character } from './character';
 import { Player } from './player';
+import { State } from './';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { CollisionData } from '../collision/collisionData';
 import { AnimationHandler } from '../handler/animationHandler';
@@ -14,10 +15,14 @@ export class Enemy extends Character {
     protected oldDirection = true;
     protected collisionDetection = CollisionDetection.getInstance();
     protected nextToEdge: boolean;
-    protected runningAnimation = new Animation();
-    protected hitAnimation = new Animation();
+    protected idleAnimation = new Animation();
+    protected idleToTrackingAnimation = new Animation();
     protected trackingAnimation = new Animation();
+    protected trackingToInRangeTransitionAnimation = new Animation();
+    protected trackingToIdleTransitionAnimation = new Animation();
+    protected hitAnimation = new Animation();
     protected collisionData: CollisionData;
+    protected hitDamage = 0;
     protected hp: number = 100;
     protected freezeDamage: number = 0.08;
     protected flameDamage: number = 0.12;
@@ -26,11 +31,16 @@ export class Enemy extends Character {
     protected burnDamage = 0.2;
     protected cinderValue = 0;
     protected burnDurationFactor = 3;
-    protected tracking = false;
     protected hitAreaOffset = 40;
+    protected minDistance = 5;
     protected searchAreaOffset = 150;
     protected trackingTime = 0;
     protected trackingMaxTime = 3000;
+    protected trackingSpeed = 0;
+    protected idleSpeed = 0;
+    protected hitting = false;
+
+    protected currentState = State.Idle;
 
     constructor(position: Vector, width: number, height: number) {
         super(position, width, height);
@@ -117,12 +127,6 @@ export class Enemy extends Character {
             this.velocity.x = 0;
         }
 
-        this.trackingTime -= delta;
-        if (this.trackingTime <= 0) {
-            this.tracking = false;
-            this.currentAnimation = this.runningAnimation;
-        }
-
         let freezePercent = this.freezeValue / this.maxFreeze;
         this.updateColor([1.0 + (freezePercent * 1.0), 1.0 + (freezePercent * 2.0), 1.0 + (freezePercent * 2.0), 1.0]);
 
@@ -130,9 +134,28 @@ export class Enemy extends Character {
     }
 
     public getCollisionArea() {
-        let collisionArea = new Rectangle(this.position.x, this.position.y, this.width, 55);
-
+        let collisionArea = new Rectangle(0, 0, 0, 0);
         return collisionArea;
+    }
+
+    protected idle(delta: number, player: Player, tiles: Tile[]) {
+        this.currentAnimation = this.idleAnimation;
+        this.maxSpeed = this.idleSpeed;
+        if (this.inRange(player, this.searchAreaOffset, tiles)) {
+            this.currentState = State.IdleToTrackingTransition;
+        }
+    }
+
+    protected idleToTrackingTransition(delta: number) {
+
+    }
+
+    protected trackingToInRangeTransition(delta: number) {
+
+    }
+
+    protected trackingToIdleTransition(delta: number) {
+
     }
 
     protected patrol(delta: number) {
@@ -147,45 +170,42 @@ export class Enemy extends Character {
         }
     }
 
-    protected hit(player: Player) {
+    protected hit(delta: number, player: Player, tiles: Tile[]) {
+        this.currentAnimation = this.hitAnimation;
+        if (!this.inRange(player, this.hitAreaOffset, tiles) && this.hitAnimation.frameIndex == 0) {
+            this.currentState = State.Tracking;
+        }
 
+        this.moveToPlayer(delta, player, tiles);
     }
 
     protected npcAction(delta: number, player: Player, tiles: Tile[]) {
 
-        if (this.tracking) {
-            if (this.inRange(player, this.hitAreaOffset, tiles)) {
-                this.trackingTime = this.trackingMaxTime;
-                this.hit(player);
-                this.currentAnimation = this.hitAnimation;
-            } else {
-                this.currentAnimation = this.trackingAnimation;
-            }
+        switch (this.currentState) {
+            case State.Idle: this.idle(delta, player, tiles);
+                break;
 
-            this.track(player, delta, tiles);
+            case State.IdleToTrackingTransition: this.idleToTrackingTransition(delta);
+                break;
 
-        } else {
-            if (this.inRange(player, this.searchAreaOffset, tiles)) {
-                this.trackingTime = this.trackingMaxTime;
-                this.startTracking();
-            } else {
-                this.patrol(delta);
-            }
+            case State.TrackingToIdleTransition: this.trackingToIdleTransition(delta);
+                break;
+
+            case State.Tracking: this.track(player, delta, tiles);
+                break;
+
+            case State.TrackingToInRangeTransition: this.trackingToInRangeTransition(delta);
+                break;
+
+            case State.InHitRange: this.hit(delta, player, tiles);
+                break;
         }
     }
 
     protected checkStop(player: Player, tiles: Tile[]) {
-        if (this.nextToEdge || this.inRange(player, 5, tiles)) {
+        if (this.nextToEdge || this.inRange(player, this.minDistance, tiles)) {
             this.stop();
         }
-    }
-
-    protected startTracking() {
-        this.trackingTime = this.trackingMaxTime;
-        this.tracking = true;
-        this.currentAnimation = this.trackingAnimation;
-        this.maxSpeed = 0.2;
-        this.actualSpeed = this.maxSpeed;
     }
 
     protected stop() {
@@ -193,7 +213,27 @@ export class Enemy extends Character {
     }
 
     protected track(player: Player, delta: number, tiles: Tile[]) {
+        this.currentAnimation = this.trackingAnimation;
+        this.maxSpeed = this.trackingSpeed;
 
+        this.trackingTime -= delta;
+        if (this.trackingTime <= 0) {
+            this.currentState = State.TrackingToIdleTransition;
+        }
+
+        if (this.inRange(player, this.searchAreaOffset, tiles)) {
+            this.trackingTime = this.trackingMaxTime;
+        }
+
+        if (this.inRange(player, this.hitAreaOffset, tiles)) {
+            this.currentState = State.TrackingToInRangeTransition;
+        }
+
+        this.moveToPlayer(delta, player, tiles);
+
+    }
+
+    private moveToPlayer(delta: number, player: Player, tiles: Tile[]) {
         if (Math.abs(player.position.x - this.position.x) > 10) {
             if (player.position.x < this.position.x) {
                 this.moveLeft(delta);
@@ -205,7 +245,6 @@ export class Enemy extends Character {
                 this.checkStop(player, tiles);
             }
         }
-
     }
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {

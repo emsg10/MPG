@@ -99,11 +99,11 @@ export class ParticleHandler {
 
     private shieldEffectSettings: number[] = [
         2, 4,
-        100, 100,
+        200, 200,
         10, 10,
         0.1, 0.1,
         0.2,
-        -Math.PI * 0.52, Math.PI * 0.30
+        0, Math.PI * 2
     ];
 
     private invertedShieldEffectSettings: number[] = [
@@ -134,6 +134,29 @@ export class ParticleHandler {
     ];
 
     constructor() {
+    }
+
+     public createShieldExplosionEffect(position: Vector, inverse: boolean) {
+        position.y = position.y - 5;
+
+        let settings: number[] = [];
+        if (inverse) {
+            settings = this.invertedShieldExplosionEffectSettings;
+        } else {
+            settings = this.shieldExplosionEffectSettings;
+        }
+
+        let effectParticles = this.createCircleParticles(position, 40, 40, false, settings, 100);
+
+        this.shieldEffectParticles.push(...effectParticles);
+    }
+
+    public createShieldEffect(position: Vector, inverse: boolean) {
+        position.y = position.y + 5;
+
+        let effectParticles = this.createCenterCircleParticles(position, 10, 20, this.shieldEffectSettings, false, 0, 0, 100, 0, 2);
+
+        this.shieldEffectParticles.push(...effectParticles);
     }
 
     public createFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {

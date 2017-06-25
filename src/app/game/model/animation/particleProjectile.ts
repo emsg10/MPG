@@ -7,8 +7,8 @@ export class ParticleProjectile extends Projectile {
     private offset: number;
     private inverse: boolean;
 
-    constructor(velocity: Vector, area: Rectangle, animation: Animation, collisionRatio: number, distance: number, inverse: boolean, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
-        super(velocity, area, animation, collisionRatio);
+    constructor(velocity: Vector, area: Rectangle, animation: Animation, collisionRatio: number, distance: number, inverse: boolean, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void, collisionArea?: Rectangle) {
+        super(velocity, area, animation, collisionRatio, collisionArea);
 
         this.onUpdate = onUpdate;
         this.distance = distance;

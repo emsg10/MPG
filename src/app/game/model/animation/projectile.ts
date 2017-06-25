@@ -6,6 +6,7 @@ export abstract class Projectile {
     public collisionArea: Rectangle;
     public animation: Animation;
     public projectileType: ProjectileType = ProjectileType.None;
+    public damage: number = 0;
 
     constructor(velocity: Vector, area: Rectangle, animation: Animation, collisionRatio: number, collisionArea?: Rectangle) {
         this.velocity = velocity;

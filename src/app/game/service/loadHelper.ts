@@ -1,8 +1,9 @@
 import { LevelData } from '../map/model';
 import { Level, Tile, DynamicTile, Rectangle, Vector } from '../model';
-import { Enemy, Swordman, Archer } from '../character';
+import { Enemy, Swordman, Archer, Shadow, Apprentice } from '../character';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
+import { ParticleHandler } from '../handler/particleHandler';
 
 export class LoadHelper {
 
@@ -20,7 +21,7 @@ export class LoadHelper {
 		return LoadHelper.instance;
 	}
 
-	public levelDataToLevel(levelData: LevelData, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
+	public levelDataToLevel(levelData: LevelData, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler) {
 
 		let level = new Level();
 
@@ -70,6 +71,10 @@ export class LoadHelper {
 				enemy = new Swordman(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler);
 			} else if(it.key == 51) {
 				enemy = new Archer(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler);
+			} else if(it.key == 52) {
+				enemy = new Shadow(new Vector(it.area.x, it.area.y), 85, 85, projectileHandler, animationHandler);
+			} else if(it.key == 54) { 
+				enemy = new Apprentice(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler, particleHandler);
 			}
 
 			return enemy;

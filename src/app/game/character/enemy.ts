@@ -39,6 +39,7 @@ export class Enemy extends Character {
     protected trackingSpeed = 0;
     protected idleSpeed = 0;
     protected hitting = false;
+    protected collisionArea: Rectangle;
 
     protected currentState = State.Idle;
 
@@ -93,8 +94,10 @@ export class Enemy extends Character {
 
         this.fall(delta);
 
-        let leftEdge = this.collisionDetection.fastCheckEnviroment(new Rectangle(this.position.x, this.position.y + this.height, 1, 30), tiles);
-        let rightEdge = this.collisionDetection.fastCheckEnviroment(new Rectangle(this.position.x + this.width, this.position.y + this.height, 1, 30), tiles);
+        let collisionArea = this.getCollisionArea();
+
+        let leftEdge = this.collisionDetection.fastCheckEnviroment(new Rectangle(collisionArea.x, collisionArea.y + collisionArea.height, 1, 30), tiles);
+        let rightEdge = this.collisionDetection.fastCheckEnviroment(new Rectangle(collisionArea.x + collisionArea.width, collisionArea.y + collisionArea.height, 1, 30), tiles);
 
         if (leftEdge && rightEdge) {
             this.nextToEdge = true;
@@ -253,6 +256,10 @@ export class Enemy extends Character {
 
     protected rand(min: number, max: number) {
         return min + (Math.random() * (max - min))
+    }
+
+    protected getDeltaPosition(player: Player) {
+        return new Vector(player.position.x - this.position.x, player.position.y - this.position.y);
     }
 
     private updateBurnDamage() {

@@ -18,7 +18,7 @@ import { DebugHandler } from './handler/debugHandler';
 import { EnemyHandler } from './handler/enemyHandler';
 import { LevelData, EnemyType } from './map/model';
 import { Camera } from './camera';
-import { Archer, Shadow } from './character';
+import { Archer, Shadow, Apprentice } from './character';
 import { DynamicRenderer } from './render/dynamicRenderer';
 import { UI } from './UI/ui';
 import { SceneHandler } from './UI/sceneHandler';
@@ -319,7 +319,7 @@ export class Game {
 		this.projectileHandler = new ProjectileHandler(this.animationHandler);
 		this.dynamicTileHandler = new DynamicTileHandler();
 
-		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler);
+		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.collisionAreaEnd = new Rectangle(this.level.end.x + (this.level.end.width / 2), this.level.end.y + (this.level.end.height / 2), 1, 1);
 		this.particleHandler.tiles = this.level.tiles;
 
@@ -331,9 +331,6 @@ export class Game {
 		this.UI = new UI(100, 200);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
-
-		let shadow = new Shadow(new Vector(400, 200), 80, 80, this.projectileHandler, this.animationHandler);
-		this.enemyHandler.enemies.push(shadow);
 
 		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
 		this.tileMap = new TileMap(this.level.tiles, this.level.decorativeTiles);

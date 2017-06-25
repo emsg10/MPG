@@ -12,7 +12,6 @@ export class Swordman extends Enemy {
 
     public hitCollisionAreas: Rectangle[] = [];
     private textureMapper = TextureMapper.getInstance();
-    private collisionArea: Rectangle;
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;

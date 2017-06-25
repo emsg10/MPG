@@ -19,7 +19,6 @@ export class Archer extends Enemy {
     protected hp = 50;
     private arrowVelocity = 0.5;
     private shoot = false;
-    private shooting = false;
     public debugHandler = DebugHandler.getInstance();
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
@@ -73,11 +72,9 @@ export class Archer extends Enemy {
 
     protected hit(delta: number, player: Player, tiles: Tile[]) {
         super.hit(delta, player, tiles);
-        this.shooting = true;
 
         if(this.hitAnimation.frameIndex == 3) {
             if(!this.shoot) {
-                this.shooting = false;
                 this.shoot = true;
                 let velocity = this.calculatePath(player, this.inverse);
                 let bowPosition = new Vector(this.position.x, this.position.y + 20); 
@@ -102,10 +99,6 @@ export class Archer extends Enemy {
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        if(this.shooting) {
-            return true;
-        }
-
         let deltaPos = this.getDeltaPosition(player);
         let magnitude = deltaPos.magnitude();
         
@@ -118,10 +111,6 @@ export class Archer extends Enemy {
         } else {
             return false;
         }
-    }
-
-    private getDeltaPosition(player: Player) {
-        return new Vector(player.position.x - this.position.x, player.position.y - this.position.y);
     }
 
     private clearShoot(deltaPos: Vector, tiles: Tile[]) {

@@ -192,6 +192,29 @@ export class AnimationHandler {
         return animation;
     }
 
+    public apprentice_Death(area: Rectangle, inverse: boolean) {
+        let animation = new Animation();
+        animation.textureNumber.push(144);
+        animation.textureNumber.push(145);
+        animation.textureNumber.push(146);
+        animation.textureNumber.push(153);
+        animation.textureNumber.push(154);
+        animation.textureNumber.push(155);
+        animation.textureNumber.push(155);
+        animation.textureNumber.push(155);
+        animation.textureNumber.push(155);
+        animation.textureNumber.push(155);
+
+        animation.repetitions = 9;
+        animation.inverse = inverse;
+        animation.timeToChange = 150;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
     public shadow_Death(area: Rectangle, inverse: boolean) {
         let animation = new Animation();
         animation.textureNumber.push(132);
@@ -300,6 +323,10 @@ export class AnimationHandler {
         return animation;
     }
 
+    public necroball_explosion(position: Vector, size: number) {
+        this.particleHandler.createNecroballExplosion(position, size);
+    }
+
     public fireball_explosion(position: Vector, size: number) {
         this.particleHandler.createFireballExplosion(position, size);
     }
@@ -307,11 +334,11 @@ export class AnimationHandler {
     public swordscut_a(position: Vector, size: number, inverse: boolean) {
 
         let animation = new Animation();
-        animation.textureNumber.push(153);
-        animation.textureNumber.push(154);
-        animation.textureNumber.push(155);
-        animation.textureNumber.push(156);
-        animation.textureNumber.push(157);
+        animation.textureNumber.push(55);
+        animation.textureNumber.push(56);
+        animation.textureNumber.push(57);
+        animation.textureNumber.push(58);
+        animation.textureNumber.push(59);
         animation.inverse = inverse;
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
@@ -530,7 +557,6 @@ export class AnimationHandler {
     }
 
     public createDynamicRenderCall(renderCall: DynamicRenderCall, camera: [number, number]) {
-
 
         for (let animation of this.dynamicAnimations) {
             if (animation instanceof RotationAnimation || animation instanceof StaticRotationAnimation) {

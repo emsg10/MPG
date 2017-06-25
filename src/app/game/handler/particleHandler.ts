@@ -18,6 +18,8 @@ export class ParticleHandler {
     public fireParticles: Particle[] = [];
     public fireEffectParticles: Particle[] = [];
 
+    public necroEffectParticles: Particle[] = [];
+
     public shieldEffectParticles: Particle[] = [];
     public tiles: Tile[];
 
@@ -30,6 +32,7 @@ export class ParticleHandler {
     private frostColor = [0.4, 0.9, 0.9, 0.9];
     private frostEffectColor = [0.7, 0.9, 0.9, 0.9];
     private shieldColor = [0.5, 0.4, 0.7, 0.7];
+    private necroColor = [0, 0.5, 0, 0.8];
 
     private flameParticleSettings: number[] = [
         2, 5,
@@ -161,35 +164,32 @@ export class ParticleHandler {
 
     public createFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {
 
-        let positionOffset = new Vector(position.x, position.y);
-        let strength = size / 2;
-        let radius = strength / 2;
-        let offset = strength / 10;
-        let settingFactor = size / 100;
-
-        if (inverse) {
-            positionOffset.x += (strength - offsetX);
-        } else {
-            positionOffset.x += (strength + offsetX);
-        }
-
-        positionOffset.y += strength;
-
-        let channelMagicEffectSettings: number[] = [
-            4 + (4 * settingFactor), 2 + (2 * settingFactor),
-            500, 500,
-            -10, 10,
-            0, 0,
-            -0.2
-        ];
-
-        let effectParticles = this.createCenterCircleParticles(positionOffset, radius, radius, channelMagicEffectSettings, false, offset, strength, 200, -offset, 2);
+        let effectParticles = this.fireBall(position, size, inverse, offsetX);
 
         this.fireEffectParticles.push(...effectParticles);
     }
 
+    public createNecroFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {
+
+        let effectParticles = this.fireBall(position, size, inverse, offsetX);
+
+        this.necroEffectParticles.push(...effectParticles);
+    }
+
+    public createNecroballExplosion(position: Vector, size: number) {
+        let effectParticles = this.fireballExplosion(position, size);
+
+        this.necroEffectParticles.push(...effectParticles);
+    }
+
     public createFireballExplosion(position: Vector, size: number) {
 
+        let effectParticles = this.fireballExplosion(position, size);
+
+        this.fireEffectParticles.push(...effectParticles);
+    }
+
+    private fireballExplosion(position: Vector, size: number) {
         let radius = size / 2;
         let particleSize = 2 + (size/20);
 
@@ -207,7 +207,7 @@ export class ParticleHandler {
 
         let effectParticles = this.createCircleParticles(position, 0, 0, false, settings, 50);
 
-        this.fireEffectParticles.push(...effectParticles);
+        return effectParticles;
     }
 
     public createChannelMagic(position: Vector, inverse: boolean) {
@@ -287,6 +287,7 @@ export class ParticleHandler {
 
     public update(delta: number, enemies: Enemy[]) {
 
+        this.updateEffectParticles(this.necroEffectParticles, delta);
         this.updateEffectParticles(this.fireEffectParticles, delta);
         this.updateEffectParticles(this.frostEffectParticles, delta);
         this.updateEffectParticles(this.shieldEffectParticles, delta);
@@ -299,8 +300,6 @@ export class ParticleHandler {
         let fireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         let allFireParticles = this.fireParticles.concat(this.fireEffectParticles)
 
-        renderCalls.push(this.addParticles(fireRenderCall, allFireParticles, this.fireColor));
-
         let frostRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         let frostEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         frostEffectRenderCall.textureType = TextureType.frostTexture;
@@ -308,12 +307,45 @@ export class ParticleHandler {
         let shieldEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         shieldEffectRenderCall.textureType = TextureType.particleTexture;
 
+        let blackFireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
+        blackFireRenderCall.textureType = TextureType.particleTexture;
 
+        renderCalls.push(this.addParticles(fireRenderCall, allFireParticles, this.fireColor));
         renderCalls.push(this.addParticles(frostEffectRenderCall, this.frostEffectParticles, this.frostEffectColor));
         renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, this.frostColor));
         renderCalls.push(this.addParticles(shieldEffectRenderCall, this.shieldEffectParticles, this.shieldColor))
+        renderCalls.push(this.addParticles(blackFireRenderCall, this.necroEffectParticles, this.necroColor))
 
         return renderCalls;
+    }
+
+    private fireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {
+
+        let positionOffset = new Vector(position.x, position.y);
+        let strength = size / 2;
+        let radius = strength / 2;
+        let offset = strength / 10;
+        let settingFactor = size / 100;
+
+        if (inverse) {
+            positionOffset.x += (strength - offsetX);
+        } else {
+            positionOffset.x += (strength + offsetX);
+        }
+
+        positionOffset.y += strength;
+
+        let channelMagicEffectSettings: number[] = [
+            4 + (4 * settingFactor), 2 + (2 * settingFactor),
+            500, 500,
+            -10, 10,
+            0, 0,
+            -0.2
+        ];
+
+        let effectParticles = this.createCenterCircleParticles(positionOffset, radius, radius, channelMagicEffectSettings, false, offset, strength, 200, -offset, 2);
+
+        return effectParticles;
     }
 
     private addParticles(renderCall: SimpleParticleRenderCall, particles: Particle[], color: number[]) {

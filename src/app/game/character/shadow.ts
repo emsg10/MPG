@@ -169,10 +169,6 @@ export class Shadow extends Enemy {
         }
     }
 
-    private getDeltaPosition(player: Player) {
-        return new Vector((player.position.x + player.width/2) - (this.position.x + this.width/2), player.position.y - this.position.y);
-    }
-
     private clearShoot(deltaPos: Vector, tiles: Tile[]) {
         let clear = true;
         let pathBlocks = this.getPathBlocks(deltaPos);

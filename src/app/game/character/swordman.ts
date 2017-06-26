@@ -28,23 +28,13 @@ export class Swordman extends Enemy {
         this.maxSpeed = 0.1;
         this.actualSpeed = this.maxSpeed;
 
-        this.idleAnimation.textureNumber.push(228);
-        this.idleAnimation.textureNumber.push(227);
-        this.idleAnimation.textureNumber.push(229);
-        this.idleAnimation.textureNumber.push(227);
+        this.idleAnimation = new Animation([228, 227, 229, 227]);
 
         this.idleAnimation.timeToChange = 150;
 
-        this.hitAnimation.textureNumber.push(231);
-        this.hitAnimation.textureNumber.push(231);
-        this.hitAnimation.textureNumber.push(232);
-        this.hitAnimation.textureNumber.push(230);
-        this.hitAnimation.textureNumber.push(212);
-
-        this.trackingAnimation.textureNumber.push(211);
-        this.trackingAnimation.textureNumber.push(209);
-        this.trackingAnimation.textureNumber.push(211);
-        this.trackingAnimation.textureNumber.push(210);
+        this.hitAnimation = new Animation([231, 231, 232, 230, 212]);
+        
+        this.trackingAnimation = new Animation([211, 209, 211, 210]);
 
     }
 

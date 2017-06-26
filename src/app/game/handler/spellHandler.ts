@@ -182,8 +182,7 @@ export class SpellHandler {
 
     private initCasts() {
 
-        let fireblastAnimation = new Animation();
-        fireblastAnimation.textureNumber.push(178);
+        let fireblastAnimation = new Animation([178]);
         fireblastAnimation.repetitions = 1;
 
         let onFireCast = (animation: Animation) => {
@@ -194,8 +193,7 @@ export class SpellHandler {
 
         this.fireBlastCast = new InstantCast(fireblastAnimation, onFireCast);
 
-        let frostBlastAnimation = new Animation();
-        frostBlastAnimation.textureNumber.push(178);
+        let frostBlastAnimation = new Animation([178]);
         frostBlastAnimation.repetitions = 1;
 
         let onFrostCast = (animation: Animation) => {
@@ -206,11 +204,9 @@ export class SpellHandler {
 
         this.frostBlastCast = new InstantCast(frostBlastAnimation, onFrostCast);
 
-        let channelAnimation = new Animation();
-        channelAnimation.textureNumber.push(175);
+        let channelAnimation = new Animation([175]);
 
-        let channelLowerAnimation = new Animation();
-        channelLowerAnimation.textureNumber.push(162);
+        let channelLowerAnimation = new Animation([162]);
 
         let onChannelMagic = () => {
             this.particleHandler.createChannelMagic(this.player.position, this.player.inverse);
@@ -221,11 +217,7 @@ export class SpellHandler {
 
         this.channelMagicCast = new ChannelCast(channelAnimation, channelLowerAnimation, onChannelMagic, onCancelChannelMagic, 40, 100, 0.03);
 
-        let castAnimation = new Animation();
-        castAnimation.textureNumber.push(170);
-        castAnimation.textureNumber.push(176);
-        castAnimation.textureNumber.push(177);
-        castAnimation.textureNumber.push(176);
+        let castAnimation = new Animation([170, 176, 177, 176]);
         castAnimation.repetitions = 3;
         castAnimation.timeToChange = 170;
 

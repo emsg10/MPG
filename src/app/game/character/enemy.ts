@@ -15,12 +15,12 @@ export class Enemy extends Character {
     protected oldDirection = true;
     protected collisionDetection = CollisionDetection.getInstance();
     protected nextToEdge: boolean;
-    protected idleAnimation = new Animation();
-    protected idleToTrackingAnimation = new Animation();
-    protected trackingAnimation = new Animation();
-    protected trackingToInRangeTransitionAnimation = new Animation();
-    protected trackingToIdleTransitionAnimation = new Animation();
-    protected hitAnimation = new Animation();
+    protected idleAnimation: Animation;
+    protected idleToTrackingAnimation: Animation;
+    protected trackingAnimation: Animation;
+    protected trackingToInRangeTransitionAnimation: Animation;
+    protected trackingToIdleTransitionAnimation: Animation;
+    protected hitAnimation: Animation;
     protected collisionData: CollisionData;
     protected hitDamage = 0;
     protected hp: number = 100;

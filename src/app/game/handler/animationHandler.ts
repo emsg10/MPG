@@ -18,13 +18,8 @@ export class AnimationHandler {
     }
 
     public bloodAnimation_A(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(100);
-        animation.textureNumber.push(101);
-        animation.textureNumber.push(102);
-        animation.textureNumber.push(103);
-        animation.textureNumber.push(104);
-        animation.textureNumber.push(105);
+        let animation = new Animation([100, 101, 102, 103, 104, 105]);
+
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.repetitions = 6;
@@ -35,13 +30,7 @@ export class AnimationHandler {
     }
 
     public bloodAnimation_B_Right(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(106);
-        animation.textureNumber.push(107);
-        animation.textureNumber.push(108);
-        animation.textureNumber.push(109);
-        animation.textureNumber.push(110);
-        animation.textureNumber.push(111);
+        let animation = new Animation([106, 107, 108, 109, 110, 111]);
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.repetitions = 6;
@@ -52,13 +41,7 @@ export class AnimationHandler {
     }
 
     public bloodAnimation_B_Left(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(106);
-        animation.textureNumber.push(107);
-        animation.textureNumber.push(108);
-        animation.textureNumber.push(109);
-        animation.textureNumber.push(110);
-        animation.textureNumber.push(111);
+        let animation = new Animation([106, 107, 108, 109, 110, 111]);
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.inverse = true;
@@ -71,7 +54,7 @@ export class AnimationHandler {
     }
 
     public voidAnimation() {
-        let animation = new Animation();
+        let animation = new Animation([]);
 
         animation.areaToRender = new Rectangle(0, 0, 0, 0);
 
@@ -79,13 +62,8 @@ export class AnimationHandler {
     }
 
     public bloodAnimation_C(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(147);
-        animation.textureNumber.push(148);
-        animation.textureNumber.push(149);
-        animation.textureNumber.push(150);
-        animation.textureNumber.push(151);
-        animation.textureNumber.push(152);
+        let animation = new Animation([147, 148, 149, 150, 151, 152]);
+
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
         animation.repetitions = 6;
@@ -96,11 +74,9 @@ export class AnimationHandler {
     }
 
     public swordman_death(position: Vector, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(214);
-        animation.textureNumber.push(216);
-        animation.textureNumber.push(217);
-        animation.textureNumber.push(218);
+        let animation = new Animation([
+            214, 216, 217, 218
+        ]);
 
         animation.timeToChange = 120;
 
@@ -124,11 +100,7 @@ export class AnimationHandler {
     }
 
     public archer_death(area: Rectangle, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(290);
-        animation.textureNumber.push(291);
-        animation.textureNumber.push(292);
-        animation.textureNumber.push(293);
+        let animation = new Animation([290, 291, 292, 293]);
 
         animation.timeToChange = 120;
 
@@ -144,8 +116,7 @@ export class AnimationHandler {
     }
 
     public archer_corpse(area: Rectangle, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(293);
+        let animation = new Animation([293]);
         animation.timeToChange = 120;
 
         animation.delay = 4;
@@ -160,8 +131,7 @@ export class AnimationHandler {
     }
 
     public player_sword_death_corpse(position: Vector, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(306);
+        let animation = new Animation([306]);
         animation.timeToChange = 150;
         animation.delay = 6;
 
@@ -175,13 +145,8 @@ export class AnimationHandler {
     }
 
     public player_sword_death_animation(position: Vector, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(301);
-        animation.textureNumber.push(302);
-        animation.textureNumber.push(303);
-        animation.textureNumber.push(304);
-        animation.textureNumber.push(305);
-        animation.textureNumber.push(306);
+        let animation = new Animation([301, 302, 303, 304, 305, 306]);
+
         animation.inverse = inverse;
         animation.timeToChange = 150;
         animation.repetitions = 6;
@@ -193,17 +158,7 @@ export class AnimationHandler {
     }
 
     public apprentice_Death(area: Rectangle, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(144);
-        animation.textureNumber.push(145);
-        animation.textureNumber.push(146);
-        animation.textureNumber.push(153);
-        animation.textureNumber.push(154);
-        animation.textureNumber.push(155);
-        animation.textureNumber.push(155);
-        animation.textureNumber.push(155);
-        animation.textureNumber.push(155);
-        animation.textureNumber.push(155);
+        let animation = new Animation([144, 145, 146, 153, 154, 155, 155, 155, 155, 155]);
 
         animation.repetitions = 9;
         animation.inverse = inverse;
@@ -216,13 +171,8 @@ export class AnimationHandler {
     }
 
     public shadow_Death(area: Rectangle, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(132);
-        animation.textureNumber.push(130);
-        animation.textureNumber.push(127);
-        animation.textureNumber.push(124);
-        animation.textureNumber.push(119);
-
+        let animation = new Animation([132, 130, 127, 124, 119]);
+        
         animation.repetitions = 4;
         animation.inverse = inverse;
         animation.timeToChange = 100;
@@ -234,8 +184,7 @@ export class AnimationHandler {
     }
 
     public swordman_corpse(position: Vector, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(219);
+        let animation = new Animation([219]);
 
         animation.timeToChange = 120;
 
@@ -251,16 +200,7 @@ export class AnimationHandler {
     }
 
     public swordman_head(position: Vector, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(215);
-        animation.textureNumber.push(220);
-        animation.textureNumber.push(221);
-        animation.textureNumber.push(222);
-        animation.textureNumber.push(223);
-        animation.textureNumber.push(224);
-        animation.textureNumber.push(225);
-        animation.textureNumber.push(226);
-
+        let animation = new Animation([215, 220, 221, 222, 223, 224, 225, 226]);
         animation.timeToChange = 75;
         animation.areaToRender = new Rectangle(position.x, position.y, 56, 59);
 
@@ -271,48 +211,8 @@ export class AnimationHandler {
         return animation;
     }
 
-    
-
-    public createSpellAnimation(position: Vector, animationSize: number, inverse: boolean, type: SpellType) {
-        switch (type) {
-            case SpellType.fireball: return this.fireball(position, animationSize, inverse);
-            case SpellType.electricbolt: return this.electricbolt(position, animationSize, inverse);
-        }
-    }
-
-    public sizzle(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(137);
-        animation.textureNumber.push(138);
-        animation.textureNumber.push(139);
-        animation.textureNumber.push(140);
-        animation.textureNumber.push(141);
-        animation.textureNumber.push(142);
-        animation.textureNumber.push(143);
-        animation.textureNumber.push(144);
-        animation.textureNumber.push(145);
-        animation.textureNumber.push(146);
-        animation.timeToChange = 70;
-        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
-
-        animation.repetitions = 10;
-
-        this.animations.push(animation);
-
-        return animation;
-    }
-
     public fireball_destroy(position: Vector, size: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(118);
-        animation.textureNumber.push(119);
-        animation.textureNumber.push(120);
-        animation.textureNumber.push(121);
-        animation.textureNumber.push(122);
-        animation.textureNumber.push(123);
-        animation.textureNumber.push(124);
-        animation.textureNumber.push(125);
-        animation.textureNumber.push(126);
+        let animation = new Animation([118, 119, 120, 121, 122, 123, 124, 125, 126]);
         animation.timeToChange = 50;
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
@@ -333,12 +233,7 @@ export class AnimationHandler {
 
     public swordscut_a(position: Vector, size: number, inverse: boolean) {
 
-        let animation = new Animation();
-        animation.textureNumber.push(55);
-        animation.textureNumber.push(56);
-        animation.textureNumber.push(57);
-        animation.textureNumber.push(58);
-        animation.textureNumber.push(59);
+        let animation = new Animation([55, 56, 57, 58, 59]);
         animation.inverse = inverse;
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
 
@@ -350,8 +245,7 @@ export class AnimationHandler {
     }
 
     public createDebugAnimation(position: Vector, size: number, repetitions: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(5);
+        let animation = new Animation([5]);
         animation.areaToRender = new Rectangle(position.x, position.y, size, size);
         animation.repetitions = repetitions;
         this.animations.push(animation);
@@ -371,16 +265,7 @@ export class AnimationHandler {
             this.particleHandler.createFireDeath(position);
         }
 
-        let animation = new FrameAnimation(0, -4, 0, 0, onUpdate);
-        animation.textureNumber.push(250);
-        animation.textureNumber.push(251);
-        animation.textureNumber.push(252);
-        animation.textureNumber.push(253);
-        animation.textureNumber.push(254);
-        animation.textureNumber.push(255);
-        animation.textureNumber.push(256);
-        animation.textureNumber.push(257);
-
+        let animation = new FrameAnimation(0, -4, 0, 0, onUpdate, [250, 251, 252, 253, 254, 255, 256, 257]);
         animation.inverse = inverse;
         animation.timeToChange = 100;
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
@@ -398,16 +283,7 @@ export class AnimationHandler {
             this.particleHandler.createFireDeath(position);
         }
 
-        let animation = new FrameAnimation(0, -4, 0, 0, onUpdate);
-        animation.textureNumber.push(282);
-        animation.textureNumber.push(283);
-        animation.textureNumber.push(284);
-        animation.textureNumber.push(285);
-        animation.textureNumber.push(286);
-        animation.textureNumber.push(287);
-        animation.textureNumber.push(288);
-        animation.textureNumber.push(289);
-
+        let animation = new FrameAnimation(0, -4, 0, 0, onUpdate, [282, 283, 284, 285, 286, 287, 288, 289]);
         animation.inverse = inverse;
         animation.timeToChange = 100;
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
@@ -420,8 +296,7 @@ export class AnimationHandler {
     }
 
     public createArrow(area: Rectangle, inverse: boolean, velocity: Vector) {
-        let animation = new RotationAnimation(velocity);
-        animation.textureNumber.push(268);
+        let animation = new RotationAnimation(velocity, [268]);
         animation.inverse = inverse;
         animation.areaToRender = area;
 
@@ -436,8 +311,7 @@ export class AnimationHandler {
     public createDeadArrow(area: Rectangle, inverse: boolean, velocity: Vector) {
         let collAngle = new Vector(velocity.x, velocity.y);
 
-        let animation = new StaticRotationAnimation(collAngle, inverse);
-        animation.textureNumber.push(268);
+        let animation = new StaticRotationAnimation(collAngle, inverse, [268]);
         animation.inverse = inverse;
 
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
@@ -454,8 +328,7 @@ export class AnimationHandler {
 
         let collAngle = new Vector(projectile.velocity.x, projectile.velocity.y);
 
-        let animation = new RotationAnimation(collAngle);
-        animation.textureNumber.push(269);
+        let animation = new RotationAnimation(collAngle, [269]);
         animation.inverse = projectile.animation.inverse;
 
         if(useCollisionArea) {
@@ -476,13 +349,7 @@ export class AnimationHandler {
     }
 
     public frozenSwordMan(area: Rectangle, inverse: boolean, color: number[], onCompletion: () => void) {
-        let animation = new Animation();
-        animation.textureNumber.push(237);
-        animation.textureNumber.push(238);
-        animation.textureNumber.push(239);
-        animation.textureNumber.push(240);
-        animation.textureNumber.push(241);
-        animation.textureNumber.push(242);
+        let animation = new Animation([237, 238, 239, 240, 241, 242]);
         animation.inverse = inverse;
         animation.color = color;
         animation.timeToChange = 250;
@@ -498,13 +365,7 @@ export class AnimationHandler {
     }
 
     public frozenArcher(area: Rectangle, inverse: boolean, color: number[], onCompletion: () => void) {
-        let animation = new Animation();
-        animation.textureNumber.push(270);
-        animation.textureNumber.push(271);
-        animation.textureNumber.push(272);
-        animation.textureNumber.push(273);
-        animation.textureNumber.push(274);
-        animation.textureNumber.push(275);
+        let animation = new Animation([270, 271, 272, 273, 274, 275]);
         animation.inverse = inverse;
         animation.color = color;
         animation.timeToChange = 250;
@@ -520,8 +381,7 @@ export class AnimationHandler {
     }
 
     public frozenPart(area: Rectangle, inverse: boolean, color: number[], partIndex: number, baseTextureNumber: number) {
-        let animation = new Animation();
-        animation.textureNumber.push(baseTextureNumber + partIndex);
+        let animation = new Animation([baseTextureNumber + partIndex]);
         animation.inverse = inverse;
         animation.color = color;
         animation.timeToChange = 2000;
@@ -572,7 +432,7 @@ export class AnimationHandler {
                     renderCall.vertecies = this.renderHelper.getVertecies(x, y, width, height, renderCall.vertecies);
                 }
 
-                renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
+                renderCall.textureCoords.push.apply(renderCall.textureCoords, animation.getCurrentFrame());
                 renderCall.matrices = this.renderHelper.getMatrices(x, y, width, height, animation.angle, renderCall.matrices);
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             }
@@ -594,7 +454,7 @@ export class AnimationHandler {
                     renderCall.vertecies = this.renderHelper.getVertecies(x, y, width, height, renderCall.vertecies);
                 }
 
-                renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, animation.getCurrentFrame());
+                renderCall.textureCoords.push.apply(renderCall.textureCoords, animation.getCurrentFrame());
 
                 renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
                 if (animation.color) {
@@ -621,11 +481,7 @@ export class AnimationHandler {
     }
 
     public enemy(position: Vector, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(209);
-        animation.textureNumber.push(211);
-        animation.textureNumber.push(210);
-
+        let animation = new Animation([209, 211, 210]);
         animation.timeToChange = 120;
         animation.areaToRender = new Rectangle(position.x, position.y, 56, 58);
 
@@ -635,47 +491,6 @@ export class AnimationHandler {
 
         return animation;
     }
-
-    private fireball(position: Vector, size: number, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(112);
-        animation.textureNumber.push(113);
-        animation.textureNumber.push(114);
-        animation.textureNumber.push(115);
-        animation.textureNumber.push(116);
-        animation.textureNumber.push(117);
-        animation.timeToChange = 50;
-        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
-
-        animation.inverse = inverse;
-
-        this.animations.push(animation);
-
-        return animation;
-    }
-
-    private electricbolt(position: Vector, size: number, inverse: boolean) {
-        let animation = new Animation();
-        animation.textureNumber.push(127);
-        animation.textureNumber.push(128);
-        animation.textureNumber.push(129);
-        animation.textureNumber.push(130);
-        animation.textureNumber.push(131);
-        animation.textureNumber.push(132);
-        animation.textureNumber.push(133);
-        animation.textureNumber.push(134);
-        animation.textureNumber.push(135);
-        animation.textureNumber.push(136);
-        animation.timeToChange = 50;
-        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
-
-        animation.inverse = inverse;
-
-        this.animations.push(animation);
-
-        return animation;
-    }
-
 
 
 }

@@ -44,18 +44,6 @@ export class ProjectileHandler {
         this.enemyProjectiles = [];
     }
 
-    public createBolt(position: Vector, size: number, inverse: boolean, type: SpellType) {
-        let spell: Spell;
-
-        if (inverse) {
-            spell = new Spell(new Vector(-0.6, 0), new Rectangle(position.x, position.y, size, size), this.animationHandler.createSpellAnimation(new Vector(position.x, position.y), size, inverse, type), 0.2, (size * 10), type);
-        } else {
-            spell = new Spell(new Vector(0.6, 0), new Rectangle(position.x, position.y, size, size), this.animationHandler.createSpellAnimation(new Vector(position.x, position.y), size, inverse, type), 0.2, (size * 10), type);
-        }
-
-        this.projectiles.push(spell);
-    }
-
     public createArrow(position: Vector, inverse: boolean, velocity: Vector) {
         let arrow: PhysicalProjectile;
         let rectangle = new Rectangle(position.x, position.y, 40, 10);
@@ -160,7 +148,7 @@ export class ProjectileHandler {
         projectile = new PhysicalProjectile(velocity, new Rectangle(position.x, position.y, 28, 29), this.animationHandler.swordman_head(position, inverse), 0.3)
         projectile.extendedOnGroundCollision = () => {
             let currentFrame = projectile.animation.getCurrentFrame();
-            projectile.animation.textureNumber = [currentFrame];
+            projectile.animation.textureCoords = [currentFrame];
             projectile.animation.frameIndex = 0;
         }
         this.animationHandler.bloodAnimation_C(new Vector(position.x - 10, position.y - 20), 75);

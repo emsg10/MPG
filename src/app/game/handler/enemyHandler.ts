@@ -45,7 +45,7 @@ export class EnemyHandler {
             } else {
                 renderCall.vertecies = this.renderHelper.getVertecies(enemy.position.x, enemy.position.y, enemy.width, enemy.height, renderCall.vertecies);
             }
-            renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, enemy.currentAnimation.getCurrentFrame());
+            renderCall.textureCoords.push.apply(renderCall.textureCoords, enemy.currentAnimation.getCurrentFrame());
             renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
             renderCall.color = this.renderHelper.getColor(renderCall.color, enemy.color);
         }

@@ -32,8 +32,8 @@ export class Player extends Character {
 	private dragForce: Drag = new Drag(this.drag);
 	private externalDrag = new Drag(this.externalDragForce);
 
-	private stunnedAnimation: Animation = new Animation();
-	private stunnedEffect: Animation = new Animation();
+	private stunnedAnimation: Animation;
+	private stunnedEffect: Animation;
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
 	private jumping: boolean = false;
@@ -47,17 +47,17 @@ export class Player extends Character {
 	private lowerAnimation: Animation;
 	private upperAnimation: Animation;
 
-	private lowerIdleAnimation: Animation = new Animation();
-	private upperIdleAnimation: Animation = new Animation();
+	private lowerIdleAnimation: Animation;
+	private upperIdleAnimation: Animation;
 
-	private lowerJumpAnimation = new Animation();
-	private upperJumpAnimation = new Animation();
+	private lowerJumpAnimation: Animation;
+	private upperJumpAnimation: Animation;
 
-	private lowerRunningAnimation = new Animation();
-	private upperRunningAnimation = new Animation();
+	private lowerRunningAnimation: Animation;
+	private upperRunningAnimation: Animation;
 
-	private lowerStillAnimation = new Animation();
-	private upperStillAnimation = new Animation();
+	private lowerStillAnimation: Animation;
+	private upperStillAnimation: Animation;
 
 	private onGroundTimer = 0;
 	private shieldTextureCoords = this.renderHelper.getTextureCoordinates([], 199);
@@ -72,34 +72,26 @@ export class Player extends Character {
 		this.particleHandler = particleHandler;
 		this.spellHandler = new SpellHandler(this.animationHandler, this.projectileHandler, this.particleHandler, this);
 
-		this.lowerIdleAnimation.textureNumber.push(162);
-		this.upperIdleAnimation.textureNumber.push(163);
+		this.lowerIdleAnimation = new Animation([162]);
+		this.upperIdleAnimation = new Animation([163]);
 
-		this.upperRunningAnimation.textureNumber.push(170);
-		this.upperRunningAnimation.textureNumber.push(171);
-		this.upperRunningAnimation.textureNumber.push(172);
-		this.upperRunningAnimation.textureNumber.push(170);
-		this.upperRunningAnimation.textureNumber.push(173);
-		this.upperRunningAnimation.textureNumber.push(174);
+		this.upperRunningAnimation = new Animation([170, 171, 172, 170, 173, 174]);
 		this.upperRunningAnimation.timeToChange = 150;
 
-		this.lowerRunningAnimation.textureNumber.push(165);
-		this.lowerRunningAnimation.textureNumber.push(166);
-		this.lowerRunningAnimation.textureNumber.push(167);
-		this.lowerRunningAnimation.textureNumber.push(165);
-		this.lowerRunningAnimation.textureNumber.push(168);
-		this.lowerRunningAnimation.textureNumber.push(169);
+		this.lowerRunningAnimation = new Animation([165, 166, 167, 165, 168, 169]);
 		this.lowerRunningAnimation.timeToChange = 150;
 
-		this.stunnedAnimation.textureNumber.push(170);
-		this.stunnedEffect.textureNumber.push(170);
-		this.stunnedAnimation.timeToChange;
+		this.stunnedAnimation = new Animation([170]);
 
-		this.lowerJumpAnimation.textureNumber.push(160);
-		this.upperJumpAnimation.textureNumber.push(161);
+		this.stunnedEffect = new Animation([170]);
 
-		this.lowerStillAnimation.textureNumber.push(165);
-		this.upperStillAnimation.textureNumber.push(170);
+		this.lowerJumpAnimation = new Animation([160]);
+		
+		this.upperJumpAnimation = new Animation([161]);
+
+		this.lowerStillAnimation = new Animation([165]);
+		
+		this.upperStillAnimation = new Animation([170]);
 
 		this.hp = hp;
 		this.mana = mana;
@@ -175,9 +167,7 @@ export class Player extends Character {
 			x1, y2
 		];
 
-		textureNumber = this.upperAnimation.getCurrentFrame();
-
-		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
+		renderCall.textureCoords.push.apply(renderCall.textureCoords, this.upperAnimation.getCurrentFrame());
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
 
@@ -243,9 +233,7 @@ export class Player extends Character {
 			x1, y2
 		];
 
-		textureNumber = this.lowerAnimation.getCurrentFrame();
-
-		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, textureNumber);
+		renderCall.textureCoords.push.apply(renderCall.textureCoords, this.lowerAnimation.getCurrentFrame());
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
 
@@ -437,7 +425,7 @@ export class Player extends Character {
 		} else {
 			renderCall.vertecies = this.renderHelper.getVertecies(this.position.x + 13, this.position.y - 8, 32, 32, renderCall.vertecies);
 		}
-		renderCall.textureCoords = this.renderHelper.getTextureCoordinates(renderCall.textureCoords, this.stunnedEffect.getCurrentFrame());
+		renderCall.textureCoords.push.apply(renderCall.textureCoords, this.stunnedEffect.getCurrentFrame());
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 
 		return renderCall;

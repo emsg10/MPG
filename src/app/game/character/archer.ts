@@ -29,20 +29,12 @@ export class Archer extends Enemy {
         this.maxSpeed = 0.1;
         this.actualSpeed = this.maxSpeed;
 
-        this.idleAnimation.textureNumber.push(267);
-        this.idleAnimation.textureNumber.push(266);
-        this.idleAnimation.textureNumber.push(267);
-        this.idleAnimation.textureNumber.push(265);
+        this.idleAnimation = new Animation([267, 266, 267, 265]);
 
-        this.hitAnimation.textureNumber.push(262);
-        this.hitAnimation.textureNumber.push(264);
-        this.hitAnimation.textureNumber.push(263);
-        this.hitAnimation.textureNumber.push(264);
+        this.hitAnimation = new Animation([262, 264, 263, 264]);
 
-        this.trackingAnimation.textureNumber.push(267);
-        this.trackingAnimation.textureNumber.push(266);
-        this.trackingAnimation.textureNumber.push(267);
-        this.trackingAnimation.textureNumber.push(265);
+        this.trackingAnimation = new Animation([267, 266, 267, 265]);
+
         this.trackingAnimation.timeToChange = 175;
 
         this.hitAnimation.timeToChange = 300;

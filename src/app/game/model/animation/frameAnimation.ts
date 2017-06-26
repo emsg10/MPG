@@ -9,8 +9,8 @@ export class FrameAnimation extends Animation {
     private offsetX: number = 10;
     private particleFunction: (position: Vector) => void;
 
-	constructor(growthX: number, growthY: number, offsetX: number, offsetY: number, particleFunction: (position: Vector) => void) {
-        super();
+	constructor(growthX: number, growthY: number, offsetX: number, offsetY: number, particleFunction: (position: Vector) => void, texturenumbers: number[]) {
+        super(texturenumbers);
 
         this.particleFunction = particleFunction;
         this.growthX = growthX;

@@ -34,28 +34,16 @@ export class Apprentice extends Enemy {
         this.projectileHandler = projectileHandler;
         this.animationHandler = animationHandler;
 
-        this.idleAnimation.textureNumber.push(139);
-        this.idleAnimation.textureNumber.push(140);
-        this.idleAnimation.textureNumber.push(141);
-        this.idleAnimation.textureNumber.push(142);
-        this.idleAnimation.textureNumber.push(143);
+        this.idleAnimation = new Animation([139, 140, 141, 142, 143]);
         this.idleAnimation.timeToChange = 175;
 
-        this.trackingAnimation.textureNumber.push(139);
-        this.trackingAnimation.textureNumber.push(140);
-        this.trackingAnimation.textureNumber.push(141);
-        this.trackingAnimation.textureNumber.push(142);
-        this.trackingAnimation.textureNumber.push(143);
+        this.trackingAnimation = new Animation([139, 140, 141, 142, 143]);
 
         this.trackingAnimation.timeToChange = 175;
 
-        this.hitAnimation.textureNumber.push(139);
-        this.hitAnimation.textureNumber.push(140);
-        this.hitAnimation.textureNumber.push(141);
-        this.hitAnimation.textureNumber.push(142);
-        this.hitAnimation.textureNumber.push(143);
+        this.hitAnimation = new Animation([139, 140, 141, 142, 143]);
 
-        this.hitAnimation.timeToChange = 150;
+        this.hitAnimation.timeToChange = 250;
 
         this.currentAnimation = this.hitAnimation;
 

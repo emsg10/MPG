@@ -14,7 +14,7 @@ export class Shadow extends Enemy {
     private textureMapper = TextureMapper.getInstance();
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
-    protected hitAreaOffset: number = 100;
+    protected hitAreaOffset: number = 50;
     protected searchAreaOffset: number = 100;
     protected hp = 300;
     protected trackingSpeed = 0.2;
@@ -27,44 +27,20 @@ export class Shadow extends Enemy {
         this.projectileHandler = projectileHandler;
         this.animationHandler = animationHandler;
 
-        this.idleAnimation.textureNumber.push(118);
+        this.idleAnimation = new Animation([118])
 
-        this.idleToTrackingAnimation.textureNumber.push(119);
-        this.idleToTrackingAnimation.textureNumber.push(120);
-        this.idleToTrackingAnimation.textureNumber.push(121);
-        this.idleToTrackingAnimation.textureNumber.push(122);
-        this.idleToTrackingAnimation.textureNumber.push(123);
-        this.idleToTrackingAnimation.textureNumber.push(124);
-        this.idleToTrackingAnimation.textureNumber.push(125);
-        this.idleToTrackingAnimation.textureNumber.push(126);
-        this.idleToTrackingAnimation.textureNumber.push(127);
-        this.idleToTrackingAnimation.textureNumber.push(128);
-        this.idleToTrackingAnimation.textureNumber.push(129);
-        this.idleToTrackingAnimation.textureNumber.push(130);
-        this.idleToTrackingAnimation.textureNumber.push(131);
-        this.idleToTrackingAnimation.textureNumber.push(132);
+        this.idleToTrackingAnimation = new Animation([119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132]);
 
         this.idleToTrackingAnimation.repetitions = 13;
         this.idleToTrackingAnimation.timeToChange = 50;
 
-        this.trackingToIdleTransitionAnimation.textureNumber.push(132);
-        this.trackingToIdleTransitionAnimation.textureNumber.push(130);
-        this.trackingToIdleTransitionAnimation.textureNumber.push(127);
-        this.trackingToIdleTransitionAnimation.textureNumber.push(124);
-        this.trackingToIdleTransitionAnimation.textureNumber.push(119);
+        this.trackingToIdleTransitionAnimation = new Animation([132, 130, 127, 124, 119]);
 
         this.trackingToIdleTransitionAnimation.repetitions = 4;
 
-        this.trackingAnimation.textureNumber.push(133);
-        this.trackingAnimation.textureNumber.push(134);
-        this.trackingAnimation.textureNumber.push(135);
+        this.trackingAnimation = new Animation([133, 134, 135]);
 
-        this.hitAnimation.textureNumber.push(136);
-        this.hitAnimation.textureNumber.push(136);
-        this.hitAnimation.textureNumber.push(137);
-        this.hitAnimation.textureNumber.push(137);
-        this.hitAnimation.textureNumber.push(138);
-        this.hitAnimation.textureNumber.push(138);
+        this.hitAnimation = new Animation([136, 136, 137, 137, 138, 138]);
 
         this.hitAnimation.timeToChange = 150;
 

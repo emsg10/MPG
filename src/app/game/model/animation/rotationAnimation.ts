@@ -5,8 +5,8 @@ export class RotationAnimation extends Animation {
     private vec: Vector;
     public angle: number;
 
-    constructor(vec: Vector) {
-        super();
+    constructor(vec: Vector, texturenumbers: number[]) {
+        super(texturenumbers);
         this.vec = vec;
     }
 

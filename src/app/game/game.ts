@@ -23,6 +23,7 @@ import { DynamicRenderer } from './render/dynamicRenderer';
 import { UI } from './UI/ui';
 import { SceneHandler } from './UI/sceneHandler';
 import { LoadHelper } from './service/loadHelper';
+import { SceneIndex } from './UI/sceneIndex';
 
 export class Game {
 	public canvasWidth = 1200;
@@ -194,6 +195,7 @@ export class Game {
 		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.collisionAreaEnd);
 		if (this.levelCompleted) {
 			this.sceneHandler.levelCompleted(this.level.name);
+			this.sceneHandler.currentScene = SceneIndex.LevelFinished;
 		}
 	}
 

@@ -48,6 +48,26 @@ export class Constants {
     public uiResources: TextureResource[] = [
         new TextureResource("100ui.png", [256, 128]),
         new TextureResource("101ui.png", [512, 512]),
+        new TextureResource("102ui.png", [256, 256]),
+        new TextureResource("103ui.png", [256, 256]),
+        new TextureResource("104ui.png", [256, 256]),
+        new TextureResource("105ui.png", [256, 256]),
+        new TextureResource("106ui.png", [256, 256]),
+        new TextureResource("107ui.png", [256, 256]),
+        new TextureResource("108ui.png", [256, 256]),
+        new TextureResource("109ui.png", [256, 256]),
+        new TextureResource("110ui.png", [256, 256]),
+        new TextureResource("111ui.png", [256, 256]),
+        new TextureResource("112ui.png", [256, 256]),
+        new TextureResource("113ui.png", [256, 256]),
+        new TextureResource("114ui.png", [256, 256]),
+        new TextureResource("115ui.png", [256, 256]),
+        new TextureResource("116ui.png", [256, 256]),
+        new TextureResource("117ui.png", [256, 256]),
+        new TextureResource("118ui.png", [256, 256]),
+        new TextureResource("119ui.png", [256, 256]),
+        new TextureResource("120ui.png", [256, 256]),
+        new TextureResource("121ui.png", [256, 256]),
     ];
 
     public tileSize: [number, number] = [32, 32];

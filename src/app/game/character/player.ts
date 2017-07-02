@@ -33,7 +33,6 @@ export class Player extends Character {
 	private externalDrag = new Drag(this.externalDragForce);
 
 	private stunnedAnimation: Animation;
-	private stunnedEffect: Animation;
 	private idleTime = 3000;
 	private idleTimeChange = 3000;
 	private jumping: boolean = false;
@@ -81,16 +80,15 @@ export class Player extends Character {
 		this.lowerRunningAnimation = new Animation([165, 166, 167, 165, 168, 169]);
 		this.lowerRunningAnimation.timeToChange = 150;
 
-		this.stunnedAnimation = new Animation([170]);
-
-		this.stunnedEffect = new Animation([170]);
+		this.stunnedAnimation = new Animation([60, 61, 62, 63]);
+		this.stunnedAnimation.timeToChange = 200;
 
 		this.lowerJumpAnimation = new Animation([160]);
-		
+
 		this.upperJumpAnimation = new Animation([161]);
 
 		this.lowerStillAnimation = new Animation([165]);
-		
+
 		this.upperStillAnimation = new Animation([170]);
 
 		this.hp = hp;
@@ -141,45 +139,27 @@ export class Player extends Character {
 
 	public createRenderCall(renderCall: RenderCall) {
 
-		let call = new RenderCall();
-		let x: number = this.position.x;
-		let x1: number;
-		let x2: number;
-		let textureNumber: number;
 
-		if (this.inverse) {
-			x2 = x;
-			x1 = x + (this.width);
-		} else {
-			x2 = x + (this.width);
-			x1 = x;
-		}
-
-		let y1 = this.position.y;
-		let y2 = this.position.y + (this.height);
-
-		call.vertecies = [
-			x1, y1,
-			x2, y2,
-			x2, y1,
-			x1, y1,
-			x2, y2,
-			x1, y2
-		];
-
-		renderCall.textureCoords.push.apply(renderCall.textureCoords, this.upperAnimation.getCurrentFrame());
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-		renderCall.vertecies.push.apply(renderCall.vertecies, call.vertecies);
+
+		if(this.inverse) {
+			renderCall.vertecies = this.renderHelper.getInverseVertecies(this.position.x, this.position.y, this.width, this.height, renderCall.vertecies);
+		} else {
+			renderCall.vertecies = this.renderHelper.getVertecies(this.position.x, this.position.y, this.width, this.height, renderCall.vertecies);
+		}
+		
 
 		if (this.stunned) {
-			renderCall = this.renderStunnedEffect(renderCall);
-		}
+			renderCall.textureCoords.push.apply(renderCall.textureCoords, this.stunnedAnimation.getCurrentFrame());
+		} else {
+			renderCall.textureCoords.push.apply(renderCall.textureCoords, this.upperAnimation.getCurrentFrame());
 
-		this.renderLower(renderCall);
+			this.renderLower(renderCall);
 
-		if (this.spellHandler.castingShield) {
-			this.renderShield(renderCall);
-			this.spellHandler.castingShield = false;
+			if (this.spellHandler.castingShield) {
+				this.renderShield(renderCall);
+				this.spellHandler.castingShield = false;
+			}
 		}
 
 		return renderCall;
@@ -323,8 +303,7 @@ export class Player extends Character {
 
 		if (this.stunned) {
 			this.stunnedAnimation.next(delta);
-			this.stunnedEffect.next(delta);
-			this.currentAnimation = this.stunnedAnimation;
+			this.spellHandler.castingShield = false;
 			if (this.stunnedAnimation.repetitions == 0) {
 				this.stunned = false;
 			}
@@ -406,7 +385,7 @@ export class Player extends Character {
 
 	private renderShield(renderCall: RenderCall) {
 
-		renderCall.vertecies =  this.renderHelper.getVertecies(this.position.x - 18, this.position.y - 5, 80, 100, renderCall.vertecies);
+		renderCall.vertecies = this.renderHelper.getVertecies(this.position.x - 18, this.position.y - 5, 80, 100, renderCall.vertecies);
 		renderCall.textureCoords.push.apply(renderCall.textureCoords, this.shieldTextureCoords);
 		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
 
@@ -415,20 +394,8 @@ export class Player extends Character {
 
 	private stun() {
 		this.stunned = true;
-		this.stunnedAnimation.repetitions = 20;
+		this.stunnedAnimation.repetitions = 10;
 		this.stunnedAnimation.reset();
-	}
-
-	private renderStunnedEffect(renderCall: RenderCall) {
-		if (this.inverse) {
-			renderCall.vertecies = this.renderHelper.getInverseVertecies(this.position.x, this.position.y - 8, 32, 32, renderCall.vertecies);
-		} else {
-			renderCall.vertecies = this.renderHelper.getVertecies(this.position.x + 13, this.position.y - 8, 32, 32, renderCall.vertecies);
-		}
-		renderCall.textureCoords.push.apply(renderCall.textureCoords, this.stunnedEffect.getCurrentFrame());
-		renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
-
-		return renderCall;
 	}
 
 	private updateDamageAnimations() {

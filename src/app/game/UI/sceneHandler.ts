@@ -2,19 +2,23 @@ import { RenderCall, Renderer, RenderHelper } from '../render';
 import { Observable, Observer } from 'rxjs';
 import { Scene } from './scene';
 import { SceneIndex } from './sceneIndex';
-import { Menu } from './Menu';
+import { Menu } from './menu';
 import { Clickable } from './clickable';
+import { PowerSelector } from './powerSelector';
+import { Active } from './active';
 import { Rectangle } from '../model';
 import { LevelData } from '../map/model';
 import { LoadHelper } from '../service/loadHelper';
 import { LocalStorageHelper } from '../service/localStorageHelper';
 import { Game } from '../game';
 import { AssetsLoader } from '../service/assetsLoader';
+import { PowerSelectionMenu } from './powerSelectionMenu';
 
 export class SceneHandler {
 
     public started = false;
     public currentScene = SceneIndex.StartMenu;
+    public lastCurrentScene = SceneIndex.StartMenu;
     private scenes: Map<number, Scene> = new Map<number, Scene>();
     private mousePosition: [number, number] = [-100, 0];
     private renderHelper = RenderHelper.getInstance();
@@ -22,6 +26,7 @@ export class SceneHandler {
     private clicked = false;
     private importClicked = false;
 
+    private textArea = document.getElementById("textarea");
     private fileUploadButton = document.getElementById("fileupload");
     private fileUploadButtonHighlight = document.getElementById("fileuploadHighlight");
     private uploadInput = document.getElementById("importLink") as HTMLInputElement;
@@ -35,6 +40,7 @@ export class SceneHandler {
 
         let startMenu = new Menu(
             this,
+            this.textArea,
             renderer,
             canvasSize,
             100,
@@ -51,6 +57,7 @@ export class SceneHandler {
 
         let loadMenu = new Menu(
             this,
+            this.textArea,
             renderer,
             canvasSize,
             100,
@@ -64,6 +71,7 @@ export class SceneHandler {
         this.scenes.set(SceneIndex.LoadMenu, loadMenu);
 
         this.loadLevelSelectionScreen();
+        this.loadLevelFinishedScreen();
 
         this.createEventListerners();
     }
@@ -72,12 +80,19 @@ export class SceneHandler {
 
         let currentScene = this.scenes.get(this.currentScene);
 
+        if(this.currentScene != this.lastCurrentScene) {
+            this.textArea.style.visibility = "hidden";
+            currentScene.load();
+        }
+
         if (this.click && !this.clicked) {
             this.clicked = true;
             currentScene.click(this.mousePosition);
         }
 
         currentScene.mouseOver(this.mousePosition);
+
+        this.lastCurrentScene = this.currentScene;
     }
 
     public render() {
@@ -98,9 +113,40 @@ export class SceneHandler {
         return renderCalls;
     }
 
+    private loadLevelFinishedScreen() {
+        let levelFinishedScene = new PowerSelectionMenu(
+            this,
+            this.textArea,
+            this.renderer,
+            this.canvasSize,
+            100,
+            [512, 512],
+            false,
+            [
+            ],
+            [
+                this.newPowerSelector(150, 100, 150, [105, 102, 106, 103, 107, 104]),
+                this.newPowerSelector(350, 100, 150, [111, 108, 112, 109, 113, 110]),
+                this.newPowerSelector(550, 100, 150, [117, 114, 118, 115, 119, 116])
+            ]
+        );
+
+        this.scenes.set(SceneIndex.LevelFinished, levelFinishedScene);
+    }
+
+    private newPowerSelector(x: number, y: number, offset: number, assets: number[]) {
+
+        let active1 = new Active(0, 1, false, new Rectangle(x, y, 100, 100), assets[0], assets[1], [100, 100])
+        let active2 = new Active(0, 2, false, new Rectangle(x, y + offset, 100, 100), assets[2], assets[3], [100, 100])
+        let active3 = new Active(0, 3, false, new Rectangle(x, y + offset * 2, 100, 100), assets[4], assets[5], [100, 100])
+        
+        return new PowerSelector([active1, active2, active3]);
+    }
+
     private loadLevelSelectionScreen() {
         let levelSelectionMenu = new Menu(
             this,
+            this.textArea,
             this.renderer,
             this.canvasSize,
             100,

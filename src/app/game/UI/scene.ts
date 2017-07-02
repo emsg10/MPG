@@ -17,6 +17,11 @@ export class Scene {
     }
 
     public render() {
+        this.renderCalls = new Map<number, RenderCall>();
+        this.createRenderCalls();
+    }
+
+    public load() {
     }
 
     public click(mousePosition: [number, number]) {
@@ -33,6 +38,19 @@ export class Scene {
         }
     }
 
+    protected createMenu(renderCalls: Map<number, RenderCall>) {
+        let menu = new RenderCall();
+
+        menu.vertecies = this.renderHelper.getVertecies((this.canvasSize[0] / 2) - 256, 50, 512, 700, menu.vertecies);
+        menu.indecies = this.renderHelper.getIndecies(menu.indecies);
+        menu.textureCoords = this.renderHelper.getTiledTextureCoordinates(new Rectangle(0, 0, 288, 295), menu.textureCoords, [512, 512]);
+        menu.key = 101;
+
+        renderCalls.set(menu.key, menu);
+
+        return renderCalls;
+    }
+
     private createBackGround(renderCalls: Map<number, RenderCall>) {
         let background = new RenderCall();
 
@@ -46,16 +64,5 @@ export class Scene {
         return renderCalls;
     }
 
-    private createMenu(renderCalls: Map<number, RenderCall>) {
-        let menu = new RenderCall();
 
-        menu.vertecies = this.renderHelper.getVertecies((this.canvasSize[0] / 2) - 256, 50, 512, 700, menu.vertecies);
-        menu.indecies = this.renderHelper.getIndecies(menu.indecies);
-        menu.textureCoords = this.renderHelper.getTiledTextureCoordinates(new Rectangle(0, 0, 288, 295), menu.textureCoords, [512, 512]);
-        menu.key = 101;
-
-        renderCalls.set(menu.key, menu);
-
-        return renderCalls;
-    }
 }

@@ -13,11 +13,11 @@
   <div style="width: 100%;">
     <div style="float: left; width: 1200; position: relative">
       <canvas class="noPointer" id="gameCanvas"></canvas>
-      <img onmouseover="document.getElementById('fileuploadHighlight').style.visibility = 'visible'" id="fileupload" style="visibility: hidden; position: absolute; top: 175px; left: 450px; width: 300px; height: 50px;" src="/src/assets/texture/fromFileButton.png" />
-      <img onmouseout="this.style.visibility = 'hidden'" onclick="document.getElementById('importLink').click();" id="fileuploadHighlight" style="visibility: hidden; position: absolute; top: 175px; left: 450px; width: 300px; height: 50px;" src="/src/assets/texture/fromFileButtonHighlighted.png" />
+      <span class="noselect" id="textarea" style="visibility: hidden; color: white !important; position: absolute; top: 50px; left: 150px; width: 300px; height: 50px;"></span>
+      <img class="noPointer" onmouseover="document.getElementById('fileuploadHighlight').style.visibility = 'visible'" id="fileupload" style="visibility: hidden; position: absolute; top: 175px; left: 450px; width: 300px; height: 50px;" src="/src/assets/texture/fromFileButton.png" />
+      <img class="noPointer" onmouseout="this.style.visibility = 'hidden'" onclick="document.getElementById('importLink').click();" id="fileuploadHighlight" style="visibility: hidden; position: absolute; top: 175px; left: 450px; width: 300px; height: 50px;" src="/src/assets/texture/fromFileButtonHighlighted.png" />
       <input id="importLink" hidden type="file" accept=".json">
       <div id="modal" style="display: none; position: absolute; top: 250px; left: 450px; width: 300px; height: 100px;border: 2px solid black; border-radius: 4px; background-color: #CCC; text-align: center; padding: 10px;">
-        
         <span style="border: 1px solid black; padding: 3px; border-radius: 5px; position: absolute; top: 90px; left: 140px; cursor: pointer" onclick="document.getElementById('modal').style.display = 'none'">Close</span>
       </div>
     </div>

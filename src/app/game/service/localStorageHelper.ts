@@ -22,13 +22,32 @@ export class LocalStorageHelper {
         progress.playerName = name;
         progress.active = true;
         progress.completedLevels = 0;
+        progress.level = 1;
+        progress.fire = 0;
+        progress.frost = 0;
+        progress.defence = 0;
+        progress.hp = 0;
+        progress.mana = 0;
+
+        this.saveProgress(progress);
+    }
+
+    public setPowers(fire: number, frost: number, defence: number) {
+        let progress = this.getCurrentProgress();
+
+        progress.fire = fire;
+        progress.frost = frost;
+        progress.defence = defence;
 
         this.saveProgress(progress);
     }
 
     public setCurrentProgress(level: number) {
         let progress = this.getCurrentProgress();
-        progress.completedLevels = level;
+        progress.level++;
+        if(progress.completedLevels < level) {
+            progress.completedLevels = level;
+        }
 
         this.saveProgress(progress);
     }
@@ -44,7 +63,7 @@ export class LocalStorageHelper {
         return progression.find(it => it.active == true);
     }
 
-    private saveProgress(progress: Progress) {
+    public saveProgress(progress: Progress) {
 
         let progression = this.getItem(this.progressionKey) as Progress[];
 

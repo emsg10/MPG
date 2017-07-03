@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile, ChannelCast } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile, ChannelCast, Progress } from '../model';
 import { RenderCall, ColorRenderCall, RenderHelper } from '../render';
 import { Context } from '../';
 import { CollisionData } from '../collision';
@@ -63,13 +63,13 @@ export class Player extends Character {
 
 	private debugHandler = DebugHandler.getInstance();
 
-	constructor(position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number, hp: number, mana: number) {
+	constructor(position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number, hp: number, mana: number, progress: Progress, fireLevel: number, frostLevel: number, shieldLevel: number) {
 		super(position, width, height);
 		this.context = context;
 		this.projectileHandler = projectileHandler;
 		this.animationHandler = animationHandler;
 		this.particleHandler = particleHandler;
-		this.spellHandler = new SpellHandler(this.animationHandler, this.projectileHandler, this.particleHandler, this);
+		this.spellHandler = new SpellHandler(this.animationHandler, this.projectileHandler, this.particleHandler, this, fireLevel, frostLevel, shieldLevel);
 
 		this.lowerIdleAnimation = new Animation([162]);
 		this.upperIdleAnimation = new Animation([163]);

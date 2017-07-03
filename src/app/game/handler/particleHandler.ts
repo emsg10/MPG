@@ -154,10 +154,10 @@ export class ParticleHandler {
         this.shieldEffectParticles.push(...effectParticles);
     }
 
-    public createShieldEffect(position: Vector, inverse: boolean) {
+    public createShieldEffect(position: Vector, inverse: boolean, shieldLevel: number) {
         position.y = position.y + 5;
 
-        let effectParticles = this.createCenterCircleParticles(position, 10, 20, this.shieldEffectSettings, false, 0, 0, 100, 0, 2);
+        let effectParticles = this.createCenterCircleParticles(position, 10, 20, this.shieldEffectSettings, false, 0, 0, 100, 0, 1 + shieldLevel);
 
         this.shieldEffectParticles.push(...effectParticles);
     }
@@ -230,7 +230,7 @@ export class ParticleHandler {
         this.fireEffectParticles.push(...effectParticles);
     }
 
-    public createFrostBlast(position: Vector, inverse: boolean) {
+    public createFrostBlast(position: Vector, inverse: boolean, frostLevel: number) {
 
         let positionOffset = new Vector(position.x, position.y);
         positionOffset.y += 45;
@@ -241,14 +241,14 @@ export class ParticleHandler {
             positionOffset.x += 40;
         }
 
-        let particles = this.createParticles(positionOffset, inverse, this.frostParticleSettings, 10);
-        let effectParticles = this.createParticles(positionOffset, inverse, this.frostEffectParticleSettings, 2);
+        let particles = this.createParticles(positionOffset, inverse, this.frostParticleSettings, 3 + (frostLevel * 3));
+        let effectParticles = this.createParticles(positionOffset, inverse, this.frostEffectParticleSettings, 2 + (frostLevel * 1));
 
         this.frostEffectParticles.push(...effectParticles);
         this.frostParticles.push(...particles);
     }
 
-    public createFireBlast(position: Vector, inverse: boolean) {
+    public createFireBlast(position: Vector, inverse: boolean, fireLevel: number) {
 
         let positionOffset = new Vector(position.x, position.y);
         positionOffset.y += 45;
@@ -259,8 +259,8 @@ export class ParticleHandler {
             positionOffset.x += 40;
         }
 
-        let particles = this.createParticles(positionOffset, inverse, this.flameParticleSettings, 10);
-        let effectParticles = this.createParticles(positionOffset, inverse, this.flameEffectSettings, 5);
+        let particles = this.createParticles(positionOffset, inverse, this.flameParticleSettings, 3 + (fireLevel * 3));
+        let effectParticles = this.createParticles(positionOffset, inverse, this.flameEffectSettings, 2 + (fireLevel * 1));
 
         this.fireParticles.push(...particles);
         this.fireEffectParticles.push(...effectParticles);

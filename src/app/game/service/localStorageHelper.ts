@@ -57,7 +57,7 @@ export class LocalStorageHelper {
 
         if(!progression) {
             this.newPlayer("newPLayer");
-            let progression = this.getItem(this.progressionKey) as Progress[];
+            progression = this.getItem(this.progressionKey) as Progress[];
         }
 
         return progression.find(it => it.active == true);

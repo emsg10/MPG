@@ -23,6 +23,7 @@ import { DynamicRenderer } from './render/dynamicRenderer';
 import { UI } from './UI/ui';
 import { SceneHandler } from './UI/sceneHandler';
 import { LoadHelper } from './service/loadHelper';
+import { LocalStorageHelper } from './service/localStorageHelper';
 import { SceneIndex } from './UI/sceneIndex';
 
 export class Game {
@@ -316,9 +317,11 @@ export class Game {
 
 	public loadLevel(levelData: LevelData) {
 
+		let progress = LocalStorageHelper.getInstance().getCurrentProgress();
+
 		this.particleHandler = new ParticleHandler();
 		this.animationHandler = new AnimationHandler(this.particleHandler);
-		this.projectileHandler = new ProjectileHandler(this.animationHandler);
+		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.getSpellLevel(progress.defence));
 		this.dynamicTileHandler = new DynamicTileHandler();
 
 		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler, this.particleHandler);
@@ -327,10 +330,12 @@ export class Game {
 
 		this.camera = new Camera([this.level.camera[0], this.level.camera[1]], [this.canvasWidth, this.canvasHeight], this.level.gameSize);
 		this.levelCompleted = false;
-
-		this.player = new Player(new Vector(this.level.player[0], this.level.player[1]), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 48, 85, 100, 200);
+		
+		let hp  = 100 + (10 * progress.hp);
+		let mana  = 200 + (20 * progress.mana);
+		this.player = new Player(new Vector(this.level.player[0], this.level.player[1]), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 48, 85, hp, mana, progress, this.getSpellLevel(progress.fire), this.getSpellLevel(progress.frost), this.getSpellLevel(progress.defence));
 		this.collision.createGrid(new Vector(this.level.gameSize[0], this.level.gameSize[1]), this.level.tiles);
-		this.UI = new UI(100, 200);
+		this.UI = new UI(hp, mana);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
 
@@ -339,5 +344,17 @@ export class Game {
 
 		this.textRenderer = new TextRenderer(this.context);
 	}
+
+	private getSpellLevel(spellPoints: number) {
+        if (spellPoints == 0) {
+            return 0;
+        } else if (spellPoints < 3) {
+            return 1;
+        } else if (spellPoints < 6) {
+            return 2;
+        } else {
+            return 3;
+        };
+    }
 
 }

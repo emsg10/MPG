@@ -14,7 +14,8 @@ import {
     CollisionProjectile,
     ProjectileType,
     ParticleProjectile,
-    DynamicTile
+    DynamicTile,
+    Progress
 } from '../model';
 import { Player } from '../character/player';
 import { AnimationHandler } from './animationHandler';
@@ -35,7 +36,7 @@ export class ProjectileHandler {
     private collisionDetection = CollisionDetection.getInstance();
     private debuggHandler = DebugHandler.getInstance();
 
-    constructor(animationHandler: AnimationHandler) {
+    constructor(animationHandler: AnimationHandler, private shieldLevel: number) {
         this.animationHandler = animationHandler;
     }
 
@@ -116,6 +117,20 @@ export class ProjectileHandler {
     public createFireBall(position: Vector, inverse: boolean, velocityValue: number, strength: number, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
 
         let fireBall: ParticleProjectile;
+
+        if (inverse) {
+            fireBall = new ParticleProjectile(new Vector(-velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
+        } else {
+            fireBall = new ParticleProjectile(new Vector(velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
+        }
+
+        this.projectiles.push(fireBall);
+    }
+
+    public createFireballRank1(position: Vector, inverse: boolean, velocityValue: number, strength: number, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
+        let fireBall: ParticleProjectile;
+
+        strength = strength/3;
 
         if (inverse) {
             fireBall = new ParticleProjectile(new Vector(-velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
@@ -492,7 +507,14 @@ export class ProjectileHandler {
 
     private drainShield(player: Player, projectile: Projectile, amount: number) {
         if (player.mana > 0) {
-            if (!player.useMana(amount)) {
+            let extra: number;
+            if(this.shieldLevel != 0) {
+                extra = (amount / this.shieldLevel);
+            } else {
+                extra = amount * 2;
+            }
+            
+            if (!player.useMana(amount + extra)) {
                 player.mana = 0;
                 if (projectile.area.x > player.position.x) {
                     player.shieldExplosion(false);

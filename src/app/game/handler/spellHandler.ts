@@ -1,4 +1,4 @@
-import { SpellType, Cast, Animation, InstantCast, ChannelCast, Vector, Rectangle, SpellCast } from '../model';
+import { SpellType, Cast, Animation, InstantCast, ChannelCast, Vector, Rectangle, SpellCast, Progress } from '../model';
 import { AnimationHandler } from './animationHandler';
 import { ProjectileHandler } from './projectileHandler';
 import { ParticleHandler } from './particleHandler';
@@ -23,8 +23,10 @@ export class SpellHandler {
 
     private break: number = 0;
     private refShieldCollidables: Rectangle[] = [];
+    private maxMagicValue = 50 + (20 * this.fireLevel);
+    private minMagicValue = 25 + (5 * this.fireLevel);
 
-    constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler, particleHandler: ParticleHandler, player: Player) {
+    constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler, particleHandler: ParticleHandler, player: Player, private fireLevel: number, private frostLevel: number, private shieldLevel: number) {
         this.animationHandler = animationHandler;
         this.projectileHandler = projectileHandler;
         this.particleHandler = particleHandler;
@@ -50,7 +52,7 @@ export class SpellHandler {
             }
         }
 
-        if (this.channelMagicCast.currentValue >= 100) {
+        if (this.channelMagicCast.currentValue >= this.maxMagicValue) {
             this.particleHandler.createMagicEffect(this.player.position, this.player.inverse);
         }
 
@@ -61,7 +63,7 @@ export class SpellHandler {
                 this.shieldCollidables.push(new Rectangle(collidable.x + this.player.position.x, collidable.y + this.player.position.y, collidable.width, collidable.height));
             }
 
-            this.particleHandler.createShieldEffect(this.player.getCalculatedPos(this.player.position, 0), this.player.inverse);
+            this.particleHandler.createShieldEffect(this.player.getCalculatedPos(this.player.position, 0), this.player.inverse, this.shieldLevel);
         }
 
         this.updateBreak(delta);
@@ -181,26 +183,18 @@ export class SpellHandler {
     }
 
     private initCasts() {
-
+    
         let fireblastAnimation = new Animation([178]);
         fireblastAnimation.repetitions = 1;
 
-        let onFireCast = (animation: Animation) => {
-            this.particleHandler.createFireBlast(this.player.position, this.player.inverse);
-
-            return animation;
-        };
+        let onFireCast = this.getOnCastFireBlast(this.fireLevel);
 
         this.fireBlastCast = new InstantCast(fireblastAnimation, onFireCast);
 
         let frostBlastAnimation = new Animation([178]);
         frostBlastAnimation.repetitions = 1;
 
-        let onFrostCast = (animation: Animation) => {
-            this.particleHandler.createFrostBlast(this.player.position, this.player.inverse);
-
-            return animation;
-        };
+        let onFrostCast = this.getOnCastFrostBlast(this.frostLevel);
 
         this.frostBlastCast = new InstantCast(frostBlastAnimation, onFrostCast);
 
@@ -215,7 +209,7 @@ export class SpellHandler {
         let onCancelChannelMagic = () => {
         }
 
-        this.channelMagicCast = new ChannelCast(channelAnimation, channelLowerAnimation, onChannelMagic, onCancelChannelMagic, 40, 100, 0.03);
+        this.channelMagicCast = new ChannelCast(channelAnimation, channelLowerAnimation, onChannelMagic, onCancelChannelMagic, 25 + (5 * this.fireLevel), this.maxMagicValue, 0.03);
 
         let castAnimation = new Animation([170, 176, 177, 176]);
         castAnimation.repetitions = 3;
@@ -234,5 +228,63 @@ export class SpellHandler {
 
         this.fireBallCast = new SpellCast(castAnimation, 2, onFireBallCast);
     }
+
+    private getOnCastFireBlast(fireLevel: number) {
+        if (fireLevel == 0) {
+            return (animation: Animation) => {
+                this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 0);
+
+                return animation;
+            };
+        } else if (fireLevel == 1) {
+            return (animation: Animation) => {
+                this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 1);
+
+                return animation;
+            };
+        } else if (fireLevel == 2) {
+            return (animation: Animation) => {
+                this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 2);
+
+                return animation;
+            };
+        } else {
+            return (animation: Animation) => {
+                this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 3);
+
+                return animation;
+            };
+        }
+    }
+
+    private getOnCastFrostBlast(frostLevel: number) {
+        if (frostLevel == 0) {
+            return (animation: Animation) => {
+                this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 0);
+
+                return animation;
+            };
+        } else if (frostLevel == 1) {
+            return (animation: Animation) => {
+                this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 1);
+
+                return animation;
+            };
+        } else if (frostLevel == 2) {
+            return (animation: Animation) => {
+                this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 2);
+
+                return animation;
+            };
+        } else {
+            return (animation: Animation) => {
+                this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 3);
+
+                return animation;
+            }
+        };
+    }
+
+    
 
 }

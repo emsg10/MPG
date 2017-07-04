@@ -42,6 +42,14 @@ export class ParticleHandler {
         0.1
     ];
 
+    private largeFlameParticleSettings: number[] = [
+        4, 6,
+        500, 700,
+        0.4, 0.5,
+        -0.05, -0.03,
+        0.1
+    ];
+
     private flameEffectSettings: number[] = [
         1, 3,
         100, 400,
@@ -80,6 +88,14 @@ export class ParticleHandler {
         3, 5,
         600, 800,
         0.4, 0.5,
+        -0.02, 0.02,
+        0.2
+    ]
+
+    private largefrostParticleSettings: number[] = [
+        5, 7,
+        600, 800,
+        0.5, 0.6,
         -0.02, 0.02,
         0.2
     ]
@@ -241,7 +257,15 @@ export class ParticleHandler {
             positionOffset.x += 40;
         }
 
-        let particles = this.createParticles(positionOffset, inverse, this.frostParticleSettings, 3 + (frostLevel * 3));
+        let settings: number[];
+
+        if(frostLevel == 3) {
+            settings = this.largefrostParticleSettings;
+        } else {
+            settings = this.frostParticleSettings;
+        }
+
+        let particles = this.createParticles(positionOffset, inverse, settings, 3 + (frostLevel * 3));
         let effectParticles = this.createParticles(positionOffset, inverse, this.frostEffectParticleSettings, 2 + (frostLevel * 1));
 
         this.frostEffectParticles.push(...effectParticles);
@@ -259,7 +283,15 @@ export class ParticleHandler {
             positionOffset.x += 40;
         }
 
-        let particles = this.createParticles(positionOffset, inverse, this.flameParticleSettings, 3 + (fireLevel * 3));
+        let settings: number[];
+
+        if(fireLevel == 3) {
+            settings = this.largeFlameParticleSettings;
+        } else {
+            settings = this.flameParticleSettings;
+        }
+
+        let particles = this.createParticles(positionOffset, inverse, settings, 3 + (fireLevel * 3));
         let effectParticles = this.createParticles(positionOffset, inverse, this.flameEffectSettings, 2 + (fireLevel * 1));
 
         this.fireParticles.push(...particles);

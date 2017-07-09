@@ -22,6 +22,7 @@ export class Scene {
     }
 
     public load() {
+        
     }
 
     public click(mousePosition: [number, number]) {

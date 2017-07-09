@@ -42,6 +42,10 @@ export class PowerSelector {
         let active2 = this.actives[1];
         let active3 = this.actives[2];
 
+        active1.reset();
+        active2.reset();
+        active3.reset();
+
         for(let i = 0; i < points; i++) {
             
             if(!active1.active) {

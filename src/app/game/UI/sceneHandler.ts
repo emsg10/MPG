@@ -13,6 +13,7 @@ import { LocalStorageHelper } from '../service/localStorageHelper';
 import { Game } from '../game';
 import { AssetsLoader } from '../service/assetsLoader';
 import { PowerSelectionMenu } from './powerSelectionMenu';
+import { NewGameMenu } from "./newGameMenu";
 
 export class SceneHandler {
 
@@ -26,6 +27,8 @@ export class SceneHandler {
     private clicked = false;
     private importClicked = false;
 
+    private playerlist = document.getElementById("playerlist");
+    private textInput = document.getElementById("textinput") as HTMLInputElement;
     private textArea = document.getElementById("textarea");
     private fileUploadButton = document.getElementById("fileupload");
     private fileUploadButtonHighlight = document.getElementById("fileuploadHighlight");
@@ -39,23 +42,12 @@ export class SceneHandler {
     constructor(private renderer: Renderer, private canvasSize: [number, number], private canvas: HTMLElement, private game: Game) {
 
         let startMenu = new Menu(
-            this,
-            this.textArea,
-            renderer,
-            canvasSize,
-            100,
-            [512, 512],
-            true,
             [
                 this.createNewGameButton(),
                 this.createContinueButton(),
                 this.createLoadButton()
-            ]
-        );
-
-        this.scenes.set(SceneIndex.StartMenu, startMenu);
-
-        let loadMenu = new Menu(
+            ],
+            [],
             this,
             this.textArea,
             renderer,
@@ -63,15 +55,31 @@ export class SceneHandler {
             100,
             [512, 512],
             true,
+        );
+
+        startMenu.load();
+
+        this.scenes.set(SceneIndex.StartMenu, startMenu);
+
+        let loadMenu = new Menu(
             [
-                this.createToStartMenuBack()
-            ]
+                this.createToStartMenuBack(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50))
+            ],
+            [],
+            this,
+            this.textArea,
+            renderer,
+            canvasSize,
+            100,
+            [512, 512],
+            true,
         );
 
         this.scenes.set(SceneIndex.LoadMenu, loadMenu);
 
         this.loadLevelSelectionScreen();
         this.loadLevelFinishedScreen();
+        this.loadNewGameMenu();
 
         this.createEventListerners();
     }
@@ -80,10 +88,12 @@ export class SceneHandler {
 
         let currentScene = this.scenes.get(this.currentScene);
 
-        if(this.currentScene != this.lastCurrentScene) {
+        if (this.currentScene != this.lastCurrentScene) {
             this.textArea.style.visibility = "hidden";
             currentScene.load();
         }
+
+        this.lastCurrentScene = this.currentScene;
 
         if (this.click && !this.clicked) {
             this.clicked = true;
@@ -91,8 +101,6 @@ export class SceneHandler {
         }
 
         currentScene.mouseOver(this.mousePosition);
-
-        this.lastCurrentScene = this.currentScene;
     }
 
     public render() {
@@ -114,6 +122,7 @@ export class SceneHandler {
     }
 
     private loadLevelFinishedScreen() {
+
         let levelFinishedScene = new PowerSelectionMenu(
             this,
             this.textArea,
@@ -123,7 +132,10 @@ export class SceneHandler {
             [512, 512],
             false,
             [
+                this.createNextLevelButton(false),
+                this.createToStartMenuBack(new Rectangle(this.canvasSize[0] / 2 - 450, 650, 250, 42))
             ],
+            [],
             [
                 this.newPowerSelector(150, 100, 150, [105, 102, 106, 103, 107, 104]),
                 this.newPowerSelector(350, 100, 150, [111, 108, 112, 109, 113, 110]),
@@ -134,17 +146,13 @@ export class SceneHandler {
         this.scenes.set(SceneIndex.LevelFinished, levelFinishedScene);
     }
 
-    private newPowerSelector(x: number, y: number, offset: number, assets: number[]) {
-
-        let active1 = new Active(0, 1, false, new Rectangle(x, y, 100, 100), assets[0], assets[1], [100, 100])
-        let active2 = new Active(0, 2, false, new Rectangle(x, y + offset, 100, 100), assets[2], assets[3], [100, 100])
-        let active3 = new Active(0, 3, false, new Rectangle(x, y + offset * 2, 100, 100), assets[4], assets[5], [100, 100])
-        
-        return new PowerSelector([active1, active2, active3]);
-    }
-
-    private loadLevelSelectionScreen() {
-        let levelSelectionMenu = new Menu(
+    private loadNewGameMenu() {
+        let newGameMenu = new NewGameMenu(
+            [
+                this.createToStartMenuBack(new Rectangle(this.canvasSize[0] / 2 - 450, 650, 250, 42)),
+                this.createToPowerSelectorMenuButton(true),
+            ],
+            [],
             this,
             this.textArea,
             this.renderer,
@@ -152,13 +160,41 @@ export class SceneHandler {
             100,
             [512, 512],
             false,
+            this.textInput,
+            this.playerlist
+        );
+
+        this.scenes.set(SceneIndex.NewGameMenu, newGameMenu);
+    }
+
+    private newPowerSelector(x: number, y: number, offset: number, assets: number[]) {
+
+        let active1 = new Active(0, 1, false, new Rectangle(x, y, 100, 100), assets[0], assets[1], [100, 100])
+        let active2 = new Active(0, 2, false, new Rectangle(x, y + offset, 100, 100), assets[2], assets[3], [100, 100])
+        let active3 = new Active(0, 3, false, new Rectangle(x, y + offset * 2, 100, 100), assets[4], assets[5], [100, 100])
+
+        return new PowerSelector([active1, active2, active3]);
+    }
+
+    private loadLevelSelectionScreen() {
+        let levelSelectionMenu = new Menu(
             [
                 ...this.createLevelMenuButtons(),
                 this.createToStartMenuBackFromLevelMenu()
-            ]
+            ],
+            [],
+            this,
+            this.textArea,
+            this.renderer,
+            this.canvasSize,
+            100,
+            [512, 512],
+            false,
         );
 
-        this.scenes.set(SceneIndex.LevelSelectionMenu, levelSelectionMenu);
+        this.scenes.set(SceneIndex.LevelSelection, levelSelectionMenu);
+
+        return levelSelectionMenu;
     }
 
     private createEventListerners() {
@@ -209,7 +245,8 @@ export class SceneHandler {
     public levelCompleted(level: string) {
         this.started = false;
         this.localStorageHelper.setCurrentProgress((+level + 1));
-        this.loadLevelSelectionScreen();
+        this.currentScene = SceneIndex.LevelFinished;
+        this.scenes.get(this.currentScene).load();
     }
 
     private createLoadButton() {
@@ -222,9 +259,57 @@ export class SceneHandler {
         return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 295, 300, 50), 179, 181, 183, onClick);
     }
 
+    private createNextLevelButton(disabled: boolean) {
+
+        let onClick = () => {
+
+            this.textInput.style.visibility = "hidden";
+            this.textArea.style.visibility = "hidden";
+            this.playerlist.style.visibility = "hidden";
+
+            let progress = this.localStorageHelper.getCurrentProgress();
+            this.assetLoader.getLevel(progress.completedLevels.toString()).subscribe(it => {
+                this.game.loadLevel(it);
+                this.started = true;
+            });
+        }
+
+        let clickable: Clickable;
+
+        if(disabled) {
+            clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick, 554);
+        } else {
+            clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick);
+        }
+
+        return clickable;
+
+    }
+
+    private createToPowerSelectorMenuButton(disabled: boolean) {
+         let onClick = () => {
+
+            this.textInput.style.visibility = "hidden";
+            this.textArea.style.visibility = "hidden";
+            this.playerlist.style.visibility = "hidden";
+
+            this.currentScene = SceneIndex.LevelFinished;
+        }
+
+        let clickable: Clickable;
+
+        if(disabled) {
+            clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick, 554);
+        } else {
+            clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick);
+        }
+
+        return clickable;
+    }
+
     private createNewGameButton() {
         let onClick = () => {
-            this.started = true;
+            this.currentScene = SceneIndex.NewGameMenu;
         }
 
         return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 175, 300, 50), 179, 181, 182, onClick);
@@ -232,21 +317,24 @@ export class SceneHandler {
 
     private createContinueButton() {
         let onClick = () => {
-            this.currentScene = SceneIndex.LevelSelectionMenu;
+            this.currentScene = SceneIndex.LevelSelection;
         }
 
-        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50), 179, 181, 184, onClick);
+        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50), 179, 181, 184, onClick, 554);
     }
 
-    private createToStartMenuBack() {
+    private createToStartMenuBack(area: Rectangle) {
         let onClick = () => {
             this.currentScene = SceneIndex.StartMenu;
 
             this.fileUploadButton.style.visibility = "hidden";
             this.fileUploadButtonHighlight.style.visibility = "hidden";
+            this.textArea.style.visibility = "hidden";
+            this.textInput.style.visibility = "hidden";
+            this.playerlist.style.visibility = "hidden";
         }
 
-        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50), 179, 181, 186, onClick);
+        return new Clickable(area, 179, 181, 186, onClick);
     }
 
     private createToStartMenuBackFromLevelMenu() {

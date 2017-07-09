@@ -4,6 +4,7 @@ import { Rectangle } from '../model';
 
 export class Clickable {
 
+    public disabled = false;
     private renderHelper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
     private hover = false;
@@ -11,17 +12,24 @@ export class Clickable {
     private baseTextureCoords: number[];
     private hoverTextureCoords: number[];
     private textTextureCoords: number[];
+    private disabledTextureCoords: number[];
      
 
-    constructor(private area: Rectangle, private buttonTexture: number, private hoverTexture: number, private textTexture: number, private onClick: () => void) {
+    constructor(private area: Rectangle, private buttonTexture: number, private hoverTexture: number, private textTexture: number, private onClick: () => void, private disabledTexture?: number) {
         this.baseTextureCoords = this.renderHelper.getTextureCoordinates([], buttonTexture);
         this.hoverTextureCoords = this.renderHelper.getTextureCoordinates([], hoverTexture);
         this.textTextureCoords = this.renderHelper.getTextureCoordinates([], textTexture);
+
+        if(disabledTexture != null) {
+            this.disabledTextureCoords = this.renderHelper.getTextureCoordinates([], disabledTexture);
+        }
     }
 
     public click(mouseposition: [number, number]) {
         if(this.isWithinArea(mouseposition)) {
-            this.onClick();
+            if(!this.disabled) {
+                this.onClick();
+            }
         };
     }
 
@@ -51,6 +59,9 @@ export class Clickable {
     }
 
     private getTexture() {
+        if(this.disabled && this.disabledTexture != null) {
+            return this.disabledTextureCoords;
+        }
         if(this.hover) {
             return this.hoverTextureCoords;
         } else {

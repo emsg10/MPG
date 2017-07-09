@@ -196,7 +196,6 @@ export class Game {
 		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.collisionAreaEnd);
 		if (this.levelCompleted) {
 			this.sceneHandler.levelCompleted(this.level.name);
-			this.sceneHandler.currentScene = SceneIndex.LevelFinished;
 		}
 	}
 

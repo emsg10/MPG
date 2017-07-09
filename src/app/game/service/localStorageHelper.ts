@@ -18,6 +18,14 @@ export class LocalStorageHelper {
     public progressionKey = "progression";
 
     public newPlayer(name: string) {
+
+        let progression = this.getProgression();
+
+        for(let p of progression){
+            p.active = false;
+            this.saveProgress(p);
+        }
+
         let progress = new Progress();
         progress.playerName = name;
         progress.active = true;
@@ -45,19 +53,29 @@ export class LocalStorageHelper {
     public setCurrentProgress(level: number) {
         let progress = this.getCurrentProgress();
         progress.level++;
-        if(progress.completedLevels < level) {
+        if (progress.completedLevels < level) {
             progress.completedLevels = level;
         }
 
         this.saveProgress(progress);
     }
 
+    public getProgression() {
+
+        let progression = this.getItem(this.progressionKey) as Progress[]
+
+        if(progression == null) {
+            progression = [];
+        }
+
+        return progression;
+    }
+
     public getCurrentProgress() {
         let progression = this.getItem(this.progressionKey) as Progress[];
 
-        if(!progression) {
-            this.newPlayer("newPLayer");
-            progression = this.getItem(this.progressionKey) as Progress[];
+        if (!progression) {
+            progression = [this.defaultProgress()] as Progress[];
         }
 
         return progression.find(it => it.active == true);
@@ -67,15 +85,15 @@ export class LocalStorageHelper {
 
         let progression = this.getItem(this.progressionKey) as Progress[];
 
-        if(!progression) {
+        if (!progression) {
             progression = [];
         }
 
-         let prg = progression.find(it => it.playerName == progress.playerName);
+        let prg = progression.find(it => it.playerName == progress.playerName);
 
-        if(prg) {
+        if (prg) {
             let index = progression.indexOf(prg);
-            if(index != -1) {
+            if (index != -1) {
                 progression.splice(index, 1);
             }
 
@@ -86,6 +104,36 @@ export class LocalStorageHelper {
 
         this.setItem(this.progressionKey, progression);
 
+    }
+
+    public setActive(name: string) {
+        let progression = this.getProgression();
+
+        for(let progress of progression) {
+            if(progress.playerName == name) {
+                progress.active = true;
+            } else {
+                progress.active = false;
+            }
+
+            this.saveProgress(progress);
+        }
+
+    }
+
+    private defaultProgress() {
+        let progress = new Progress();
+        progress.playerName = "nouser";
+        progress.active = true;
+        progress.completedLevels = 0;
+        progress.level = 1;
+        progress.fire = 0;
+        progress.frost = 0;
+        progress.defence = 0;
+        progress.hp = 0;
+        progress.mana = 0;
+
+        return progress;
     }
 
     private getItem(key: string) {

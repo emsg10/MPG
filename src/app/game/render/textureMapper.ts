@@ -300,6 +300,14 @@ export class TextureMapper {
 	private texture551 = new Rectangle(1632, 96, 111, 12);
 	private texture552 = new Rectangle(1632, 128, 111, 12);
 
+	private texture553 = new Rectangle(1440, 128, 164, 27);
+
+	private texture554 = new Rectangle(1248, 128, 164, 27);
+
+	private texture555 = new Rectangle(1440, 160, 164, 27);
+	private texture556 = new Rectangle(1440, 192, 164, 27);
+	private texture557 = new Rectangle(1440, 224, 164, 27);
+
 	constrcuctor() {
 		if (TextureMapper.instance) {
 			throw new Error("Static class cant be instanced!");
@@ -604,7 +612,12 @@ export class TextureMapper {
 			case 551: return this.texture551;
 			case 552: return this.texture552;
 
+			case 553: return this.texture553;
+			case 554: return this.texture554;
 
+			case 555: return this.texture555;
+			case 556: return this.texture556;
+			case 557: return this.texture557;
 		}
 	}
 

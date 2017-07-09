@@ -37,6 +37,11 @@ export class Active {
         }
     }
 
+    public reset() {
+        this.value = 0;
+        this.active = false;
+    }
+
     private addRenderCall(renderCalls: Map<number, RenderCall>, asset: number, partial: boolean) {
         let renderCall: RenderCall;
 

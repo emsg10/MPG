@@ -8,7 +8,7 @@ import { Scene } from './scene';
 import { Clickable } from './clickable';
 import { PowerSelector } from './powerSelector';
 import { SceneIndex } from './sceneIndex';
-import { Progress } from '../model';
+import { Progress, Tile } from '../model';
 import { SimpleClickable } from './simpleClickable';
 
 export class PowerSelectionMenu extends Menu {
@@ -24,12 +24,16 @@ export class PowerSelectionMenu extends Menu {
         protected background: number,
         protected tileSize: [number, number],
         protected menu: boolean,
-        protected clickables: Clickable[],
+        public clickables: Clickable[],
+        public text: Tile[],
         private powerSelectors: [PowerSelector, PowerSelector, PowerSelector]) {
-        super(sceneHandler, textArea, renderer, canvasSize, background, tileSize, menu, clickables)
+        super(clickables, text, sceneHandler, textArea, renderer, canvasSize, background, tileSize, menu);
+        this.load();
+        this.textArea.style.visibility = "hidden";
     }
 
     public render() {
+
         for (let powerSelector of this.powerSelectors) {
             this.renderCalls = powerSelector.render(this.renderCalls);
         }

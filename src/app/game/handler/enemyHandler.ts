@@ -2,7 +2,7 @@ import { Tile, Spell, Vector, Rectangle, ParticleProjectile, SpellType } from '.
 import { Enemy } from '../character/enemy';
 import { Player } from '../character/player';
 import { Swordman } from '../character/swordman';
-import { Archer, Shadow, Apprentice } from '../character/';
+import { Archer, Shadow, Apprentice, Screamer } from '../character/';
 import { RenderCall, RenderHelper, ColorRenderCall } from '../render';
 import { Context } from '../context';
 import { ProjectileHandler } from './projectileHandler';
@@ -79,6 +79,8 @@ export class EnemyHandler {
                     this.projectileHandler.createShadow_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if(enemy instanceof Apprentice) {
                     this.projectileHandler.createApprentice_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof Screamer) {
+                    this.projectileHandler.createScreamer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 }
                 
                 this.remove(enemy);
@@ -91,6 +93,8 @@ export class EnemyHandler {
                     this.projectileHandler.createShadow_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if(enemy instanceof Apprentice) {
                     this.projectileHandler.createApprentice_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof Screamer) {
+                    this.projectileHandler.createScreamer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 }
 
                 this.remove(enemy);
@@ -101,6 +105,8 @@ export class EnemyHandler {
                     this.projectileHandler.createShadow_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if(enemy instanceof Apprentice) {
                     this.projectileHandler.createApprentice_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof Screamer) {
+                    this.projectileHandler.createScreamer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 }
 
                 this.remove(enemy);

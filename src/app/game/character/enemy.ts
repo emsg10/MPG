@@ -179,7 +179,7 @@ export class Enemy extends Character {
             this.currentState = State.Tracking;
         }
 
-        this.moveToPlayer(delta, player, tiles);
+        this.moveToPlayer(delta, player, tiles, 10);
     }
 
     protected npcAction(delta: number, player: Player, tiles: Tile[]) {
@@ -194,7 +194,7 @@ export class Enemy extends Character {
             case State.TrackingToIdleTransition: this.trackingToIdleTransition(delta);
                 break;
 
-            case State.Tracking: this.track(player, delta, tiles);
+            case State.Tracking: this.track(player, delta, tiles, 10);
                 break;
 
             case State.TrackingToInRangeTransition: this.trackingToInRangeTransition(delta);
@@ -215,7 +215,7 @@ export class Enemy extends Character {
         this.velocity.x = 0;
     }
 
-    protected track(player: Player, delta: number, tiles: Tile[]) {
+    protected track(player: Player, delta: number, tiles: Tile[], gapSize: number) {
         this.currentAnimation = this.trackingAnimation;
         this.maxSpeed = this.trackingSpeed;
 
@@ -232,12 +232,11 @@ export class Enemy extends Character {
             this.currentState = State.TrackingToInRangeTransition;
         }
 
-        this.moveToPlayer(delta, player, tiles);
-
+        this.moveToPlayer(delta, player, tiles, gapSize);
     }
 
-    private moveToPlayer(delta: number, player: Player, tiles: Tile[]) {
-        if (Math.abs(player.position.x - this.position.x) > 10) {
+    protected moveToPlayer(delta: number, player: Player, tiles: Tile[], gapSize: number) {
+        if (Math.abs(player.position.x - this.position.x) > gapSize) {
             if (player.position.x < this.position.x) {
                 this.moveLeft(delta);
 
@@ -258,8 +257,8 @@ export class Enemy extends Character {
         return min + (Math.random() * (max - min))
     }
 
-    protected getDeltaPosition(player: Player) {
-        return new Vector(player.position.x - this.position.x, player.position.y - this.position.y);
+    protected getDeltaPosition(player: Player, offset: number) {
+        return new Vector(player.middlePosition.x - offset - this.position.x, player.middlePosition.y - this.position.y);
     }
 
     private updateBurnDamage() {

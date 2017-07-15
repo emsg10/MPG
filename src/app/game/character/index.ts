@@ -6,6 +6,7 @@ import { Player } from './player';
 import { Shadow } from './shadow';
 import { State } from './state';
 import { Apprentice } from './apprentice';
+import { Screamer } from './screamer';
 
 export {
     Enemy,
@@ -15,5 +16,6 @@ export {
     Player,
     Shadow,
     State,
-    Apprentice
+    Apprentice,
+    Screamer
 };

@@ -25,6 +25,7 @@ import { SceneHandler } from './UI/sceneHandler';
 import { LoadHelper } from './service/loadHelper';
 import { LocalStorageHelper } from './service/localStorageHelper';
 import { SceneIndex } from './UI/sceneIndex';
+import { Screamer } from "./character/screamer";
 
 export class Game {
 	public canvasWidth = 1200;
@@ -65,6 +66,7 @@ export class Game {
 	private debugHandler = DebugHandler.getInstance();
 	private camera: Camera;
 	private levelCompleted = false;
+	private deathTimer = 0;
 	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 	private sceneHandler: SceneHandler;
 	private collisionAreaEnd: Rectangle;
@@ -79,8 +81,6 @@ export class Game {
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
 		this.levelData = level;
-
-
 
 		this.initKeyBindings();
 		this.reset(this.levelData);
@@ -122,10 +122,18 @@ export class Game {
 						this.UI.update(this.player.hp, this.player.mana);
 						this.camera.update(this.player.position);
 						this.particleHandler.update(delta, this.enemyHandler.enemies);
-					} else {
+					} else if(this.deathTimer < 3000) {
+						this.deathTimer += delta;
+						this.player.position.x = -1000;
+						this.player.position.y = -1000;
+						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);
 						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
 						this.particleHandler.update(delta, this.enemyHandler.enemies);
+					} else {
+						this.sceneHandler.started = false;
+						this.sceneHandler.setCurrentLevel(this.level.name);
+						this.sceneHandler.currentScene = SceneIndex.RestartMenu;
 					}
 
 					this.render();
@@ -174,6 +182,7 @@ export class Game {
 
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(colorRenderCall)
+		this.animationHandler.createStaticRenderCall(renderCall);
 		this.UI.createRenderCall(renderCall, this.camera.position);
 		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls);
 
@@ -337,6 +346,9 @@ export class Game {
 		this.UI = new UI(hp, mana);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
+		
+
+		this.deathTimer = 0;
 
 		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
 		this.tileMap = new TileMap(this.level.tiles, this.level.decorativeTiles);

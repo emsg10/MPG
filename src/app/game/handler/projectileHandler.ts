@@ -170,7 +170,6 @@ export class ProjectileHandler {
         this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
         this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
         this.animationHandler.swordman_death(position, inverse);
-        this.animationHandler.swordman_corpse(position, inverse);
 
         this.projectiles.push(projectile);
     }
@@ -209,6 +208,17 @@ export class ProjectileHandler {
 
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.shadow_Death(area, inverse), 0.8)
+
+        this.projectiles.push(projectile);
+    }
+
+    public createScreamer_death(area: Rectangle, inverse: boolean) {
+        let projectile: PhysicalProjectile;
+        let projectileCorpse: Projectile;
+        let velocity = new Vector(0, 0);
+        let x = area.x;
+
+        projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.screamer_Death(area, inverse), 0.8)
 
         this.projectiles.push(projectile);
     }
@@ -289,7 +299,7 @@ export class ProjectileHandler {
         let removeProjectile: Projectile[] = [];
         let removeEnemyProjectile: Projectile[] = [];
 
-        removeProjectile = this.updateFriendslyProjectiles(delta, collidables);
+        removeProjectile = this.updateFriendslyProjectiles(delta, collidables, dynamicTiles);
         removeEnemyProjectile = this.updateEnemyProjectiles(delta, player, collidables, dynamicTiles);
 
         for (let projectile of removeProjectile) {
@@ -448,7 +458,7 @@ export class ProjectileHandler {
         }
     }
 
-    private updateAndCollCheck(projectile: Projectile, delta: number, collidables: Rectangle[], removeProjectiles: Projectile[]) {
+    private updateAndCollCheck(projectile: Projectile, delta: number, collidables: Rectangle[], removeProjectiles: Projectile[], dynamicTiles: DynamicTile[]) {
         let collisionData: CollisionData;
 
         projectile.updateForces(delta);
@@ -480,15 +490,19 @@ export class ProjectileHandler {
             projectile.velocity.x = 0;
         }
 
+        if (this.collisionDetection.aabbCheckS(projectile.collisionArea, dynamicTiles.map(it => it.tile))) {
+            removeProjectiles.push(projectile);
+        }
+
         return removeProjectiles;
     }
 
-    private updateFriendslyProjectiles(delta: number, collidables: Rectangle[]) {
+    private updateFriendslyProjectiles(delta: number, collidables: Rectangle[], dynamicTiles: DynamicTile[]) {
         let collisionData: CollisionData;
         let removeProjectiles: Projectile[] = [];
 
         for (let projectile of this.projectiles) {
-            this.updateAndCollCheck(projectile, delta, collidables, removeProjectiles);
+            this.updateAndCollCheck(projectile, delta, collidables, removeProjectiles, dynamicTiles);
         }
 
         return removeProjectiles;

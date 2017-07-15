@@ -22,6 +22,7 @@ export class Player extends Character {
 	public stunned = false;
 	public lift: DynamicTile = null;
 	public liftVelocity = new Vector(0, 0);
+	public middlePosition = new Vector(0, 0);
 	private collisionDetection = CollisionDetection.getInstance();
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;
@@ -110,6 +111,16 @@ export class Player extends Character {
 		}
 	}
 
+	public hardHit(inverse: boolean, x: number) {
+		this.stun();
+		this.velocity.x = 0;
+		if (inverse) {
+			this.externalVelocity.x += x;
+		} else {
+			this.externalVelocity.x -= x;
+		}
+	}
+
 	public useMana(mana: number) {
 
 		if (this.mana - mana <= 0) {
@@ -167,13 +178,7 @@ export class Player extends Character {
 
 	public shieldExplosion(inverse: boolean) {
 		this.particleHandler.createShieldExplosionEffect(this.getCalculatedPos(this.position, 0), this.inverse);
-		this.stun();
-		this.velocity.x = 0;
-		if (inverse) {
-			this.externalVelocity.x += 0.7;
-		} else {
-			this.externalVelocity.x -= 0.7;
-		}
+		this.hardHit(inverse, 0.7);
 	}
 
 	public getShieldCollidables() {
@@ -222,6 +227,9 @@ export class Player extends Character {
 	public update(tiles: Tile[], dynamicTiles: DynamicTile[], delta: number) {
 
 		let collisionData = this.collisionDetection.collisionDetection(tiles, dynamicTiles, this, this.toMove, delta);
+
+		this.middlePosition.x = (this.position.x + this.width/2);
+		this.middlePosition.y = this.position.y;
 
 		if (this.lift == null) {
 			this.fall(delta);

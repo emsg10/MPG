@@ -91,7 +91,7 @@ export class Archer extends Enemy {
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        let deltaPos = this.getDeltaPosition(player);
+        let deltaPos = this.getDeltaPosition(player, 10);
         let magnitude = deltaPos.magnitude();
         
         if(magnitude < this.searchAreaOffset) {
@@ -163,7 +163,7 @@ export class Archer extends Enemy {
     }
 
     private calculatePath(player: Player, inverse: boolean) {
-        let deltaPos = this.getDeltaPosition(player);
+        let deltaPos = this.getDeltaPosition(player, 10);
 
         deltaPos.y = deltaPos.y - ((deltaPos.x * deltaPos.x * 0.00063) + this.getDeltaVelocity(player, deltaPos));
         

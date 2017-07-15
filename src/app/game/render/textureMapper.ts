@@ -307,6 +307,29 @@ export class TextureMapper {
 	private texture555 = new Rectangle(1440, 160, 164, 27);
 	private texture556 = new Rectangle(1440, 192, 164, 27);
 	private texture557 = new Rectangle(1440, 224, 164, 27);
+	private texture558 = new Rectangle(1440, 256, 164, 27);
+
+	private texture560 = new Rectangle(1344, 704, 64, 96);
+	private texture561 = new Rectangle(1408, 704, 64, 96);
+	private texture562 = new Rectangle(1472, 704, 64, 96);
+	private texture563 = new Rectangle(1536, 704, 64, 96);
+	private texture564 = new Rectangle(1600, 704, 64, 96);
+	private texture565 = new Rectangle(1344, 800, 64, 96);
+	private texture566 = new Rectangle(1408, 800, 64, 96);
+	private texture567 = new Rectangle(1472, 800, 64, 96);
+
+	private texture568 = new Rectangle(1536, 800, 64, 96);
+	private texture569 = new Rectangle(1600, 800, 64, 96);
+	private texture570 = new Rectangle(1344, 896, 64, 96);
+	private texture571 = new Rectangle(1408, 896, 64, 96);
+	private texture572 = new Rectangle(1472, 896, 64, 96);
+	private texture573 = new Rectangle(1536, 896, 64, 96);
+	private texture574 = new Rectangle(1600, 896, 64, 96);
+	private texture575 = new Rectangle(1344, 992, 64, 96);
+	private texture576 = new Rectangle(1408, 992, 64, 96);
+	private texture577 = new Rectangle(1472, 992, 64, 96);
+	private texture578 = new Rectangle(1536, 992, 64, 96);
+	private texture579 = new Rectangle(1600, 992, 64, 96);
 
 	constrcuctor() {
 		if (TextureMapper.instance) {
@@ -618,6 +641,30 @@ export class TextureMapper {
 			case 555: return this.texture555;
 			case 556: return this.texture556;
 			case 557: return this.texture557;
+			case 558: return this.texture558;
+
+			case 560: return this.texture560;
+			case 561: return this.texture561;
+			case 562: return this.texture562;
+			case 563: return this.texture563;
+			case 564: return this.texture564;
+			case 565: return this.texture565;
+			case 566: return this.texture566;
+			case 567: return this.texture567;
+			case 568: return this.texture568;
+			case 569: return this.texture569;
+			case 570: return this.texture570;
+			case 571: return this.texture571;
+			case 572: return this.texture572;
+			case 573: return this.texture573;
+			case 574: return this.texture574;
+			case 575: return this.texture575;
+
+			case 576: return this.texture576;
+			case 577: return this.texture577;
+			case 578: return this.texture578;
+			case 579: return this.texture579;
+
 		}
 	}
 

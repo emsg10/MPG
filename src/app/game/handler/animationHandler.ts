@@ -9,6 +9,7 @@ export class AnimationHandler {
 
     public animations: Animation[] = [];
     public dynamicAnimations: Animation[] = [];
+    private staticAnimations: Animation[] = [];
     private particleHandler: ParticleHandler;
     private textureMapper = TextureMapper.getInstance();
     private renderHelper = RenderHelper.getInstance();
@@ -86,6 +87,10 @@ export class AnimationHandler {
 
         animation.inverse = inverse;
 
+        animation.onCompletion = () => {
+            this.swordman_corpse(position, inverse);
+        }
+
         this.animations.push(animation);
 
         return animation;
@@ -96,7 +101,7 @@ export class AnimationHandler {
         this.bloodAnimation_B_Left(new Vector(area.x - 10, area.y - 20), 75);
         this.bloodAnimation_B_Right(new Vector(area.x - 10, area.y - 20), 75);
         this.archer_death(area, inverse);
-        this.archer_corpse(area, inverse);
+        
     }
 
     public archer_death(area: Rectangle, inverse: boolean) {
@@ -109,6 +114,10 @@ export class AnimationHandler {
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
 
         animation.inverse = inverse;
+
+        animation.onCompletion = () => {
+            this.archer_corpse(area, inverse);
+        }
 
         this.animations.push(animation);
 
@@ -125,7 +134,7 @@ export class AnimationHandler {
 
         animation.inverse = inverse;
 
-        this.animations.push(animation);
+        this.staticAnimations.push(animation);
 
         return animation;
     }
@@ -158,27 +167,89 @@ export class AnimationHandler {
     }
 
     public apprentice_Death(area: Rectangle, inverse: boolean) {
-        let animation = new Animation([144, 145, 146, 153, 154, 155, 155, 155, 155, 155]);
+        let animation = new Animation([144, 145, 146, 153, 154, 155]);
 
-        animation.repetitions = 9;
+        animation.repetitions = 5;
         animation.inverse = inverse;
         animation.timeToChange = 150;
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.onCompletion = () => {
+            this.apprentice_corpse(area, inverse);
+        }
 
         this.animations.push(animation);
 
         return animation;
     }
 
+    public apprentice_corpse(area: Rectangle, inverse: boolean) {
+        let animation = new Animation([155]);
+
+        animation.inverse = inverse;
+        animation.timeToChange = 150;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.staticAnimations.push(animation);
+
+        return animation;
+    }
+
+    public screamer_Death(area: Rectangle, inverse: boolean) {
+        let animation = new Animation([576, 577, 578, 579]);
+
+        animation.repetitions = 3;
+        animation.inverse = inverse;
+        animation.timeToChange = 175;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.onCompletion = () => {
+            this.screamer_corpse(area, inverse);
+        }
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public screamer_corpse(area: Rectangle, inverse: boolean) {
+        let animation = new Animation([579]);
+
+        animation.inverse = inverse;
+        animation.timeToChange = 175;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.staticAnimations.push(animation);
+
+        return animation;
+    }
+
     public shadow_Death(area: Rectangle, inverse: boolean) {
         let animation = new Animation([132, 130, 127, 124, 119]);
-        
+
         animation.repetitions = 4;
         animation.inverse = inverse;
         animation.timeToChange = 100;
         animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
 
+        animation.onCompletion = () => {
+            this.shadow_corpse(area, inverse);
+        };
+
         this.animations.push(animation);
+
+        return animation;
+    }
+
+    public shadow_corpse(area: Rectangle, inverse: boolean) {
+        let animation = new Animation([119]);
+
+        animation.repetitions = 4;
+        animation.inverse = inverse;
+        animation.timeToChange = 100;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.staticAnimations.push(animation);
 
         return animation;
     }
@@ -194,7 +265,7 @@ export class AnimationHandler {
 
         animation.inverse = inverse;
 
-        this.animations.push(animation);
+        this.staticAnimations.push(animation);
 
         return animation;
     }
@@ -331,12 +402,12 @@ export class AnimationHandler {
         let animation = new RotationAnimation(collAngle, [269]);
         animation.inverse = projectile.animation.inverse;
 
-        if(useCollisionArea) {
+        if (useCollisionArea) {
             animation.areaToRender = new Rectangle(projectile.collisionArea.x, projectile.collisionArea.y, projectile.area.width, projectile.area.height);
         } else {
             animation.areaToRender = new Rectangle(projectile.area.x, projectile.area.y, projectile.area.width, projectile.area.height);
         }
-        
+
         animation.areaToRender.width = animation.areaToRender.width * 0.67;
 
         animation.timeToChange = 2000;
@@ -463,6 +534,23 @@ export class AnimationHandler {
                     renderCall.color = this.renderHelper.getColor(renderCall.color, null);
                 }
             }
+        }
+
+        return renderCall;
+    }
+
+    public createStaticRenderCall(renderCall: RenderCall) {
+
+        for (let animation of this.staticAnimations) {
+            if (animation.inverse) {
+                renderCall.vertecies = this.renderHelper.getInverseVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+            } else {
+                renderCall.vertecies = this.renderHelper.getVertecies(animation.areaToRender.x, animation.areaToRender.y, animation.areaToRender.width, animation.areaToRender.height, renderCall.vertecies);
+            }
+
+            renderCall.textureCoords.push.apply(renderCall.textureCoords, animation.getCurrentFrame());
+
+            renderCall.indecies = this.renderHelper.getIndecies(renderCall.indecies);
         }
 
         return renderCall;

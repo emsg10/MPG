@@ -10,22 +10,25 @@ import { DebugHandler } from '../handler/debugHandler';
 import { DeathType } from './deathType';
 import { State } from './state';
 
-export class Apprentice extends Enemy {
+export class Screamer extends Enemy {
 
     protected hitAreaOffset: number = 500;
     protected searchAreaOffset: number = 500;
-    protected hp = 50;
-    protected trackingSpeed = 0.05;
-    protected idleSpeed = 0.05;
+    protected hp = 100;
+    protected hitDamage = 50;
+    protected trackingSpeed = 0.4;
+    protected idleSpeed = 0.1;
     protected minDistance = 30;
     private textureMapper = TextureMapper.getInstance();
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
     private projectileVelocity = 0.5;
-    private shoot = false;
     private onBlackFireUpdate = (area: Rectangle, inverse: boolean, offsetX: number) => {
-         this.particleHandler.createNecroFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
+        this.particleHandler.createNecroFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
     };
+    private hitTimer: number = 0;
+    private chargeTimer: number = 1000;
+
 
     public debugHandler = DebugHandler.getInstance();
 
@@ -34,14 +37,16 @@ export class Apprentice extends Enemy {
         this.projectileHandler = projectileHandler;
         this.animationHandler = animationHandler;
 
-        this.idleAnimation = new Animation([139, 140, 141, 142, 143]);
+        this.acceleration = 0.1;
+
+        this.idleAnimation = new Animation([560, 561, 562, 563, 564, 565, 566, 567]);
         this.idleAnimation.timeToChange = 175;
 
-        this.trackingAnimation = new Animation([139, 140, 141, 142, 143]);
+        this.trackingAnimation = new Animation([568, 569, 570, 571, 572, 573, 574, 575]);
 
         this.trackingAnimation.timeToChange = 175;
 
-        this.hitAnimation = new Animation([139, 140, 141, 142, 143]);
+        this.hitAnimation = new Animation([568, 569, 570, 571, 572, 573, 574, 575]);
 
         this.hitAnimation.timeToChange = 250;
 
@@ -55,32 +60,35 @@ export class Apprentice extends Enemy {
 
         this.currentAnimation.next(delta);
 
+        if(this.hitTimer > 0){
+            this.hitTimer -= delta;
+        }
+
         this.npcAction(delta, player, tiles);
     }
 
     public getCollisionArea() {
         let collisionArea: Rectangle;
 
-        collisionArea = new Rectangle(this.position.x + 25, this.position.y + 15, this.width - 50, this.height - 20);
+        collisionArea = new Rectangle(this.position.x + 15, this.position.y, this.width - 30, this.height - 10);
 
         return collisionArea;
     }
 
     protected hit(delta: number, player: Player, tiles: Tile[]) {
         super.hit(delta, player, tiles);
-        if (this.hitAnimation.frameIndex == 3) {
-            if (!this.shoot) {
-                let velocity = this.getDeltaPosition(player, 0);
-                velocity.y = velocity.y + 20; 
-                velocity.normalize();
-                velocity.multiply(this.projectileVelocity);
-                let pos = new Vector(this.position.x, this.position.y);
-                this.projectileHandler.createNecroBall(pos, 40, this.inverse, velocity, this.onBlackFireUpdate);
-                this.shoot = true;
+        if (this.hitTimer <= 0) {
+            if (this.collisionDetection.aabbCheck(this.getCollisionArea(), player.getCollisionArea())) {
+                this.hitTimer = 500;
+                this.chargeTimer = 1000;
+                this.currentState = State.Idle;
+                player.takeDamage(this.hitDamage);
+                if (player.position.x < this.position.x) {
+                    player.hardHit(false, 0.8);
+                } else {
+                    player.hardHit(true, 0.8);
+                }
             }
-
-        } else {
-            this.shoot = false;
         }
     }
 
@@ -91,7 +99,12 @@ export class Apprentice extends Enemy {
     }
 
     protected idleToTrackingTransition(delta: number) {
-        this.currentState = State.Tracking;
+        this.currentAnimation = this.trackingAnimation;
+        if (this.chargeTimer > 0) {
+            this.chargeTimer -= delta;
+        } else {
+            this.currentState = State.Tracking;
+        }
     }
 
     protected trackingToInRangeTransition(delta: number) {
@@ -100,6 +113,11 @@ export class Apprentice extends Enemy {
 
     protected trackingToIdleTransition(delta: number) {
         this.currentState = State.Idle;
+    }
+
+    protected track(player: Player, delta: number, tiles: Tile[]) {
+        super.track(player, delta, tiles, 30);
+        this.actualSpeed = this.maxSpeed;
     }
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
@@ -115,6 +133,20 @@ export class Apprentice extends Enemy {
             }
         } else {
             return false;
+        }
+    }
+
+    protected moveToPlayer(delta: number, player: Player, tiles: Tile[], gapSize: number) {
+        let positionMiddle = this.position.x + (this.width / 2);
+        if (Math.abs(player.middlePosition.x - positionMiddle) > gapSize) {
+            if (player.middlePosition.x < positionMiddle) {
+                this.moveLeft(delta);
+            } else if (player.middlePosition.x > positionMiddle) {
+                this.moveRight(delta);
+            }
+        } else {
+            this.currentState = State.Idle;
+            this.chargeTimer = 1000;
         }
     }
 

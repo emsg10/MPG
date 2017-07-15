@@ -1,6 +1,6 @@
 import { LevelData } from '../map/model';
 import { Level, Tile, DynamicTile, Rectangle, Vector } from '../model';
-import { Enemy, Swordman, Archer, Shadow, Apprentice } from '../character';
+import { Enemy, Swordman, Archer, Shadow, Apprentice, Screamer } from '../character';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ParticleHandler } from '../handler/particleHandler';
@@ -75,6 +75,8 @@ export class LoadHelper {
 				enemy = new Shadow(new Vector(it.area.x, it.area.y), 85, 85, projectileHandler, animationHandler);
 			} else if(it.key == 54) { 
 				enemy = new Apprentice(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler, particleHandler);
+			} else if(it.key == 55){
+				enemy = new Screamer(new Vector(it.area.x, it.area.y), 64, 96, projectileHandler, animationHandler, particleHandler);
 			}
 
 			return enemy;

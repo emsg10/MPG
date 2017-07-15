@@ -3,5 +3,6 @@ export enum SceneIndex {
     LoadMenu = 2,
     LevelFinished = 3,
     NewGameMenu = 4,
-    LevelSelection = 5
+    LevelSelection = 5,
+    RestartMenu = 6
 }

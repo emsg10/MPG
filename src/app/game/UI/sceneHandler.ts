@@ -14,6 +14,7 @@ import { Game } from '../game';
 import { AssetsLoader } from '../service/assetsLoader';
 import { PowerSelectionMenu } from './powerSelectionMenu';
 import { NewGameMenu } from "./newGameMenu";
+import { RestartMenu } from "./restartMenu";
 
 export class SceneHandler {
 
@@ -80,6 +81,7 @@ export class SceneHandler {
         this.loadLevelSelectionScreen();
         this.loadLevelFinishedScreen();
         this.loadNewGameMenu();
+        this.loadRestartMenu();
 
         this.createEventListerners();
     }
@@ -106,6 +108,11 @@ export class SceneHandler {
     public render() {
         this.scenes.get(this.currentScene).render();
         this.renderer.render(this.createMouseRenderCall(), [0, 0]);
+    }
+
+    public setCurrentLevel(level: string) {
+        let scene = this.scenes.get(SceneIndex.RestartMenu) as RestartMenu;
+        scene.currentLevel = +level;
     }
 
     private createMouseRenderCall() {
@@ -144,6 +151,26 @@ export class SceneHandler {
         );
 
         this.scenes.set(SceneIndex.LevelFinished, levelFinishedScene);
+    }
+
+    private loadRestartMenu() {
+
+        let restartMenu = new RestartMenu(
+            [
+                this.createToStartMenuBack(new Rectangle(this.canvasSize[0] / 2 - 450, 650, 250, 42))
+            ],
+            [],
+            this,
+            this.textArea,
+            this.renderer,
+            this.canvasSize,
+            100,
+            [512, 512],
+            false,
+            this.game
+        );
+
+        this.scenes.set(SceneIndex.RestartMenu, restartMenu);
     }
 
     private loadNewGameMenu() {
@@ -276,7 +303,7 @@ export class SceneHandler {
 
         let clickable: Clickable;
 
-        if(disabled) {
+        if (disabled) {
             clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick, 554);
         } else {
             clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick);
@@ -287,7 +314,7 @@ export class SceneHandler {
     }
 
     private createToPowerSelectorMenuButton(disabled: boolean) {
-         let onClick = () => {
+        let onClick = () => {
 
             this.textInput.style.visibility = "hidden";
             this.textArea.style.visibility = "hidden";
@@ -298,7 +325,7 @@ export class SceneHandler {
 
         let clickable: Clickable;
 
-        if(disabled) {
+        if (disabled) {
             clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick, 554);
         } else {
             clickable = new Clickable(new Rectangle(this.canvasSize[0] / 2 + 200, 650, 250, 42), 179, 181, 553, onClick);

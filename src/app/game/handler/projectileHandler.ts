@@ -69,7 +69,7 @@ export class ProjectileHandler {
         return arrow;
     }
 
-    public createNecroBall(position: Vector, size: number, inverse: boolean, velocity: Vector, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
+    public createNecroBall(position: Vector, size: number, inverse: boolean, velocity: Vector, damage: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
         let necroBall: ParticleProjectile;
 
         if (inverse) {
@@ -81,7 +81,8 @@ export class ProjectileHandler {
         }
 
         necroBall.projectileType = ProjectileType.NecroBall;
-        necroBall.damage = 100;
+        necroBall.damage = damage;
+        necroBall.distance = 1000;
 
         this.enemyProjectiles.push(necroBall);
     }
@@ -208,6 +209,17 @@ export class ProjectileHandler {
 
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.shadow_Death(area, inverse), 0.8)
+
+        this.projectiles.push(projectile);
+    }
+
+    public createMasterSorcerer_death(area: Rectangle, inverse: boolean) {
+        let projectile: PhysicalProjectile;
+        let projectileCorpse: Projectile;
+        let velocity = new Vector(0, 0);
+        let x = area.x;
+
+        projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.masterSorcerer_death(area, inverse), 0.8)
 
         this.projectiles.push(projectile);
     }
@@ -398,7 +410,7 @@ export class ProjectileHandler {
             }
         }
 
-        if (projectile instanceof CollisionProjectile) {
+        if (projectile instanceof CollisionProjectile || projectile instanceof ParticleProjectile) {
             if (projectile.distance <= 0) {
                 removeProjectiles.push(projectile);
             }

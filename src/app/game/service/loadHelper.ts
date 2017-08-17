@@ -1,9 +1,10 @@
 import { LevelData } from '../map/model';
 import { Level, Tile, DynamicTile, Rectangle, Vector } from '../model';
-import { Enemy, Swordman, Archer, Shadow, Apprentice, Screamer } from '../character';
+import { Enemy, Swordman, Archer, Shadow, Apprentice, Screamer, MasterSorcerer, IEnemy } from '../character';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ParticleHandler } from '../handler/particleHandler';
+import { ShapeShifter } from "../character/shapeshifter";
 
 export class LoadHelper {
 
@@ -65,7 +66,7 @@ export class LoadHelper {
 		});
 
 		level.enemies = levelData.enemies.map(it => {
-			let enemy: Enemy;
+			let enemy: IEnemy;
 			
 			if(it.key == 50) {
 				enemy = new Swordman(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler);
@@ -73,11 +74,15 @@ export class LoadHelper {
 				enemy = new Archer(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler);
 			} else if(it.key == 52) {
 				enemy = new Shadow(new Vector(it.area.x, it.area.y), 85, 85, projectileHandler, animationHandler);
+			} else if (it.key == 53) {
+				enemy = new MasterSorcerer(new Vector(it.area.x, it.area.y), 128, 96, projectileHandler, animationHandler, particleHandler);
 			} else if(it.key == 54) { 
 				enemy = new Apprentice(new Vector(it.area.x, it.area.y), it.area.width, it.area.height, projectileHandler, animationHandler, particleHandler);
 			} else if(it.key == 55){
 				enemy = new Screamer(new Vector(it.area.x, it.area.y), 64, 96, projectileHandler, animationHandler, particleHandler);
-			}
+			} else if(it.key == 56){
+				enemy = new ShapeShifter(new Vector(it.area.x, it.area.y), 96, 96, projectileHandler, animationHandler, particleHandler);
+			} 
 
 			return enemy;
 		});

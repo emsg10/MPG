@@ -331,6 +331,35 @@ export class TextureMapper {
 	private texture578 = new Rectangle(1536, 992, 64, 96);
 	private texture579 = new Rectangle(1600, 992, 64, 96);
 
+	private texture580 = new Rectangle(1408, 1440, 128, 96);
+	private texture581 = new Rectangle(1536, 1440, 128, 96);
+	private texture582 = new Rectangle(1664, 1440, 128, 96);
+	private texture583 = new Rectangle(1792, 1440, 128, 96);
+	private texture584 = new Rectangle(1408, 1568, 128, 96);
+	private texture585 = new Rectangle(1536, 1568, 128, 96);
+	private texture586 = new Rectangle(1664, 1568, 128, 96);
+	private texture587 = new Rectangle(1792, 1568, 128, 96);
+	private texture588 = new Rectangle(1408, 1696, 128, 96);
+	private texture589 = new Rectangle(1536, 1696, 128, 96);
+	private texture590 = new Rectangle(1664, 1696, 128, 96);
+	private texture591 = new Rectangle(1792, 1696, 128, 96);
+	private texture592 = new Rectangle(1408, 1824, 128, 96);
+	private texture593 = new Rectangle(1536, 1824, 128, 96);
+	private texture594 = new Rectangle(1664, 1824, 128, 96);
+	private texture595 = new Rectangle(1792, 1824, 128, 96);
+	private texture596 = new Rectangle(1408, 1952, 128, 96);
+	private texture597 = new Rectangle(1664, 1952, 128, 96);
+	private texture598 = new Rectangle(1792, 1952, 128, 96);
+
+	private texture600 = new Rectangle(544, 0, 96, 96);
+	private texture601 = new Rectangle(640, 0, 96, 96);
+	private texture602 = new Rectangle(736, 0, 96, 96);
+	private texture603 = new Rectangle(832, 0, 96, 96);
+	private texture604 = new Rectangle(544, 96, 96, 96);
+	private texture605 = new Rectangle(640, 96, 96, 96);
+	private texture606 = new Rectangle(736, 96, 96, 96);
+	private texture607 = new Rectangle(832, 96, 96, 96);
+
 	constrcuctor() {
 		if (TextureMapper.instance) {
 			throw new Error("Static class cant be instanced!");
@@ -665,6 +694,34 @@ export class TextureMapper {
 			case 578: return this.texture578;
 			case 579: return this.texture579;
 
+			case 580: return this.texture580;
+			case 581: return this.texture581;
+			case 582: return this.texture582;
+			case 583: return this.texture583;
+			case 584: return this.texture584;
+			case 585: return this.texture585;
+			case 586: return this.texture586;
+			case 587: return this.texture587;
+			case 588: return this.texture588;
+			case 589: return this.texture589;
+			case 590: return this.texture590;
+			case 591: return this.texture591;
+			case 592: return this.texture592;
+			case 593: return this.texture593;
+			case 594: return this.texture594;
+			case 595: return this.texture595;
+			case 596: return this.texture596;
+			case 597: return this.texture597;
+			case 598: return this.texture598;
+
+			case 600: return this.texture600;
+			case 601: return this.texture601;
+			case 602: return this.texture602;
+			case 603: return this.texture603;
+			case 604: return this.texture604;
+			case 605: return this.texture605;
+			case 606: return this.texture606;
+			case 607: return this.texture607;
 		}
 	}
 

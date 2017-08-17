@@ -70,12 +70,12 @@ export class Apprentice extends Enemy {
         super.hit(delta, player, tiles);
         if (this.hitAnimation.frameIndex == 3) {
             if (!this.shoot) {
-                let velocity = this.getDeltaPosition(player, 0);
+                let velocity = this.getDeltaPosition(player, 0, 0);
                 velocity.y = velocity.y + 20; 
                 velocity.normalize();
                 velocity.multiply(this.projectileVelocity);
                 let pos = new Vector(this.position.x, this.position.y);
-                this.projectileHandler.createNecroBall(pos, 40, this.inverse, velocity, this.onBlackFireUpdate);
+                this.projectileHandler.createNecroBall(pos, 40, this.inverse, velocity, 100, this.onBlackFireUpdate);
                 this.shoot = true;
             }
 
@@ -104,7 +104,7 @@ export class Apprentice extends Enemy {
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        let deltaPos = this.getDeltaPosition(player, 10);
+        let deltaPos = this.getDeltaPosition(player, 10, 0);
         let magnitude = deltaPos.magnitude();
 
         if (magnitude < offset) {

@@ -2,7 +2,7 @@ import { Tile, Spell, Vector, Rectangle, ParticleProjectile, SpellType } from '.
 import { Enemy } from '../character/enemy';
 import { Player } from '../character/player';
 import { Swordman } from '../character/swordman';
-import { Archer, Shadow, Apprentice, Screamer } from '../character/';
+import { Archer, Shadow, Apprentice, Screamer, MasterSorcerer, IEnemy } from '../character/';
 import { RenderCall, RenderHelper, ColorRenderCall } from '../render';
 import { Context } from '../context';
 import { ProjectileHandler } from './projectileHandler';
@@ -13,7 +13,7 @@ import { DeathType } from '../character/deathType';
 
 export class EnemyHandler {
 
-    public enemies: Enemy[] = [];
+    public enemies: IEnemy[] = [];
 
     private context: Context;
     private renderHelper = RenderHelper.getInstance();
@@ -53,14 +53,14 @@ export class EnemyHandler {
         return renderCall;
     }
 
-    remove(enemy: Enemy) {
+    remove(enemy: IEnemy) {
         let index = this.enemies.indexOf(enemy);
         if (index >= 0) {
             this.enemies.splice(index, 1);
         }
     }
 
-    private checkBurn(enemy: Enemy) {
+    private checkBurn(enemy: IEnemy) {
         if (enemy.burnValue > 0) {
             let collarea = enemy.getCollisionArea();
             let pos = new Vector(collarea.x, collarea.y);
@@ -68,7 +68,7 @@ export class EnemyHandler {
         }
     }
 
-    private checkEnemyDeath(enemy: Enemy) {
+    private checkEnemyDeath(enemy: IEnemy) {
         if (enemy.dead) {
             if (enemy.deathType == DeathType.freezeDeath) {
                 if(enemy instanceof Swordman) {
@@ -81,6 +81,8 @@ export class EnemyHandler {
                     this.projectileHandler.createApprentice_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if (enemy instanceof Screamer) {
                     this.projectileHandler.createScreamer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof MasterSorcerer) {
+                    this.projectileHandler.createMasterSorcerer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 }
                 
                 this.remove(enemy);
@@ -95,6 +97,8 @@ export class EnemyHandler {
                     this.projectileHandler.createApprentice_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if (enemy instanceof Screamer) {
                     this.projectileHandler.createScreamer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof MasterSorcerer) {
+                    this.projectileHandler.createMasterSorcerer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 }
 
                 this.remove(enemy);
@@ -107,6 +111,8 @@ export class EnemyHandler {
                     this.projectileHandler.createApprentice_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if (enemy instanceof Screamer) {
                     this.projectileHandler.createScreamer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
+                } else if (enemy instanceof MasterSorcerer) {
+                    this.projectileHandler.createMasterSorcerer_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 }
 
                 this.remove(enemy);
@@ -130,9 +136,9 @@ export class EnemyHandler {
 
                         enemy.takeDamage(projectile.area.width, SpellType.fireball)
                         if (enemy.inverse) {
-                            this.animationHandler.bloodAnimation_B_Right(new Vector(enemy.position.x + 10, enemy.position.y - 20), 75);
+                            this.animationHandler.bloodAnimation_B_Right(new Vector(projectile.area.x, projectile.area.y - 20), 75);
                         } else {
-                            this.animationHandler.bloodAnimation_B_Left(new Vector(enemy.position.x - 10, enemy.position.y - 20), 75);
+                            this.animationHandler.bloodAnimation_B_Left(new Vector(projectile.area.x - projectile.area.width, projectile.area.y - 20), 75);
                         }
 
                         this.projectileHandler.destroyProjectile(projectile, this.projectileHandler.projectiles);

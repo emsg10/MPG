@@ -6,7 +6,7 @@ import { TextureResource, TileAsset } from '../map/model/';
 export class AssetsLoader {
   private shaderUrl = 'src/assets/shader/';
   private textureUrl = "src/assets/texture/";
-  private levelUrl = "src/app/game/map/";
+  private levelUrl = "src/assets/maps/";
   private constants = Constants.getInstance();
 
 

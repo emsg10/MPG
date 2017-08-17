@@ -8,10 +8,12 @@ import { SceneIndex } from "./sceneIndex";
 import { LocalStorageHelper } from "../service/localStorageHelper";
 import { AssetsLoader } from '../service/assetsLoader';
 import { Game } from "../game";
+import { LevelData } from "../map/model/index";
 
 export class RestartMenu extends Menu {
 
     public currentLevel = 0;
+    public tempLevel: LevelData;
     private assetLoader = new AssetsLoader();
 
     constructor(
@@ -36,10 +38,15 @@ export class RestartMenu extends Menu {
 
     private getClickCall() {
         return () => {
-            this.assetLoader.getLevel(this.currentLevel.toString()).subscribe(it => {
-                this.game.loadLevel(it);
+            if (this.tempLevel != null) {
+                this.game.loadLevel(this.tempLevel);
                 this.sceneHandler.started = true;
-            });
+            } else {
+                this.assetLoader.getLevel(this.currentLevel.toString()).subscribe(it => {
+                    this.game.loadLevel(it);
+                    this.sceneHandler.started = true;
+                });
+            }
         }
     }
 }

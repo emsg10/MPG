@@ -113,7 +113,7 @@ export class Game {
 					if (!this.player.dead && !this.levelCompleted) {
 						this.checkGoal();
 						this.checkKeys(delta);
-						this.collision.checkCoutOfBounds(this.player, new Vector(this.levelData.gameSize[0], this.levelData.gameSize[1]));
+						this.collision.checkCoutOfBounds(this.player, this.level.gameSize);
 						this.player.update(this.level.tiles, this.dynamicTileHandler.dynamicTiles, delta);
 						this.dynamicTileHandler.update(this.player, delta);
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
@@ -122,7 +122,7 @@ export class Game {
 						this.UI.update(this.player.hp, this.player.mana);
 						this.camera.update(this.player.position);
 						this.particleHandler.update(delta, this.enemyHandler.enemies);
-					} else if(this.deathTimer < 3000) {
+					} else if (this.deathTimer < 3000) {
 						this.deathTimer += delta;
 						this.player.position.x = -1000;
 						this.player.position.y = -1000;
@@ -220,7 +220,7 @@ export class Game {
 				this.player.jump();
 			}
 
-			if(this.shieldPress) {
+			if (this.shieldPress) {
 				this.player.cast(SpellType.shield);
 			}
 
@@ -240,40 +240,55 @@ export class Game {
 
 		document.body.addEventListener("keydown", (event: KeyboardEvent) => {
 
-			var keyCode = event.code;
+			var keyCode = event.keyCode;
 
 			switch (keyCode) {
-				case 'KeyA':
+				case 65:
 					this.leftKeyPress = true;
 					break;
-				case 'KeyD':
+				case 68:
 					this.rightKeyPress = true;
 					break;
-				case 'KeyW':
+				case 87:
 					this.jumpKeyPress = true;
 					break;
-				case 'Numpad1':
+				case 97:
 					this.fireballKeyPress = true;
 					break;
-				case 'Numpad2':
+				case 49:
+					this.fireballKeyPress = true;
+					break;
+				case 98:
 					this.channelMagicKeyPress = true;
 					break;
-				case 'Numpad3':
+				case 50:
+					this.channelMagicKeyPress = true;
+					break;
+				case 99:
 					this.frostKeyPress = true;
 					break;
-				case 'Numpad4':
+				case 51:
+					this.frostKeyPress = true;
+					break;
+				case 100:
 					this.fireKeyPress = true;
 					break;
-				case 'Numpad5':
+				case 52:
+					this.fireKeyPress = true;
+					break;
+				case 101:
 					this.shieldPress = true;
 					break;
-				case 'ArrowUp':
+				case 53:
+					this.shieldPress = true;
+					break;
+				case 38:
 					this.jumpKeyPress = true;
 					break;
-				case 'ArrowRight':
+				case 39:
 					this.rightKeyPress = true;
 					break;
-				case 'ArrowLeft':
+				case 37:
 					this.leftKeyPress = true;
 					break;
 
@@ -283,40 +298,55 @@ export class Game {
 
 		document.body.addEventListener("keyup", (event: KeyboardEvent) => {
 
-			var keyCode = event.code;
+			var keyCode = event.keyCode;
 
 			switch (keyCode) {
-				case 'KeyA':
+				case 65:
 					this.leftKeyPress = false;
 					break;
-				case 'KeyD':
+				case 68:
 					this.rightKeyPress = false;
 					break;
-				case 'KeyW':
+				case 87:
 					this.jumpKeyPress = false;
 					break;
-				case 'Numpad1':
+				case 97:
 					this.fireballKeyPress = false;
 					break;
-				case 'Numpad2':
+				case 49:
+					this.fireballKeyPress = false;
+					break;
+				case 98:
 					this.channelMagicKeyPress = false;
 					break;
-				case 'Numpad3':
+				case 50:
+					this.channelMagicKeyPress = false;
+					break;
+				case 99:
 					this.frostKeyPress = false;
 					break;
-				case 'Numpad4':
+				case 51:
+					this.frostKeyPress = false;
+					break;
+				case 100:
 					this.fireKeyPress = false;
 					break;
-				case 'Numpad5':
+				case 52:
+					this.fireKeyPress = false;
+					break;
+				case 101:
 					this.shieldPress = false;
 					break;
-				case 'ArrowUp':
+				case 53:
+					this.shieldPress = false;
+					break;
+				case 38:
 					this.jumpKeyPress = false;
 					break;
-				case 'ArrowRight':
+				case 39:
 					this.rightKeyPress = false;
 					break;
-				case 'ArrowLeft':
+				case 37:
 					this.leftKeyPress = false;
 					break;
 			}
@@ -338,15 +368,15 @@ export class Game {
 
 		this.camera = new Camera([this.level.camera[0], this.level.camera[1]], [this.canvasWidth, this.canvasHeight], this.level.gameSize);
 		this.levelCompleted = false;
-		
-		let hp  = 100 + (10 * progress.hp);
-		let mana  = 200 + (20 * progress.mana);
+
+		let hp = 100 + (10 * progress.hp);
+		let mana = 200 + (20 * progress.mana);
 		this.player = new Player(new Vector(this.level.player[0], this.level.player[1]), this.context, this.projectileHandler, this.animationHandler, this.particleHandler, 48, 85, hp, mana, progress, this.getSpellLevel(progress.fire), this.getSpellLevel(progress.frost), this.getSpellLevel(progress.defence));
 		this.collision.createGrid(new Vector(this.level.gameSize[0], this.level.gameSize[1]), this.level.tiles);
 		this.UI = new UI(hp, mana);
 		this.enemyHandler = new EnemyHandler(this.context, this.projectileHandler, this.animationHandler, this.particleHandler);
 		this.enemyHandler.enemies = this.level.enemies;
-		
+
 
 		this.deathTimer = 0;
 
@@ -357,15 +387,15 @@ export class Game {
 	}
 
 	private getSpellLevel(spellPoints: number) {
-        if (spellPoints == 0) {
-            return 0;
-        } else if (spellPoints < 3) {
-            return 1;
-        } else if (spellPoints < 6) {
-            return 2;
-        } else {
-            return 3;
-        };
-    }
+		if (spellPoints == 0) {
+			return 0;
+		} else if (spellPoints < 3) {
+			return 1;
+		} else if (spellPoints < 6) {
+			return 2;
+		} else {
+			return 3;
+		};
+	}
 
 }

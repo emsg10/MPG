@@ -40,10 +40,6 @@ export class Swordman extends Enemy {
 
     public takeDamage(damage: number, type: SpellType) {
         super.takeDamage(damage, type);
-        
-        if(this.currentState == State.Idle) {
-            this.currentState = State.Tracking;
-        }
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {

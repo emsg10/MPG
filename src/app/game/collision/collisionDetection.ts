@@ -186,8 +186,8 @@ export class CollisionDetection {
 		return closestX;
 	}
 
-	public checkCoutOfBounds(character: Character, area: Vector) {
-		let rect = new Rectangle(0, 0, area.x, area.y);
+	public checkCoutOfBounds(character: Character, area: [number, number]) {
+		let rect = new Rectangle(0, 0, area[0], area[1]);
 		if (!this.aabbCheck(character.getCollisionArea(), rect)) {
 			character.dead = true;
 		}

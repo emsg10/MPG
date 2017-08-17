@@ -1,0 +1,53 @@
+{
+    "tiles": [
+        {
+            "area": {
+                "x": 480,
+                "y": 384,
+                "width": 416,
+                "height": 32
+            },
+            "key": 1
+        },
+        {
+            "area": {
+                "x": 96,
+                "y": 384,
+                "width": 416,
+                "height": 32
+            },
+            "key": 1
+        }
+    ],
+    "decorativeTiles": [],
+    "enemies": [
+        {
+            "area": {
+                "x": 800,
+                "y": 256,
+                "width": 128,
+                "height": 128
+            },
+            "key": 53
+        }
+    ],
+    "dynamicTiles": [],
+    "background": null,
+    "player": [
+        288,
+        288
+    ],
+    "camera": [
+        0,
+        0
+    ],
+    "gameSize": [
+        2400,
+        1600
+    ],
+    "end": [
+        32,
+        224
+    ],
+    "name": "3"
+}

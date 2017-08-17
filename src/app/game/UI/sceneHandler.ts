@@ -112,7 +112,9 @@ export class SceneHandler {
 
     public setCurrentLevel(level: string) {
         let scene = this.scenes.get(SceneIndex.RestartMenu) as RestartMenu;
-        scene.currentLevel = +level;
+        if(!isNaN(+level)) {
+            scene.currentLevel = +level;
+        }
     }
 
     private createMouseRenderCall() {
@@ -252,6 +254,8 @@ export class SceneHandler {
                     let leveldata = JSON.parse(target.result) as LevelData;
                     if (this.loadHelper.validateLevelData(leveldata)) {
                         this.game.loadLevel(leveldata);
+                        let restartMenu = this.scenes.get(SceneIndex.RestartMenu) as RestartMenu;
+                        restartMenu.tempLevel = leveldata;
                         this.started = true;
                         this.fileUploadButton.style.visibility = "hidden";
                         this.fileUploadButtonHighlight.style.visibility = "hidden";

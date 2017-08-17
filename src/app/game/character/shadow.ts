@@ -131,7 +131,7 @@ export class Shadow extends Enemy {
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        let deltaPos = this.getDeltaPosition(player, 10);
+        let deltaPos = this.getDeltaPosition(player, 10, 0);
         let magnitude = deltaPos.magnitude();
 
         if (magnitude < offset) {

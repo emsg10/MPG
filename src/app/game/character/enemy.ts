@@ -1,13 +1,13 @@
 import { Vector, Tile, Rectangle, Animation, SpellType } from '../model'
 import { Character } from './character';
 import { Player } from './player';
-import { State } from './';
+import { State, IEnemy } from './';
 import { CollisionDetection } from '../collision/collisionDetection';
 import { CollisionData } from '../collision/collisionData';
 import { AnimationHandler } from '../handler/animationHandler';
 import { DeathType } from './deathType';
 
-export class Enemy extends Character {
+export class Enemy extends Character implements IEnemy {
 
     public color = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     public burnValue = 0;
@@ -72,16 +72,24 @@ export class Enemy extends Character {
         }
     }
 
+    public setFreezeSpeed() {
+        this.actualSpeed = this.maxSpeed * Math.pow(0.997, this.freezeValue);
+ 
+        if (this.actualSpeed < this.maxSpeed * 0.3) {
+            this.actualSpeed = this.maxSpeed * 0.3;
+        }
+    }
+
     public freeze() {
+        this.freezeValue++;
         if (this.actualSpeed > this.maxSpeed * 0.3) {
             this.actualSpeed = this.actualSpeed * 0.997;
         }
 
         this.takeDamage(this.freezeDamage, SpellType.frostBlast);
-        this.freezeValue++;
     }
 
-    public update(delta: number, tiles: Tile[], player: Player) {
+    public update(delta: number, tiles: Tile[], player: Player): void {
         this.toMove.x = this.velocity.x * delta;
         this.toMove.y = this.velocity.y * delta;
         this.nextToEdge = false;
@@ -257,8 +265,8 @@ export class Enemy extends Character {
         return min + (Math.random() * (max - min))
     }
 
-    protected getDeltaPosition(player: Player, offset: number) {
-        return new Vector(player.middlePosition.x - offset - this.position.x, player.middlePosition.y - this.position.y);
+    protected getDeltaPosition(player: Player, offsetX: number, offsetY: number) {
+        return new Vector(player.middlePosition.x - offsetX - this.position.x, player.middlePosition.y - offsetY - this.position.y);
     }
 
     private updateBurnDamage() {

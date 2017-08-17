@@ -195,6 +195,35 @@ export class AnimationHandler {
         return animation;
     }
 
+    public masterSorcerer_death(area: Rectangle, inverse: boolean) {
+        let animation = new Animation([586, 587, 589, 590, 591, 592, 593, 594, 595, 596]);
+
+        animation.repetitions = 9;
+        animation.inverse = inverse;
+        animation.timeToChange = 125;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        animation.onCompletion = () => {
+            this.masterSorcerer_corpse(area, inverse);
+        }
+
+        this.animations.push(animation);
+
+        return animation;
+    }
+
+    public masterSorcerer_corpse(area: Rectangle, inverse: boolean) {
+        let animation = new Animation([596]);
+
+        animation.inverse = inverse;
+        animation.timeToChange = 175;
+        animation.areaToRender = new Rectangle(area.x, area.y, area.width, area.height);
+
+        this.staticAnimations.push(animation);
+
+        return animation;
+    }    
+
     public screamer_Death(area: Rectangle, inverse: boolean) {
         let animation = new Animation([576, 577, 578, 579]);
 

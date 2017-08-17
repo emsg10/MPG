@@ -14,7 +14,7 @@ export class Screamer extends Enemy {
 
     protected hitAreaOffset: number = 500;
     protected searchAreaOffset: number = 500;
-    protected hp = 100;
+    protected hp = 200;
     protected hitDamage = 50;
     protected trackingSpeed = 0.4;
     protected idleSpeed = 0.1;
@@ -117,12 +117,12 @@ export class Screamer extends Enemy {
 
     protected track(player: Player, delta: number, tiles: Tile[]) {
         super.track(player, delta, tiles, 30);
-        this.actualSpeed = this.maxSpeed;
+        this.setFreezeSpeed();
     }
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        let deltaPos = this.getDeltaPosition(player, 10);
+        let deltaPos = this.getDeltaPosition(player, 10, 0);
         let magnitude = deltaPos.magnitude();
 
         if (magnitude < offset) {

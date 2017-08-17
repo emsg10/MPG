@@ -1,0 +1,94 @@
+{
+    "tiles": [
+        {
+            "area": {
+                "x": 160,
+                "y": 512,
+                "width": 864,
+                "height": 32
+            },
+            "key": 20
+        },
+        {
+            "area": {
+                "x": 416,
+                "y": 384,
+                "width": 160,
+                "height": 32
+            },
+            "key": 20
+        }
+    ],
+    "decorativeTiles": [],
+    "enemies": [
+        {
+            "area": {
+                "x": 864,
+                "y": 448,
+                "width": 56,
+                "height": 59
+            },
+            "key": 50
+        },
+        {
+            "area": {
+                "x": 384,
+                "y": 288,
+                "width": 128,
+                "height": 128
+            },
+            "key": 52
+        },
+        {
+            "area": {
+                "x": 768,
+                "y": 448,
+                "width": 50,
+                "height": 50
+            },
+            "key": 51
+        },
+        {
+            "area": {
+                "x": 928,
+                "y": 416,
+                "width": 80,
+                "height": 80
+            },
+            "key": 54
+        }
+    ],
+    "dynamicTiles": [
+        {
+            "tile": {
+                "x": 256,
+                "y": 448,
+                "width": 96,
+                "height": 32
+            },
+            "inverse": true,
+            "vertical": true,
+            "distance": 100,
+            "velocity": 0.1,
+            "key": 20
+        }
+    ],
+    "background": null,
+    "player": [
+        160,
+        416
+    ],
+    "camera": [
+        0,
+        0
+    ],
+    "gameSize": [
+        2400,
+        1600
+    ],
+    "end": [
+        992,
+        384
+    ],
+    "name": "1"
+}

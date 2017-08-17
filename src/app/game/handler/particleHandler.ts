@@ -9,6 +9,7 @@ import { DebugHandler } from './debugHandler';
 import { EnemyHandler } from './enemyHandler';
 import { Enemy } from '../character/enemy';
 import { Gravity } from '../forces/gravity';
+import { IEnemy } from "../character/index";
 
 export class ParticleHandler {
 
@@ -235,6 +236,21 @@ export class ParticleHandler {
         this.fireEffectParticles.push(...effectParticles);
     }
 
+    public createNecroChannelMagic(position: Vector, inverse: boolean) {
+
+        let positionOffset: Vector;
+        
+        if(inverse) {
+            positionOffset = new Vector(position.x + 27, position.y + 10);
+        } else {
+            positionOffset = new Vector(position.x + 101, position.y + 10);
+        }
+
+        let effectParticles = this.createCenterCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
+
+        this.necroEffectParticles.push(...effectParticles);
+    }
+
     public createMagicEffect(position: Vector, inverse: boolean) {
 
         let offSetX = this.rand(-10, 10) + 22;
@@ -317,7 +333,7 @@ export class ParticleHandler {
         this.fireEffectParticles.push(...effectParticles);
     }
 
-    public update(delta: number, enemies: Enemy[]) {
+    public update(delta: number, enemies: IEnemy[]) {
 
         this.updateEffectParticles(this.necroEffectParticles, delta);
         this.updateEffectParticles(this.fireEffectParticles, delta);
@@ -407,7 +423,7 @@ export class ParticleHandler {
         this.removeParticles(removeCollection, particleCollection);
     }
 
-    private updateParticles(particleCollection: Particle[], gravity: Gravity, delta: number, enemies: Enemy[], spelltype: SpellType) {
+    private updateParticles(particleCollection: Particle[], gravity: Gravity, delta: number, enemies: IEnemy[], spelltype: SpellType) {
 
         let removeCollection: Particle[] = [];
 

@@ -388,15 +388,6 @@
             "key": 25
         }
     ],
-    "background": {
-        "area": {
-            "x": 0,
-            "y": 0,
-            "width": 2400,
-            "height": 2400
-        },
-        "key": 26
-    },
     "decorativeTiles": [
         {
             "area": {
@@ -569,5 +560,5 @@
         0,
         128
     ],
-    "name": "1"
+    "name": "0"
 }

@@ -32,7 +32,7 @@ export class AnimationHandler {
 
     public bloodAnimation_B_Right(position: Vector, size: number) {
         let animation = new Animation([106, 107, 108, 109, 110, 111]);
-        animation.areaToRender = new Rectangle(position.x, position.y, size, size);
+        animation.areaToRender = new Rectangle(position.x - 75, position.y, size, size);
 
         animation.repetitions = 6;
 
@@ -99,7 +99,7 @@ export class AnimationHandler {
     public createArcherDeath(area: Rectangle, inverse: boolean) {
         this.bloodAnimation_C(new Vector(area.x - 10, area.y - 20), 75);
         this.bloodAnimation_B_Left(new Vector(area.x - 10, area.y - 20), 75);
-        this.bloodAnimation_B_Right(new Vector(area.x - 10, area.y - 20), 75);
+        this.bloodAnimation_B_Right(new Vector(area.x + 65, area.y - 20), 75);
         this.archer_death(area, inverse);
         
     }

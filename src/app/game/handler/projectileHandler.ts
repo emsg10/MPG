@@ -128,20 +128,6 @@ export class ProjectileHandler {
         this.projectiles.push(fireBall);
     }
 
-    public createFireballRank1(position: Vector, inverse: boolean, velocityValue: number, strength: number, offset: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
-        let fireBall: ParticleProjectile;
-
-        strength = strength/3;
-
-        if (inverse) {
-            fireBall = new ParticleProjectile(new Vector(-velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
-        } else {
-            fireBall = new ParticleProjectile(new Vector(velocityValue, 0), new Rectangle(position.x, position.y, strength, strength), this.animationHandler.voidAnimation(), 0.2, (strength * 10), inverse, offset, onUpdate);
-        }
-
-        this.projectiles.push(fireBall);
-    }
-
     public createCollisionProjectile(position: Vector, offset: number, inverse: boolean, damage: number, velocity: Vector) {
         let rect: Rectangle;
         if (inverse) {
@@ -169,7 +155,7 @@ export class ProjectileHandler {
         }
         this.animationHandler.bloodAnimation_C(new Vector(position.x - 10, position.y - 20), 75);
         this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
-        this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
+        this.animationHandler.bloodAnimation_B_Right(new Vector(position.x + 65, position.y - 20), 75);
         this.animationHandler.swordman_death(position, inverse);
 
         this.projectiles.push(projectile);
@@ -360,7 +346,6 @@ export class ProjectileHandler {
         let collisionData: CollisionData;
         let shieldCollisionData: CollisionData;
         let groundCollision: boolean;
-        let liftVelocity: Vector;
         projectile.updateForces(delta);
 
         let velocity = player.getVelocity();
@@ -502,8 +487,10 @@ export class ProjectileHandler {
             projectile.velocity.x = 0;
         }
 
-        if (this.collisionDetection.aabbCheckS(projectile.collisionArea, dynamicTiles.map(it => it.tile))) {
-            removeProjectiles.push(projectile);
+        if (!(projectile instanceof PhysicalProjectile)) {
+            if (this.collisionDetection.aabbCheckS(projectile.collisionArea, dynamicTiles.map(it => it.tile))) {
+                removeProjectiles.push(projectile);
+            }
         }
 
         return removeProjectiles;
@@ -534,12 +521,12 @@ export class ProjectileHandler {
     private drainShield(player: Player, projectile: Projectile, amount: number) {
         if (player.mana > 0) {
             let extra: number;
-            if(this.shieldLevel != 0) {
+            if (this.shieldLevel != 0) {
                 extra = (amount / this.shieldLevel);
             } else {
                 extra = amount * 2;
             }
-            
+
             if (!player.useMana(amount + extra)) {
                 player.mana = 0;
                 if (projectile.area.x > player.position.x) {

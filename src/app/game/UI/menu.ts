@@ -19,7 +19,8 @@ export class Menu extends Scene {
         protected canvasSize: [number, number],
         protected background: number,
         protected tileSize: [number, number],
-        protected menu: boolean) {
+        protected menu: boolean,
+        private onLoad?: () => void) {
         super(sceneHandler, renderer, canvasSize, background, tileSize, menu);
         this.createRenderCalls();
     }
@@ -28,6 +29,10 @@ export class Menu extends Scene {
     }
 
     public load() {
+
+        if(this.onLoad) {
+            this.onLoad();
+        }
 
         if(this.sceneHandler.currentScene == SceneIndex.StartMenu) {
 

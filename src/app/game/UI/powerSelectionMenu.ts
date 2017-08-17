@@ -97,7 +97,7 @@ export class PowerSelectionMenu extends Menu {
     }
 
     private getAvailablePoints() {
-        return (this.progress.level - (this.progress.fire + this.progress.frost + this.progress.defence + this.progress.hp + this.progress.mana));
+        return ((this.progress.completedLevels+1) - (this.progress.fire + this.progress.frost + this.progress.defence + this.progress.hp + this.progress.mana));
     }
 
 

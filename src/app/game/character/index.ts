@@ -9,6 +9,7 @@ import { Apprentice } from './apprentice';
 import { Screamer } from './screamer';
 import { MasterSorcerer } from './masterSorcerer';
 import { IEnemy } from "./iEnemy";
+import { ShapeShifterState } from "./shapeShifterState";
 
 export {
     Enemy,
@@ -18,6 +19,7 @@ export {
     Player,
     Shadow,
     State,
+    ShapeShifterState,
     Apprentice,
     Screamer,
     MasterSorcerer,

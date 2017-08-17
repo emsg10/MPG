@@ -30,7 +30,6 @@ export class LocalStorageHelper {
         progress.playerName = name;
         progress.active = true;
         progress.completedLevels = 0;
-        progress.level = 1;
         progress.fire = 0;
         progress.frost = 0;
         progress.defence = 0;
@@ -52,7 +51,6 @@ export class LocalStorageHelper {
 
     public setCurrentProgress(level: number) {
         let progress = this.getCurrentProgress();
-        progress.level++;
         if (progress.completedLevels < level) {
             progress.completedLevels = level;
         }
@@ -126,7 +124,6 @@ export class LocalStorageHelper {
         progress.playerName = "nouser";
         progress.active = true;
         progress.completedLevels = 0;
-        progress.level = 1;
         progress.fire = 0;
         progress.frost = 0;
         progress.defence = 0;

@@ -112,7 +112,7 @@ export class SceneHandler {
 
     public setCurrentLevel(level: string) {
         let scene = this.scenes.get(SceneIndex.RestartMenu) as RestartMenu;
-        if(!isNaN(+level)) {
+        if (!isNaN(+level)) {
             scene.currentLevel = +level;
         }
     }
@@ -206,6 +206,14 @@ export class SceneHandler {
     }
 
     private loadLevelSelectionScreen() {
+
+        let onLoad = () => {
+            levelSelectionMenu.clickables = [
+                ...this.createLevelMenuButtons(),
+                this.createToStartMenuBackFromLevelMenu()
+            ];
+        };
+
         let levelSelectionMenu = new Menu(
             [
                 ...this.createLevelMenuButtons(),
@@ -219,7 +227,10 @@ export class SceneHandler {
             100,
             [512, 512],
             false,
+            onLoad
         );
+
+
 
         this.scenes.set(SceneIndex.LevelSelection, levelSelectionMenu);
 

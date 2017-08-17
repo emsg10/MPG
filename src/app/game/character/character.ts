@@ -44,7 +44,7 @@ export abstract class Character {
 			this.velocity.x -= this.acceleration * delta;
 		}
 
-		if (this.velocity.x < this.actualSpeed) {
+		if (this.velocity.x < -this.actualSpeed) {
 			this.velocity.x = -this.actualSpeed;
 		}
 

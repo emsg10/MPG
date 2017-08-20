@@ -20,6 +20,7 @@ export class ParticleHandler {
     public fireEffectParticles: Particle[] = [];
 
     public necroEffectParticles: Particle[] = [];
+    public blueEffectParticles: Particle[] = [];
 
     public shieldEffectParticles: Particle[] = [];
     public tiles: Tile[];
@@ -34,6 +35,7 @@ export class ParticleHandler {
     private frostEffectColor = [0.7, 0.9, 0.9, 0.9];
     private shieldColor = [0.5, 0.4, 0.7, 0.7];
     private necroColor = [0, 0.5, 0, 0.8];
+    private blueColor = [0.4, 0.5, 1, 1];
 
     private flameParticleSettings: number[] = [
         2, 5,
@@ -118,11 +120,11 @@ export class ParticleHandler {
     ];
 
     private shieldEffectSettings: number[] = [
-        2, 4,
-        200, 200,
+        4, 6,
+        150, 250,
         10, 10,
         0.1, 0.1,
-        0.2,
+        -0.2,
         0, Math.PI * 2
     ];
 
@@ -156,7 +158,7 @@ export class ParticleHandler {
     constructor() {
     }
 
-     public createShieldExplosionEffect(position: Vector, inverse: boolean) {
+    public createShieldExplosionEffect(position: Vector, inverse: boolean) {
         position.y = position.y - 5;
 
         let settings: number[] = [];
@@ -186,6 +188,19 @@ export class ParticleHandler {
         this.fireEffectParticles.push(...effectParticles);
     }
 
+    public createBlueFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {
+
+        let effectParticles = this.fireBall(position, size, inverse, offsetX);
+
+        this.blueEffectParticles.push(...effectParticles);
+    }
+
+    public createBlueExplosion(position: Vector, size: number) {
+        let effectParticles = this.fireballExplosion(position, size);
+
+        this.blueEffectParticles.push(...effectParticles);
+    }
+
     public createNecroFireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {
 
         let effectParticles = this.fireBall(position, size, inverse, offsetX);
@@ -208,7 +223,7 @@ export class ParticleHandler {
 
     private fireballExplosion(position: Vector, size: number) {
         let radius = size / 2;
-        let particleSize = 2 + (size/20);
+        let particleSize = 2 + (size / 20);
 
         position.x = position.x + radius;
         position.y = position.y + radius;
@@ -236,19 +251,18 @@ export class ParticleHandler {
         this.fireEffectParticles.push(...effectParticles);
     }
 
-    public createNecroChannelMagic(position: Vector, inverse: boolean) {
+    public createNecroChannelMagic(position: Vector, inverse: boolean, offsetX: number, offsetY: number, offsetXInverse: number, offsetYInverse: number) {
 
-        let positionOffset: Vector;
-        
-        if(inverse) {
-            positionOffset = new Vector(position.x + 27, position.y + 10);
-        } else {
-            positionOffset = new Vector(position.x + 101, position.y + 10);
-        }
-
-        let effectParticles = this.createCenterCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
+        let effectParticles = this.channelCenter(position, inverse, offsetX, offsetY, offsetXInverse, offsetYInverse);
 
         this.necroEffectParticles.push(...effectParticles);
+    }
+
+    public createBlueChannelMagic(position: Vector, inverse: boolean, offsetX: number, offsetY: number, offsetXInverse: number, offsetYInverse: number) {
+
+        let effectParticles = this.channelCenter(position, inverse, offsetX, offsetY, offsetXInverse, offsetYInverse);
+
+        this.blueEffectParticles.push(...effectParticles);
     }
 
     public createMagicEffect(position: Vector, inverse: boolean) {
@@ -275,7 +289,7 @@ export class ParticleHandler {
 
         let settings: number[];
 
-        if(frostLevel == 3) {
+        if (frostLevel == 3) {
             settings = this.largefrostParticleSettings;
         } else {
             settings = this.frostParticleSettings;
@@ -301,7 +315,7 @@ export class ParticleHandler {
 
         let settings: number[];
 
-        if(fireLevel == 3) {
+        if (fireLevel == 3) {
             settings = this.largeFlameParticleSettings;
         } else {
             settings = this.flameParticleSettings;
@@ -335,6 +349,7 @@ export class ParticleHandler {
 
     public update(delta: number, enemies: IEnemy[]) {
 
+        this.updateEffectParticles(this.blueEffectParticles, delta);
         this.updateEffectParticles(this.necroEffectParticles, delta);
         this.updateEffectParticles(this.fireEffectParticles, delta);
         this.updateEffectParticles(this.frostEffectParticles, delta);
@@ -363,8 +378,22 @@ export class ParticleHandler {
         renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, this.frostColor));
         renderCalls.push(this.addParticles(shieldEffectRenderCall, this.shieldEffectParticles, this.shieldColor))
         renderCalls.push(this.addParticles(blackFireRenderCall, this.necroEffectParticles, this.necroColor))
+        renderCalls.push(this.addParticles(blackFireRenderCall, this.blueEffectParticles, this.blueColor))
 
         return renderCalls;
+    }
+
+    private channelCenter(position: Vector, inverse: boolean, offsetX: number, offsetY: number, offsetXInverse: number, offsetYInverse: number) {
+
+        let positionOffset: Vector;
+
+        if (inverse) {
+            positionOffset = new Vector(position.x + offsetXInverse, position.y + offsetYInverse);
+        } else {
+            positionOffset = new Vector(position.x + offsetX, position.y + offsetY);
+        }
+
+        return this.createCenterCircleParticles(positionOffset, 30, 40, this.channelMagicEffectSettings, true, 3, 10, 100, 0, 2);
     }
 
     private fireBall(position: Vector, size: number, inverse: boolean, offsetX: number) {

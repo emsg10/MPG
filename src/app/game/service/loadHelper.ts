@@ -81,7 +81,7 @@ export class LoadHelper {
 			} else if(it.key == 55){
 				enemy = new Screamer(new Vector(it.area.x, it.area.y), 64, 96, projectileHandler, animationHandler, particleHandler);
 			} else if(it.key == 56){
-				enemy = new ShapeShifter(new Vector(it.area.x, it.area.y), 96, 96, projectileHandler, animationHandler, particleHandler);
+				enemy = new ShapeShifter(new Vector(it.area.x, it.area.y), 128, 128, projectileHandler, animationHandler, particleHandler);
 			} 
 
 			return enemy;

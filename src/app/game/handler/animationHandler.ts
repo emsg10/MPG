@@ -327,6 +327,10 @@ export class AnimationHandler {
         this.particleHandler.createNecroballExplosion(position, size);
     }
 
+    public blue_explosion(position: Vector, size: number) {
+        this.particleHandler.createBlueExplosion(position, size);
+    }
+
     public fireball_explosion(position: Vector, size: number) {
         this.particleHandler.createFireballExplosion(position, size);
     }

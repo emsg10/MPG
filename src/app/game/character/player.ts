@@ -23,7 +23,7 @@ export class Player extends Character {
 	public lift: DynamicTile = null;
 	public liftVelocity = new Vector(0, 0);
 	public middlePosition = new Vector(0, 0);
-	protected acceleration: number = 0.006;
+	protected acceleration: number = 0.003;
 	private collisionDetection = CollisionDetection.getInstance();
 	private projectileHandler: ProjectileHandler;
 	private animationHandler: AnimationHandler;

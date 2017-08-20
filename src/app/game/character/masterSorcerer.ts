@@ -1,7 +1,7 @@
 import { Enemy } from './enemy';
 import { Player } from './player';
 import { Context } from '../context';
-import { Vector, Rectangle, Tile, Meele, Animation, SpellType, DebugElement } from '../model';
+import { Vector, Rectangle, Tile, Meele, Animation, SpellType, DebugElement, ProjectileType } from '../model';
 import { TextureMapper } from '../render/textureMapper';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
@@ -95,7 +95,7 @@ export class MasterSorcerer extends Enemy {
 
         if (this.channel(delta)) {
             this.currentAnimation = this.channelAnimation;
-            this.particleHandler.createNecroChannelMagic(this.position, this.inverse);
+            this.particleHandler.createNecroChannelMagic(this.position, this.inverse, 101, 10, 27, 10);
         } else if (this.channelHitTransitionAnimation.frameIndex != 2) {
             this.currentAnimation = this.channelHitTransitionAnimation;
         } else {
@@ -115,7 +115,7 @@ export class MasterSorcerer extends Enemy {
                         pos = new Vector(this.position.x + 80, this.position.y + 20);
                     }
                     
-                    this.projectileHandler.createNecroBall(pos, 25, this.inverse, velocity, 10, this.onBlackFireUpdate);
+                    this.projectileHandler.createNecroBall(pos, 25, this.inverse, velocity, 10, 40, ProjectileType.NecroBall, this.onBlackFireUpdate);
                 } else {
                     this.shootsFired = 0;
                     this.channelTimer = this.defaultChannelTime;

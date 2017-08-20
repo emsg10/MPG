@@ -1,7 +1,7 @@
 import { Enemy } from './enemy';
 import { Player } from './player';
 import { Context } from '../context';
-import { Vector, Rectangle, Tile, Meele, Animation, SpellType, DebugElement } from '../model';
+import { Vector, Rectangle, Tile, Meele, Animation, SpellType, DebugElement, ProjectileType } from '../model';
 import { TextureMapper } from '../render/textureMapper';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
@@ -75,7 +75,7 @@ export class Apprentice extends Enemy {
                 velocity.normalize();
                 velocity.multiply(this.projectileVelocity);
                 let pos = new Vector(this.position.x, this.position.y);
-                this.projectileHandler.createNecroBall(pos, 40, this.inverse, velocity, 100, this.onBlackFireUpdate);
+                this.projectileHandler.createNecroBall(pos, 40, this.inverse, velocity, 100, 40, ProjectileType.NecroBall, this.onBlackFireUpdate);
                 this.shoot = true;
             }
 

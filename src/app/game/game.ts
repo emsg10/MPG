@@ -179,7 +179,6 @@ export class Game {
 			renderCall = this.player.createRenderCall(renderCall)
 		}
 
-
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(colorRenderCall)
 		this.animationHandler.createStaticRenderCall(renderCall);

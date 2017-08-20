@@ -2,7 +2,7 @@ attribute vec2 a_position;
 attribute vec2 a_texture_coord;
 attribute mat3 a_matrix;
 
-varying highp vec2 v_texture_coord;
+varying mediump vec2 v_texture_coord;
 
 void main() {
   v_texture_coord = a_texture_coord;

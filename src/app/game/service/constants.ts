@@ -25,24 +25,7 @@ export class Constants {
         new TextureResource("6tile.png", [32, 32]),
         new TextureResource("7tile.png", [32, 32]),
         new TextureResource("8tile.png", [32, 32]),
-        new TextureResource("9tile.png", [32, 32]),
-        new TextureResource("10tile.png", [32, 32]),
-        new TextureResource("11tile.png", [32, 32]),
-        new TextureResource("12tile.png", [32, 32]),
-        new TextureResource("13tile.png", [32, 32]),
-        new TextureResource("14tile.png", [32, 32]),
-        new TextureResource("15tile.png", [32, 32]),
-        new TextureResource("16tile.png", [32, 32]),
-        new TextureResource("17tile.png", [32, 32]),
-        new TextureResource("18tile.png", [32, 32]),
-        new TextureResource("19tile.png", [32, 32]),
-        new TextureResource("20tile.png", [32, 32]),
-        new TextureResource("21tile.png", [32, 32]),
-        new TextureResource("22tile.png", [32, 32]),
-        new TextureResource("23tile.png", [32, 32]),
-        new TextureResource("24tile.png", [32, 32]),
-        new TextureResource("25tile.png", [32, 32]),
-        new TextureResource("26tile.png", [32, 32])
+        new TextureResource("9tile.png", [32, 32])
     ];
 
     public uiResources: TextureResource[] = [

@@ -1,5 +1,5 @@
 import { RenderCall, RenderHelper } from "../render/";
-import { Animation, SpellType, Vector, Rectangle, Tile } from "../model";
+import { Animation, SpellType, Vector, Rectangle, Tile, ProjectileType } from "../model";
 import { IEnemy, Character, Player, ShapeShifterState } from "./index";
 import { DeathType } from "./deathType";
 import { ProjectileHandler } from "../handler/projectileHandler";
@@ -10,8 +10,6 @@ import { CollisionData } from "../collision";
 import { CollisionDetection } from '../collision/collisionDetection';
 
 export class ShapeShifter extends Character implements IEnemy {
-    [x: string]: any;
-
     public toMove: Vector;
     public dead: boolean;
     public burnValue: number;
@@ -24,17 +22,32 @@ export class ShapeShifter extends Character implements IEnemy {
     protected gravityStrength: number = 0;
     private currentState = ShapeShifterState.Idle;
     private collisionArea: Rectangle;
-    private hp: number = 500;
+    private hp: number = 1500;
     private sorcererAnimation: Animation;
+    private sorcererAnimationP2: Animation;
     private moveTimer = 0;
     private up = true;
+    private ammunition = 10;
+    private elevated = false;
+    private elevateTime = 0;
+    private projectileVelocity = 0.5;
+    private p1FireCd = 1000;
+    private p1FireCdTimer = 0;
+    private patrolTimer = 0;
+    private patrolMax = 5000;
+    private direction = true;
 
     private renderHalper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
 
+    private onBlackFireUpdate = (area: Rectangle, inverse: boolean, offsetX: number) => {
+        this.particleHandler.createBlueFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
+    };
+
     constructor(public position: Vector, public width: number, public height: number, private projectileHandler: ProjectileHandler, private animationHandler: AnimationHandler, private particleHandler: ParticleHandler) {
         super(position, width, height);
         this.sorcererAnimation = new Animation([600, 601, 602, 603, 604, 605, 606, 607]);
+        this.sorcererAnimationP2 = new Animation([608, 609, 610, 611, 612, 613, 614, 615]);
         this.currentAnimation = this.sorcererAnimation;
         this.collisionArea = new Rectangle(0, 0, this.width - 10, this.height);
         this.velocity = new Vector(0, 0);
@@ -57,6 +70,10 @@ export class ShapeShifter extends Character implements IEnemy {
             }
 
             this.dead = true;
+        }
+
+        if (this.hp < 1500) {
+            this.currentState = ShapeShifterState.Phase1To2;
         }
     }
 
@@ -84,6 +101,12 @@ export class ShapeShifter extends Character implements IEnemy {
 
             case ShapeShifterState.Phase1: this.phase1(delta, player);
                 break;
+
+            case ShapeShifterState.Phase1To2: this.phase1To2();
+                break;
+
+            case ShapeShifterState.Phase2: this.phase2(delta, player);
+                break;
         }
     }
 
@@ -104,7 +127,76 @@ export class ShapeShifter extends Character implements IEnemy {
 
     private phase1(delta: number, player: Player) {
         this.turnToPlayer(player);
+
         this.move(delta);
+        if (!this.elevated) {
+            this.velocity.y = -0.2;
+            this.elevateTime += delta;
+
+            if (this.elevateTime > 600) {
+                this.elevated = true;
+                this.elevateTime = 0;
+                this.velocity.y = 0;
+            } else {
+
+            }
+        } else {
+            this.patrol(delta);
+            this.p1FireCdTimer += delta;
+            if (this.p1FireCdTimer > this.p1FireCd) {
+                this.p1Fire(player);
+                this.p1FireCdTimer = 0;
+            } else {
+                this.particleHandler.createBlueChannelMagic(this.position, this.inverse, 105, 75, 20, 75);
+            }
+        }
+    }
+
+    private phase1To2() {
+        this.currentAnimation = this.sorcererAnimationP2;
+        
+        this.currentState = ShapeShifterState.Phase2;
+        this.hp = 1000;
+    }
+
+    private phase2(delta: number, player: Player) {
+        this.velocity.x = 0;
+        this.turnToPlayer(player);
+
+        this.move(delta);
+    }
+
+    private patrol(delta: number) {
+        this.patrolTimer += delta;
+        if (this.patrolTimer > this.patrolMax) {
+            this.direction = !this.direction;
+            this.patrolTimer = 0;
+        }
+
+        if (this.direction) {
+            this.velocity.x = 0.1;
+        } else {
+            this.velocity.x = -0.1;
+        }
+    }
+
+    private p1Fire(player: Player) {
+        let velocity = this.getDeltaPosition(player, 0, this.rand(0, 50));
+        velocity.y = velocity.y + 20;
+        velocity.normalize();
+        velocity.multiply(this.projectileVelocity);
+        let pos: Vector
+        if (this.inverse) {
+            pos = new Vector(this.position.x - 10, this.position.y + 40);
+        } else {
+            pos = new Vector(this.position.x + 120, this.position.y + 40);
+        }
+
+        this.projectileHandler.createNecroBall(pos, 60, this.inverse, velocity, 50, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);
+    }
+
+    private rand(min: number, max: number) {
+        return min + (Math.random() * (max - min))
     }
 
     private turnToPlayer(player: Player) {
@@ -133,6 +225,8 @@ export class ShapeShifter extends Character implements IEnemy {
         }
     }
 
-
+    protected getDeltaPosition(player: Player, offsetX: number, offsetY: number) {
+        return new Vector(player.middlePosition.x - offsetX - this.position.x, player.middlePosition.y - offsetY - this.position.y);
+    }
 
 }

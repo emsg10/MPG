@@ -5,7 +5,7 @@ attribute vec4 a_color;
 uniform vec2 u_resolution;
 uniform vec2 u_camera;
 
-varying highp vec2 v_texture_coord;
+varying mediump vec2 v_texture_coord;
 varying vec4 v_color;
 
 void main() {

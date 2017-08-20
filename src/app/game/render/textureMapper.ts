@@ -351,14 +351,23 @@ export class TextureMapper {
 	private texture597 = new Rectangle(1664, 1952, 128, 96);
 	private texture598 = new Rectangle(1792, 1952, 128, 96);
 
-	private texture600 = new Rectangle(544, 0, 96, 96);
-	private texture601 = new Rectangle(640, 0, 96, 96);
-	private texture602 = new Rectangle(736, 0, 96, 96);
-	private texture603 = new Rectangle(832, 0, 96, 96);
-	private texture604 = new Rectangle(544, 96, 96, 96);
-	private texture605 = new Rectangle(640, 96, 96, 96);
-	private texture606 = new Rectangle(736, 96, 96, 96);
-	private texture607 = new Rectangle(832, 96, 96, 96);
+	private texture600 = new Rectangle(448, 736, 128, 128);
+	private texture601 = new Rectangle(576, 736, 128, 128);
+	private texture602 = new Rectangle(704, 736, 128, 128);
+	private texture603 = new Rectangle(832, 736, 128, 128);
+	private texture604 = new Rectangle(448, 864, 128, 128);
+	private texture605 = new Rectangle(576, 864, 128, 128);
+	private texture606 = new Rectangle(704, 864, 128, 128);
+	private texture607 = new Rectangle(832, 864, 128, 128);
+
+	private texture608 = new Rectangle(448, 480, 128, 128);
+	private texture609 = new Rectangle(576, 480, 128, 128);
+	private texture610 = new Rectangle(704, 480, 128, 128);
+	private texture611 = new Rectangle(832, 480, 128, 128);
+	private texture612 = new Rectangle(448, 608, 128, 128);
+	private texture613 = new Rectangle(576, 608, 128, 128);
+	private texture614 = new Rectangle(704, 608, 128, 128);
+	private texture615 = new Rectangle(832, 608, 128, 128);
 
 	constrcuctor() {
 		if (TextureMapper.instance) {
@@ -722,6 +731,15 @@ export class TextureMapper {
 			case 605: return this.texture605;
 			case 606: return this.texture606;
 			case 607: return this.texture607;
+
+			case 608: return this.texture608;
+			case 609: return this.texture609;
+			case 610: return this.texture610;
+			case 611: return this.texture611;
+			case 612: return this.texture612;
+			case 613: return this.texture613;
+			case 614: return this.texture614;
+			case 615: return this.texture615;
 		}
 	}
 

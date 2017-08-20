@@ -4,7 +4,7 @@ attribute vec2 a_texture_coord;
 uniform vec2 u_resolution;
 uniform vec2 u_camera;
 
-varying highp vec2 v_texture_coord;
+varying mediump vec2 v_texture_coord;
 
 void main() {
   v_texture_coord = a_texture_coord;

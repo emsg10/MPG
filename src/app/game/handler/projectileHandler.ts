@@ -69,18 +69,18 @@ export class ProjectileHandler {
         return arrow;
     }
 
-    public createNecroBall(position: Vector, size: number, inverse: boolean, velocity: Vector, damage: number, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
+    public createNecroBall(position: Vector, size: number, inverse: boolean, velocity: Vector, damage: number, offset: number, type: ProjectileType, onUpdate: (area: Rectangle, inverse: boolean, offsetX: number) => void) {
         let necroBall: ParticleProjectile;
 
         if (inverse) {
             let area = new Rectangle(position.x + 5, position.y, size, size);
             necroBall = new ParticleProjectile(velocity, area, this.animationHandler.voidAnimation(), 0.2, (size * 10), inverse, 0, onUpdate);
         } else {
-            let area = new Rectangle(position.x + 40, position.y, size, size);
+            let area = new Rectangle(position.x + offset, position.y, size, size);
             necroBall = new ParticleProjectile(velocity, area, this.animationHandler.voidAnimation(), 0.2, (size * 10), inverse, 0, onUpdate);
         }
 
-        necroBall.projectileType = ProjectileType.NecroBall;
+        necroBall.projectileType = type;
         necroBall.damage = damage;
         necroBall.distance = 1000;
 
@@ -178,7 +178,7 @@ export class ProjectileHandler {
         if (inverse) {
             this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
         } else {
-            this.animationHandler.bloodAnimation_B_Right(new Vector(position.x - 10, position.y - 20), 75);
+            this.animationHandler.bloodAnimation_B_Right(new Vector(position.x + 65, position.y - 20), 75);
         }
 
         this.projectiles.push(projectile);
@@ -415,7 +415,7 @@ export class ProjectileHandler {
             player.takeDamage(projectile.damage);
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             player.takeDamage(projectile.damage);
-        } else if (projectile.projectileType = ProjectileType.NecroBall) {
+        } else if (projectile.projectileType == ProjectileType.NecroBall || projectile.projectileType == ProjectileType.BlueBall) {
             player.takeDamage(projectile.damage);
         }
     }
@@ -513,7 +513,7 @@ export class ProjectileHandler {
             this.drainShield(player, projectile, projectile.damage);
         } else if (projectile.projectileType == ProjectileType.Sword && projectile instanceof CollisionProjectile) {
             this.drainShield(player, projectile, projectile.damage);
-        } else if (projectile.projectileType = ProjectileType.NecroBall) {
+        } else if (projectile.projectileType == ProjectileType.NecroBall || projectile.projectileType == ProjectileType.BlueBall) {
             this.drainShield(player, projectile, projectile.damage * 2);
         }
     }
@@ -540,7 +540,9 @@ export class ProjectileHandler {
 
     private destroyAnimation(projectile: Projectile) {
         if (projectile instanceof ParticleProjectile) {
-            if (projectile.projectileType == ProjectileType.NecroBall) {
+            if (projectile.projectileType == ProjectileType.BlueBall) {
+                this.animationHandler.blue_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
+            } else if (projectile.projectileType == ProjectileType.NecroBall) {
                 this.animationHandler.necroball_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
             } else {
                 this.animationHandler.fireball_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);

@@ -1,7 +1,7 @@
 precision mediump float;
 uniform sampler2D u_sampler;
       
-varying highp vec2 v_texture_coord;      
+varying mediump vec2 v_texture_coord;      
 varying vec4 v_color;
 
 void main(void) {

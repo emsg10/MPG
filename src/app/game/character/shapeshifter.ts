@@ -32,10 +32,14 @@ export class ShapeShifter extends Character implements IEnemy {
     private elevateTime = 0;
     private projectileVelocity = 0.5;
     private p1FireCd = 1000;
-    private p1FireCdTimer = 0;
+    private p2FireCd = 1500;
+    private p2BurstCd = 100;
+    private burstTimer = 0;
+    private fireCdTimer = 0;
     private patrolTimer = 0;
     private patrolMax = 5000;
     private direction = true;
+    private currentSpell = 0;
 
     private renderHalper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
@@ -142,10 +146,10 @@ export class ShapeShifter extends Character implements IEnemy {
             }
         } else {
             this.patrol(delta);
-            this.p1FireCdTimer += delta;
-            if (this.p1FireCdTimer > this.p1FireCd) {
+            this.fireCdTimer += delta;
+            if (this.fireCdTimer > this.p1FireCd) {
                 this.p1Fire(player);
-                this.p1FireCdTimer = 0;
+                this.fireCdTimer = 0;
             } else {
                 this.particleHandler.createBlueChannelMagic(this.position, this.inverse, 105, 75, 20, 75);
             }
@@ -154,7 +158,7 @@ export class ShapeShifter extends Character implements IEnemy {
 
     private phase1To2() {
         this.currentAnimation = this.sorcererAnimationP2;
-        
+
         this.currentState = ShapeShifterState.Phase2;
         this.hp = 1000;
     }
@@ -164,6 +168,42 @@ export class ShapeShifter extends Character implements IEnemy {
         this.turnToPlayer(player);
 
         this.move(delta);
+
+        this.fireCdTimer += delta;
+        this.burstTimer += delta;
+
+        if (this.fireCdTimer > this.p2FireCd) {
+            this.currentSpell = Math.round(this.rand(0, 3));
+            this.fireCdTimer = 0;
+            this.burstTimer = 0;
+        }
+
+        switch (this.currentSpell) {
+            case 0: this.hail(player);
+                break;
+
+            case 1: this.hail(player);
+                break;
+
+            case 2: this.hail(player);
+                break;
+
+            case 3: this.hail(player);
+                break;
+        }
+    }
+
+    private hail(player: Player) {
+        if (this.burstTimer < this.p2BurstCd) {
+            this.p2Fire(player);
+        };
+    }
+
+    private p2Fire(player: Player) {
+        let velocity = this.getProjectileVelocity(player, 100);
+        let pos = this.getPos(150, 30, 10, 30);
+
+        this.projectileHandler.createNecroBall(pos, 10, this.inverse, velocity, 10, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);
     }
 
     private patrol(delta: number) {
@@ -180,17 +220,30 @@ export class ShapeShifter extends Character implements IEnemy {
         }
     }
 
-    private p1Fire(player: Player) {
-        let velocity = this.getDeltaPosition(player, 0, this.rand(0, 50));
+    private getProjectileVelocity(player: Player, spread: number) {
+        let velocity = this.getDeltaPosition(player, 0, this.rand(0, spread));
         velocity.y = velocity.y + 20;
         velocity.normalize();
         velocity.multiply(this.projectileVelocity);
+
+        return velocity;
+    }
+
+    private getPos(offsetX: number, offsetY: number, inverseOffsetX: number, inverseOffsetY: number) {
         let pos: Vector
         if (this.inverse) {
-            pos = new Vector(this.position.x - 10, this.position.y + 40);
+            pos = new Vector(this.position.x + inverseOffsetX, this.position.y + inverseOffsetY);
         } else {
-            pos = new Vector(this.position.x + 120, this.position.y + 40);
+            pos = new Vector(this.position.x + offsetX, this.position.y + offsetY);
         }
+
+        return pos;
+    }
+
+    private p1Fire(player: Player) {
+
+        let velocity = this.getProjectileVelocity(player, 100);
+        let pos = this.getPos(120, 40, -10, 40);
 
         this.projectileHandler.createNecroBall(pos, 60, this.inverse, velocity, 50, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);
     }
@@ -226,7 +279,12 @@ export class ShapeShifter extends Character implements IEnemy {
     }
 
     protected getDeltaPosition(player: Player, offsetX: number, offsetY: number) {
-        return new Vector(player.middlePosition.x - offsetX - this.position.x, player.middlePosition.y - offsetY - this.position.y);
+        if(this.inverse) {
+            return new Vector(player.middlePosition.x - offsetX - this.position.x, player.middlePosition.y - offsetY - this.position.y);
+        } else {
+            return new Vector(player.middlePosition.x - offsetX - (this.position.x + this.width), player.middlePosition.y - offsetY - this.position.y);
+        }
+        
     }
 
 }

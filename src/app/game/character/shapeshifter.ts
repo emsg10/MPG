@@ -32,8 +32,9 @@ export class ShapeShifter extends Character implements IEnemy {
     private elevateTime = 0;
     private projectileVelocity = 0.5;
     private p1FireCd = 1000;
-    private p2FireCd = 1500;
-    private p2BurstCd = 100;
+    private p2FireCd = 2000;
+    private p2BurstCd = 70;
+    private p2BeamCd = 300;
     private burstTimer = 0;
     private fireCdTimer = 0;
     private patrolTimer = 0;
@@ -182,7 +183,7 @@ export class ShapeShifter extends Character implements IEnemy {
             case 0: this.hail(player);
                 break;
 
-            case 1: this.hail(player);
+            case 1: this.beam(player);
                 break;
 
             case 2: this.hail(player);
@@ -199,11 +200,25 @@ export class ShapeShifter extends Character implements IEnemy {
         };
     }
 
+    private p2FireBeam(player: Player) {
+        let velocity = this.getProjectileVelocity(player, 50, 120);
+        let pos = this.getPos(140, 70, 0, 70);
+
+        this.projectileHandler.createNecroBall(pos, 30, this.inverse, velocity, 25, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);
+    }
+
     private p2Fire(player: Player) {
-        let velocity = this.getProjectileVelocity(player, 100);
+        let velocity = this.getProjectileVelocity(player, 0, 100);
         let pos = this.getPos(150, 30, 10, 30);
 
         this.projectileHandler.createNecroBall(pos, 10, this.inverse, velocity, 10, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);
+    }
+
+    private beam(player: Player) {
+        if (this.burstTimer > this.p2BeamCd) {
+            this.burstTimer = 0;
+            this.p2FireBeam(player);
+        };
     }
 
     private patrol(delta: number) {
@@ -220,8 +235,8 @@ export class ShapeShifter extends Character implements IEnemy {
         }
     }
 
-    private getProjectileVelocity(player: Player, spread: number) {
-        let velocity = this.getDeltaPosition(player, 0, this.rand(0, spread));
+    private getProjectileVelocity(player: Player, startSpread: number, endSpread: number) {
+        let velocity = this.getDeltaPosition(player, 0, this.rand(startSpread, endSpread));
         velocity.y = velocity.y + 20;
         velocity.normalize();
         velocity.multiply(this.projectileVelocity);
@@ -242,7 +257,7 @@ export class ShapeShifter extends Character implements IEnemy {
 
     private p1Fire(player: Player) {
 
-        let velocity = this.getProjectileVelocity(player, 100);
+        let velocity = this.getProjectileVelocity(player, 0, 100);
         let pos = this.getPos(120, 40, -10, 40);
 
         this.projectileHandler.createNecroBall(pos, 60, this.inverse, velocity, 50, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);

@@ -34,8 +34,11 @@ export class ShapeShifter extends Character implements IEnemy {
     private p1FireCd = 1000;
     private p2FireCd = 2000;
     private p2BurstCd = 70;
+    private fireSingle = false;
     private p2BeamCd = 300;
+    private p2Beam2Cd = 1500;
     private burstTimer = 0;
+    private burstTimer2 = 0;
     private fireCdTimer = 0;
     private patrolTimer = 0;
     private patrolMax = 5000;
@@ -47,6 +50,10 @@ export class ShapeShifter extends Character implements IEnemy {
 
     private onBlackFireUpdate = (area: Rectangle, inverse: boolean, offsetX: number) => {
         this.particleHandler.createBlueFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
+    };
+
+    private onNecroUpdate = (area: Rectangle, inverse: boolean, offsetX: number) => {
+        this.particleHandler.createNecroFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
     };
 
     constructor(public position: Vector, public width: number, public height: number, private projectileHandler: ProjectileHandler, private animationHandler: AnimationHandler, private particleHandler: ParticleHandler) {
@@ -77,7 +84,7 @@ export class ShapeShifter extends Character implements IEnemy {
             this.dead = true;
         }
 
-        if (this.hp < 1500) {
+        if (this.hp < 1500 && this.currentState == ShapeShifterState.Phase1) {
             this.currentState = ShapeShifterState.Phase1To2;
         }
     }
@@ -161,7 +168,6 @@ export class ShapeShifter extends Character implements IEnemy {
         this.currentAnimation = this.sorcererAnimationP2;
 
         this.currentState = ShapeShifterState.Phase2;
-        this.hp = 1000;
     }
 
     private phase2(delta: number, player: Player) {
@@ -172,11 +178,14 @@ export class ShapeShifter extends Character implements IEnemy {
 
         this.fireCdTimer += delta;
         this.burstTimer += delta;
+        this.burstTimer2 += delta;
 
         if (this.fireCdTimer > this.p2FireCd) {
             this.currentSpell = Math.round(this.rand(0, 3));
             this.fireCdTimer = 0;
             this.burstTimer = 0;
+            this.burstTimer2 = 0;
+            this.fireSingle = false;
         }
 
         switch (this.currentSpell) {
@@ -186,12 +195,32 @@ export class ShapeShifter extends Character implements IEnemy {
             case 1: this.beam(player);
                 break;
 
-            case 2: this.hail(player);
+            case 2: this.necroBall(player);
                 break;
 
-            case 3: this.hail(player);
+            case 3: this.hail2(player);
                 break;
         }
+    }
+
+    private necroBall(player: Player) {
+        if (!this.fireSingle) {
+            this.fireSingle = true;
+            this.p2FireBall(player);
+        };
+    }
+
+    private p2FireBall(player: Player) {
+        let velocity = this.getProjectileVelocity(player, 50, 70);
+        let pos = this.getPos(40, 20, 70, 20);
+
+        this.projectileHandler.createNecroBall(pos, 50, this.inverse, velocity, 100, -40, ProjectileType.NecroBall, this.onNecroUpdate);
+    }
+
+    private hail2(player: Player) {
+        if (this.burstTimer < this.p2BurstCd) {
+            this.p2Fire2(player);
+        };
     }
 
     private hail(player: Player) {
@@ -212,6 +241,13 @@ export class ShapeShifter extends Character implements IEnemy {
         let pos = this.getPos(150, 30, 10, 30);
 
         this.projectileHandler.createNecroBall(pos, 10, this.inverse, velocity, 10, -40, ProjectileType.BlueBall, this.onBlackFireUpdate);
+    }
+
+    private p2Fire2(player: Player) {
+        let velocity = this.getProjectileVelocity(player, 0, 100);
+        let pos = this.getPos(30, 50, 110, 50);
+
+        this.projectileHandler.createNecroBall(pos, 20, this.inverse, velocity, 15, -40, ProjectileType.NecroBall, this.onNecroUpdate);
     }
 
     private beam(player: Player) {
@@ -294,12 +330,12 @@ export class ShapeShifter extends Character implements IEnemy {
     }
 
     protected getDeltaPosition(player: Player, offsetX: number, offsetY: number) {
-        if(this.inverse) {
+        if (this.inverse) {
             return new Vector(player.middlePosition.x - offsetX - this.position.x, player.middlePosition.y - offsetY - this.position.y);
         } else {
             return new Vector(player.middlePosition.x - offsetX - (this.position.x + this.width), player.middlePosition.y - offsetY - this.position.y);
         }
-        
+
     }
 
 }

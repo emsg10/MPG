@@ -370,15 +370,18 @@ export class ParticleHandler {
         let shieldEffectRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
         shieldEffectRenderCall.textureType = TextureType.particleTexture;
 
-        let blackFireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
-        blackFireRenderCall.textureType = TextureType.particleTexture;
+        let necroFireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
+        necroFireRenderCall.textureType = TextureType.particleTexture;
+
+        let blueFireRenderCall: SimpleParticleRenderCall = new SimpleParticleRenderCall();
+        blueFireRenderCall.textureType = TextureType.particleTexture;
 
         renderCalls.push(this.addParticles(fireRenderCall, allFireParticles, this.fireColor));
         renderCalls.push(this.addParticles(frostEffectRenderCall, this.frostEffectParticles, this.frostEffectColor));
         renderCalls.push(this.addParticles(frostRenderCall, this.frostParticles, this.frostColor));
         renderCalls.push(this.addParticles(shieldEffectRenderCall, this.shieldEffectParticles, this.shieldColor))
-        renderCalls.push(this.addParticles(blackFireRenderCall, this.necroEffectParticles, this.necroColor))
-        renderCalls.push(this.addParticles(blackFireRenderCall, this.blueEffectParticles, this.blueColor))
+        renderCalls.push(this.addParticles(necroFireRenderCall, this.necroEffectParticles, this.necroColor))
+        renderCalls.push(this.addParticles(blueFireRenderCall, this.blueEffectParticles, this.blueColor))
 
         return renderCalls;
     }

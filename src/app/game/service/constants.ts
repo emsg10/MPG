@@ -53,5 +53,10 @@ export class Constants {
         new TextureResource("121ui.png", [256, 256]),
     ];
 
+    public audioResources: string[] = [
+        "explosion1.wav",
+        "flamethrower.ogg"
+    ];
+
     public tileSize: [number, number] = [32, 32];
 }

@@ -28,6 +28,8 @@ import { DynamicTile } from './dynamicTile';
 import { DynamicTileData } from './dynamicTileData';
 import { RenderableData } from './renderable-data';
 import { Progress } from './progress';
+import { AudioAsset } from "./audioAsset";
+import { ContinuousAudio } from "./audio/continousAudio";
 
 export {
     ShaderType,
@@ -59,5 +61,7 @@ export {
     DynamicTile,
     DynamicTileData,
     RenderableData,
-    Progress
+    Progress,
+    AudioAsset,
+    ContinuousAudio
 };

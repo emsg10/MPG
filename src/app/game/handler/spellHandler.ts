@@ -3,6 +3,7 @@ import { AnimationHandler } from './animationHandler';
 import { ProjectileHandler } from './projectileHandler';
 import { ParticleHandler } from './particleHandler';
 import { Player } from '../character/player';
+import { AudioHandler } from "./audioHandler";
 
 export class SpellHandler {
 
@@ -159,6 +160,7 @@ export class SpellHandler {
             if (this.player.useMana(0.5)) {
                 this.fireBlastCast.reset();
                 this.currentCast = this.fireBlastCast;
+                this.animationHandler.audioHandler.playFlameThrower();
             } else {
                 this.break = 500;
                 if (this.castingShield) {

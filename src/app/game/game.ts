@@ -3,7 +3,7 @@ import { RenderCall, ParticleRenderer, DynamicRenderCall, ColorRenderCall, Color
 import { Player } from './character/player';
 import { Enemy } from './character/enemy';
 import { Swordman } from './character/swordman';
-import { Vector, Rectangle, Asset, SpellType, Level, Tile, Animation, DynamicTile } from './model';
+import { Vector, Rectangle, Asset, SpellType, Level, Tile, Animation, DynamicTile, AudioAsset } from './model';
 import { CollisionDetection } from './collision/collisionDetection';
 import { Gravity } from './forces/gravity';
 import { TextRenderer } from './text/textRenderer';
@@ -26,6 +26,7 @@ import { LoadHelper } from './service/loadHelper';
 import { LocalStorageHelper } from './service/localStorageHelper';
 import { SceneIndex } from './UI/sceneIndex';
 import { Screamer } from "./character/screamer";
+import { AudioHandler } from "./handler/audioHandler";
 
 export class Game {
 	public canvasWidth = 1200;
@@ -70,9 +71,10 @@ export class Game {
 	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 	private sceneHandler: SceneHandler;
 	private collisionAreaEnd: Rectangle;
+	private audioHandler: AudioHandler;
 
 
-	constructor(private asset: Asset, canvas: HTMLCanvasElement, level: LevelData) {
+	constructor(private asset: Asset, audioAsset: AudioAsset, canvas: HTMLCanvasElement, level: LevelData) {
 
 		this.context = new Context(asset, this.canvasWidth, this.canvasHeight, canvas);
 		this.renderer = new Renderer(this.context);
@@ -80,6 +82,7 @@ export class Game {
 		this.colorRenderer = new ColorRenderer(this.context);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
+		this.audioHandler = new AudioHandler(audioAsset);
 		this.levelData = level;
 
 		this.initKeyBindings();
@@ -113,6 +116,7 @@ export class Game {
 					if (!this.player.dead && !this.levelCompleted) {
 						this.checkGoal();
 						this.checkKeys(delta);
+						this.audioHandler.update(delta);
 						this.collision.checkCoutOfBounds(this.player, this.level.gameSize);
 						this.player.update(this.level.tiles, this.dynamicTileHandler.dynamicTiles, delta);
 						this.dynamicTileHandler.update(this.player, delta);
@@ -131,6 +135,7 @@ export class Game {
 						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
 						this.particleHandler.update(delta, this.enemyHandler.enemies);
 					} else {
+						this.audioHandler.reset();
 						this.sceneHandler.started = false;
 						this.sceneHandler.setCurrentLevel(this.level.name);
 						this.sceneHandler.currentScene = SceneIndex.RestartMenu;
@@ -357,7 +362,7 @@ export class Game {
 		let progress = LocalStorageHelper.getInstance().getCurrentProgress();
 
 		this.particleHandler = new ParticleHandler();
-		this.animationHandler = new AnimationHandler(this.particleHandler);
+		this.animationHandler = new AnimationHandler(this.particleHandler, this.audioHandler);
 		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.getSpellLevel(progress.defence));
 		this.dynamicTileHandler = new DynamicTileHandler();
 

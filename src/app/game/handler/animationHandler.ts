@@ -4,6 +4,7 @@ import { Context } from '../context';
 import { CollisionData } from '../collision/collisionData';
 import { Player } from '../character/player';
 import { ParticleHandler } from '../handler/particleHandler';
+import { AudioHandler } from "./audioHandler";
 
 export class AnimationHandler {
 
@@ -14,7 +15,7 @@ export class AnimationHandler {
     private textureMapper = TextureMapper.getInstance();
     private renderHelper = RenderHelper.getInstance();
 
-    constructor(particleHandler: ParticleHandler) {
+    constructor(particleHandler: ParticleHandler, public audioHandler: AudioHandler) {
         this.particleHandler = particleHandler;
     }
 
@@ -332,6 +333,7 @@ export class AnimationHandler {
     }
 
     public fireball_explosion(position: Vector, size: number) {
+        this.audioHandler.playSound("explosion1.wav");
         this.particleHandler.createFireballExplosion(position, size);
     }
 

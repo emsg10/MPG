@@ -7,6 +7,7 @@ export class AssetsLoader {
   private shaderUrl = 'src/assets/shader/';
   private textureUrl = "src/assets/texture/";
   private levelUrl = "src/assets/maps/";
+  private audioUrl = "src/assets/audio/"
   private constants = Constants.getInstance();
 
 
@@ -37,9 +38,32 @@ export class AssetsLoader {
   private httpGet(url: string): Observable<string> {
     return Observable.create((observer: Observer<string>) => {
       let xmlHttp = new XMLHttpRequest();
+
       xmlHttp.onreadystatechange = () => {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
           observer.next(xmlHttp.responseText);
+          observer.complete();
+        };
+      };
+
+      xmlHttp.onerror = () => {
+        observer.error(xmlHttp.responseText);
+      };
+
+      xmlHttp.open("GET", url, true);
+      xmlHttp.send(null);
+    });
+  }
+
+  private httpGetBinary(url: string): Observable<ArrayBuffer> {
+    return Observable.create((observer: Observer<ArrayBuffer>) => {
+      let xmlHttp = new XMLHttpRequest();
+
+      xmlHttp.responseType = 'arraybuffer';
+
+      xmlHttp.onreadystatechange = () => {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+          observer.next(xmlHttp.response);
           observer.complete();
         };
       };
@@ -59,6 +83,29 @@ export class AssetsLoader {
 
   public getUiTextures(name: string) {
     return this.getTextures(name, this.constants.uiResources);
+  }
+
+  private getAudioData(name: string) {
+    return this.httpGetBinary(this.audioUrl + name);
+  }
+
+  public getAudio(audioResources: string[]) {
+    return Observable.create((obs: Observer<Map<string, ArrayBuffer>>) => {
+      let map = new Map<string, ArrayBuffer>()
+
+      let count = 0;
+      for (let auidoResource of audioResources) {
+        this.getAudioData(auidoResource).subscribe(it => {
+          count++;
+          map.set(auidoResource, it);
+
+          if (count >= audioResources.length) {
+            obs.next(map);
+            obs.complete();
+          }
+        });
+      }
+    });
   }
 
   private getTextures(name: string, textureResources: TextureResource[]) {

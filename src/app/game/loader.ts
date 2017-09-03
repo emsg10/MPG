@@ -1,15 +1,17 @@
 import { AssetsLoader } from './service/assetsLoader';
 import { Observable } from 'rxjs';
-import { Asset, Level, Vector } from './model';
+import { Asset, Level, Vector, AudioAsset } from './model';
 import { Game } from './game';
 import { LoadHelper } from './service/loadHelper';
 import { Swordman } from './character/swordman';
 import { Enemy } from './character/enemy';
 import { LevelData, TileAsset } from './map/model';
+import { Constants } from "./service/constants";
 
 export class Loader {
     private loadHelper = LoadHelper.getInstance();
     private asset: Asset = new Asset();
+    private audioAsset = new AudioAsset();
     private assetsLoader = new AssetsLoader();
     private level: LevelData;
     private game: Game;
@@ -18,7 +20,7 @@ export class Loader {
     private importLink: HTMLElement;
 
     constructor() {
-
+        
         Observable.forkJoin(
             this.assetsLoader.getShader("vertexShader.c"),
             this.assetsLoader.getShader("fragmentShader.c"),
@@ -33,7 +35,9 @@ export class Loader {
             this.assetsLoader.getTexture("genericParticle.png"),
             this.assetsLoader.getTileTextures("tile"),
             this.assetsLoader.getUiTextures("ui"),
-            this.assetsLoader.getLevel("0")
+            this.assetsLoader.getLevel("0"),
+            this.assetsLoader.getAudio(Constants.getInstance().audioResources)
+
         ).subscribe(data => {
             this.asset.vertexShader = data[0] as string;
             this.asset.fragmentShader = data[1] as string;
@@ -51,9 +55,11 @@ export class Loader {
             this.asset.tileAssets = this.addToTileAssets(this.asset.tileAssets, data[12]);
             this.level = data[13] as LevelData;
 
+            this.audioAsset.bufferDatas = data[14] as Map<string, ArrayBuffer>;
+
             this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 
-            this.game = new Game(this.asset, this.canvas, this.level);
+            this.game = new Game(this.asset, this.audioAsset, this.canvas, this.level);
         });
     }
 

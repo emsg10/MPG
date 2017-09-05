@@ -333,7 +333,7 @@ export class AnimationHandler {
     }
 
     public fireball_explosion(position: Vector, size: number) {
-        this.audioHandler.playSound("explosion1.wav");
+        this.audioHandler.playSound("explosion1.wav", 2, 0, 0.05);
         this.particleHandler.createFireballExplosion(position, size);
     }
 

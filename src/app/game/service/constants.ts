@@ -55,7 +55,11 @@ export class Constants {
 
     public audioResources: string[] = [
         "explosion1.wav",
-        "flamethrower.ogg"
+        "flamethrower.ogg",
+        "freeze.ogg",
+        "shield.ogg",
+        "foom.wav",
+        "step.wav"
     ];
 
     public tileSize: [number, number] = [32, 32];

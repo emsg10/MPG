@@ -1,4 +1,4 @@
-import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile, ChannelCast, Progress } from '../model';
+import { Vector, Rectangle, Sprite, Animation, SpellType, StickyAnimation, DebugElement, Tile, DynamicTile, ChannelCast, Progress, ContinuousAudio } from '../model';
 import { RenderCall, ColorRenderCall, RenderHelper } from '../render';
 import { Context } from '../';
 import { CollisionData } from '../collision';
@@ -63,6 +63,8 @@ export class Player extends Character {
 	private onGroundTimer = 0;
 	private shieldTextureCoords = this.renderHelper.getTextureCoordinates([], 199);
 
+	private stepAudio: ContinuousAudio;
+
 	private debugHandler = DebugHandler.getInstance();
 
 	constructor(position: Vector, context: Context, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler, particleHandler: ParticleHandler, width: number, height: number, hp: number, mana: number, progress: Progress, fireLevel: number, frostLevel: number, shieldLevel: number) {
@@ -100,7 +102,7 @@ export class Player extends Character {
 		this.lowerAnimation = this.lowerIdleAnimation;
 		this.upperAnimation = this.upperIdleAnimation;
 
-
+		this.stepAudio = this.animationHandler.audioHandler.createContinuos("step.wav", 2, 0, 0.05);
 	}
 
 	public takeDamage(damage: number) {
@@ -306,6 +308,7 @@ export class Player extends Character {
 			this.lowerAnimation = this.lowerJumpAnimation;
 		} else if (this.moving || this.velocity.x != 0) {
 			this.lowerAnimation = this.lowerRunningAnimation;
+			this.stepAudio.play();
 		} else {
 			this.lowerAnimation = this.lowerStillAnimation;
 		}

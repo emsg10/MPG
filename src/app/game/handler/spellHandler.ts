@@ -1,4 +1,4 @@
-import { SpellType, Cast, Animation, InstantCast, ChannelCast, Vector, Rectangle, SpellCast, Progress } from '../model';
+import { SpellType, Cast, Animation, InstantCast, ChannelCast, Vector, Rectangle, SpellCast, Progress, ContinuousAudio } from '../model';
 import { AnimationHandler } from './animationHandler';
 import { ProjectileHandler } from './projectileHandler';
 import { ParticleHandler } from './particleHandler';
@@ -27,6 +27,11 @@ export class SpellHandler {
     private maxMagicValue = 50 + (20 * this.fireLevel);
     private minMagicValue = 25 + (5 * this.fireLevel);
 
+    private flameThrowerAudio: ContinuousAudio;
+    private freezeAudio: ContinuousAudio;
+    private shieldAudio: ContinuousAudio;
+
+
     constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler, particleHandler: ParticleHandler, player: Player, private fireLevel: number, private frostLevel: number, private shieldLevel: number) {
         this.animationHandler = animationHandler;
         this.projectileHandler = projectileHandler;
@@ -36,6 +41,10 @@ export class SpellHandler {
         this.createShieldCollidables();
 
         this.initCasts();
+
+        this.flameThrowerAudio = this.animationHandler.audioHandler.createContinuos("flamethrower.ogg", 3.5, 0, 0.1);
+        this.freezeAudio = this.animationHandler.audioHandler.createContinuos("freeze.ogg", 6, 0, 0.1);
+        this.shieldAudio = this.animationHandler.audioHandler.createContinuos("shield.ogg", 2.4, 0, 0.03);
     }
 
     public update(delta: number) {
@@ -63,7 +72,7 @@ export class SpellHandler {
             for (let collidable of this.refShieldCollidables) {
                 this.shieldCollidables.push(new Rectangle(collidable.x + this.player.position.x, collidable.y + this.player.position.y, collidable.width, collidable.height));
             }
-
+            this.shieldAudio.play();
             this.particleHandler.createShieldEffect(this.player.getCalculatedPos(this.player.position, 0), this.player.inverse, this.shieldLevel);
         }
 
@@ -160,7 +169,6 @@ export class SpellHandler {
             if (this.player.useMana(0.5)) {
                 this.fireBlastCast.reset();
                 this.currentCast = this.fireBlastCast;
-                this.animationHandler.audioHandler.playFlameThrower();
             } else {
                 this.break = 500;
                 if (this.castingShield) {
@@ -224,7 +232,7 @@ export class SpellHandler {
         let onFireBallCast = (animation: Animation, size: number) => {
 
             this.projectileHandler.createFireBall(this.player.getCalculatedPos(this.player.position, size), this.player.inverse, 0.6, size, 11, onFireBallUpdate);
-
+            this.animationHandler.audioHandler.playSound("foom.wav", 1, 0, 0.03)
             return animation;
         };
 
@@ -235,25 +243,25 @@ export class SpellHandler {
         if (fireLevel == 0) {
             return (animation: Animation) => {
                 this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 0);
-
+                this.flameThrowerAudio.play();
                 return animation;
             };
         } else if (fireLevel == 1) {
             return (animation: Animation) => {
                 this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 1);
-
+                this.flameThrowerAudio.play();
                 return animation;
             };
         } else if (fireLevel == 2) {
             return (animation: Animation) => {
                 this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 2);
-
+                this.flameThrowerAudio.play();
                 return animation;
             };
         } else {
             return (animation: Animation) => {
                 this.particleHandler.createFireBlast(this.player.position, this.player.inverse, 3);
-
+                this.flameThrowerAudio.play();
                 return animation;
             };
         }
@@ -263,25 +271,25 @@ export class SpellHandler {
         if (frostLevel == 0) {
             return (animation: Animation) => {
                 this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 0);
-
+                this.freezeAudio.play();
                 return animation;
             };
         } else if (frostLevel == 1) {
             return (animation: Animation) => {
                 this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 1);
-
+                this.freezeAudio.play();
                 return animation;
             };
         } else if (frostLevel == 2) {
             return (animation: Animation) => {
                 this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 2);
-
+                this.freezeAudio.play();
                 return animation;
             };
         } else {
             return (animation: Animation) => {
                 this.particleHandler.createFrostBlast(this.player.position, this.player.inverse, 3);
-
+                this.freezeAudio.play();
                 return animation;
             }
         };

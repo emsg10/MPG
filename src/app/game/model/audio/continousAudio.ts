@@ -5,7 +5,7 @@ export class ContinuousAudio {
     private source: AudioBufferSourceNode;
     private gainNode = this.audioContext.createGain();
 
-    constructor(private audioContext: AudioContext, private data: AudioBuffer, private duration: number, private offset: number) {
+    constructor(private audioContext: AudioContext, private data: AudioBuffer, private duration: number, private offset: number, private gainValue: number) {
         this.gainNode.connect(this.audioContext.destination);
     }
 
@@ -22,7 +22,7 @@ export class ContinuousAudio {
     public play() {
         this.continue = true;
         if (!this.playing) {
-            this.gainNode.gain.value = 1;
+            this.gainNode.gain.value = this.gainValue;
             this.source = this.audioContext.createBufferSource();
             this.source.buffer = this.data;
             this.source.connect(this.gainNode);

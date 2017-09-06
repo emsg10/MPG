@@ -30,6 +30,8 @@ export class SpellHandler {
     private flameThrowerAudio: ContinuousAudio;
     private freezeAudio: ContinuousAudio;
     private shieldAudio: ContinuousAudio;
+    private magicChannelAudio: ContinuousAudio;
+    private maxMagicAudio: ContinuousAudio;
 
 
     constructor(animationHandler: AnimationHandler, projectileHandler: ProjectileHandler, particleHandler: ParticleHandler, player: Player, private fireLevel: number, private frostLevel: number, private shieldLevel: number) {
@@ -45,6 +47,8 @@ export class SpellHandler {
         this.flameThrowerAudio = this.animationHandler.audioHandler.createContinuos("flamethrower.ogg", 3.5, 0, 0.1);
         this.freezeAudio = this.animationHandler.audioHandler.createContinuos("freeze.ogg", 6, 0, 0.1);
         this.shieldAudio = this.animationHandler.audioHandler.createContinuos("shield.ogg", 2.4, 0, 0.03);
+        this.magicChannelAudio = this.animationHandler.audioHandler.createContinuos("fireloop.ogg", 1, 0, 0.02);
+        this.maxMagicAudio = this.animationHandler.audioHandler.createContinuos("fireloop.ogg", 2.5, 1, 0.01);   
     }
 
     public update(delta: number) {
@@ -64,6 +68,7 @@ export class SpellHandler {
 
         if (this.channelMagicCast.currentValue >= this.maxMagicValue) {
             this.particleHandler.createMagicEffect(this.player.position, this.player.inverse);
+            this.maxMagicAudio.play();
         }
 
         if (this.castingShield) {
@@ -214,6 +219,7 @@ export class SpellHandler {
 
         let onChannelMagic = () => {
             this.particleHandler.createChannelMagic(this.player.position, this.player.inverse);
+            this.magicChannelAudio.play();
         };
 
         let onCancelChannelMagic = () => {

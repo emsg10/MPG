@@ -267,6 +267,7 @@ export class Player extends Character {
 					this.idleTime = 0;
 					this.velocity.y = this.jumpSpeed;
 					this.inJump = true;
+					this.animationHandler.audioHandler.playSound("jump.ogg", 1, 0, 0.1);
 				}
 
 				this.onGroundTimer = 50;

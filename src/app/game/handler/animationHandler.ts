@@ -410,6 +410,7 @@ export class AnimationHandler {
         animation.repetitions = 1;
 
         this.dynamicAnimations.push(animation);
+        this.audioHandler.playSound("bow.wav", 1, 0, 0.1);
 
         return animation;
     }
@@ -450,6 +451,7 @@ export class AnimationHandler {
 
 
         this.dynamicAnimations.push(animation);
+        this.audioHandler.playSound("arrowhit.wav", 1, 0, 0.1);
 
         return animation;
     }

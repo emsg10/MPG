@@ -107,6 +107,7 @@ export class Player extends Character {
 
 	public takeDamage(damage: number) {
 		this.hp -= damage;
+		this.animationHandler.audioHandler.playSound("playerhit.wav", 1, 0, 0.3);
 
 		if (this.hp <= 0) {
 			this.hp = 0;

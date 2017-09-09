@@ -7,19 +7,23 @@ import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
 import { DeathType } from './deathType';
 import { State } from './state';
+import { DebugHandler } from "../handler/debugHandler";
 
 export class Swordman extends Enemy {
 
     public hitCollisionAreas: Rectangle[] = [];
+    protected hitAreaOffset: number = 100;
+    protected searchAreaOffset: number = 600;
+    protected hitting = false;
+    protected trackingSpeed = 0.2;
+    protected idleSpeed = 0.1;
+    protected minDistance = 5;
     private textureMapper = TextureMapper.getInstance();
     private projectileHandler: ProjectileHandler;
     private animationHandler: AnimationHandler;
     private meeleAnimation: Animation;
     private hitOffset = 40;
-    protected hitting = false;
-    protected trackingSpeed = 0.2;
-    protected idleSpeed = 0.1;
-    protected minDistance = 5;
+    
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
         super(position, width, height);
@@ -36,15 +40,21 @@ export class Swordman extends Enemy {
         
         this.trackingAnimation = new Animation([211, 209, 211, 210]);
 
+        
     }
 
     public takeDamage(damage: number, type: SpellType) {
         super.takeDamage(damage, type);
+        if(this.damageAudioTimer <= 0) {
+            this.animationHandler.audioHandler.playSound("swordmanhit.wav", 1, 0, 0.1);
+            this.damageAudioTimer = this.damageAudioTimerValue;
+        }
     }
 
     public update(delta: number, tiles: Tile[], player: Player) {
-        this.npcAction(delta, player, tiles);
+        
         super.update(delta, tiles, player);
+        this.npcAction(delta, player, tiles);
 
         if (this.currentAnimation == this.hitAnimation) {
             this.currentAnimation.next(delta);
@@ -94,21 +104,37 @@ export class Swordman extends Enemy {
         this.currentState = State.Idle;
     }
 
-    protected inRange(player: Player, offset: number) {
+    protected track(player: Player, delta: number, tiles: Tile[], gapSize: number) {
+        this.actualSpeed = this.trackingSpeed;
+        super.track(player, delta, tiles, gapSize);
+    }
 
-        let area: Rectangle;
+    protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        if (this.inverse) {
-            area = new Rectangle(this.position.x - offset, this.position.y, offset, this.height);
+        
+        let deltaPos: Vector;
+        if(this.inverse) {
+            deltaPos = this.getDeltaPosition(player, 50, 0);
         } else {
-            area = new Rectangle(this.position.x, this.position.y, offset + this.width, this.height);
+            deltaPos = this.getDeltaPosition(player, 0, 0);
         }
+        
+        let magnitude = deltaPos.magnitude();
 
-        return this.collisionDetection.aabbCheck(area, player.getCollisionArea());
+        if (magnitude < offset) {
+            if (this.clearShoot(deltaPos, tiles)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
 
     }
 
     protected hit(delta: number, player: Player, tiles: Tile[]) {
+        this.actualSpeed = 0;
         super.hit(delta, player, tiles);
         if (this.meeleAnimation) {
             if (this.meeleAnimation.repetitions <= 0) {
@@ -120,6 +146,7 @@ export class Swordman extends Enemy {
     }
 
     private createHit(player: Player) {
+        this.animationHandler.audioHandler.playSound("swing3.wav", 1, 0, 0.1);
         if (!this.inverse) {
             this.meeleAnimation = this.animationHandler.swordscut_a(new Vector(this.position.x + this.hitOffset, this.position.y), 50, !this.inverse);
         } else {

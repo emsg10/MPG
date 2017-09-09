@@ -117,39 +117,4 @@ export class Apprentice extends Enemy {
             return false;
         }
     }
-
-    private clearShoot(deltaPos: Vector, tiles: Tile[]) {
-        let clear = true;
-        let pathBlocks = this.getPathBlocks(deltaPos);
-
-        for (let block of pathBlocks) {
-            if (!this.collisionDetection.fastCheckEnviroment(block, tiles)) {
-                clear = false;
-                break;
-            }
-        }
-
-        return clear;
-    }
-
-    private getPathBlocks(deltaPos: Vector) {
-
-        let blocksize = 20;
-        let magnitude = deltaPos.magnitude();
-        let direction = deltaPos.copy(deltaPos);
-        let bowPosition = new Vector(this.position.x, this.position.y + 10);
-
-        direction.normalize();
-
-        let blocks: Rectangle[] = [];
-
-        for (let i = 0; i < Math.floor(magnitude / blocksize); i++) {
-
-            let newMagnitude = magnitude - (i * blocksize);
-
-            blocks.push(new Rectangle(bowPosition.x + direction.x * newMagnitude, bowPosition.y + direction.y * newMagnitude, blocksize, 17));
-        }
-
-        return blocks;
-    }
 }

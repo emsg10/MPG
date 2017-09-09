@@ -136,6 +136,7 @@ export class ProjectileHandler {
         } else {
             rect = new Rectangle(position.x + offset, position.y - 10, 10, 10);
         }
+
         let collisionProjectile = new CollisionProjectile(velocity, rect, 40, this.animationHandler.voidAnimation(), damage);
         collisionProjectile.projectileType = ProjectileType.Sword;
 
@@ -157,6 +158,8 @@ export class ProjectileHandler {
         this.animationHandler.bloodAnimation_B_Left(new Vector(position.x - 10, position.y - 20), 75);
         this.animationHandler.bloodAnimation_B_Right(new Vector(position.x + 65, position.y - 20), 75);
         this.animationHandler.swordman_death(position, inverse);
+
+        this.animationHandler.audioHandler.playSound("swordmandeath.wav", 2, 0, 0.3);
 
         this.projectiles.push(projectile);
     }

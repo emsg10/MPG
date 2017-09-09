@@ -1,4 +1,4 @@
-import { Vector, Tile, Rectangle, Animation, SpellType } from '../model'
+import { Vector, Tile, Rectangle, Animation, SpellType, ContinuousAudio } from '../model'
 import { Character } from './character';
 import { Player } from './player';
 import { State, IEnemy } from './';
@@ -40,6 +40,8 @@ export class Enemy extends Character implements IEnemy {
     protected idleSpeed = 0;
     protected hitting = false;
     protected collisionArea: Rectangle;
+    protected damageAudioTimerValue = 500;
+    protected damageAudioTimer = 0;
 
     protected currentState = State.Idle;
 
@@ -74,7 +76,7 @@ export class Enemy extends Character implements IEnemy {
 
     public setFreezeSpeed() {
         this.actualSpeed = this.maxSpeed * Math.pow(0.997, this.freezeValue);
- 
+
         if (this.actualSpeed < this.maxSpeed * 0.3) {
             this.actualSpeed = this.maxSpeed * 0.3;
         }
@@ -142,6 +144,10 @@ export class Enemy extends Character implements IEnemy {
         this.updateColor([1.0 + (freezePercent * 1.0), 1.0 + (freezePercent * 2.0), 1.0 + (freezePercent * 2.0), 1.0]);
 
         this.updateBurnDamage();
+
+        if(this.damageAudioTimer > 0) {
+            this.damageAudioTimer -= delta;
+        }
     }
 
     public getCollisionArea() {
@@ -267,6 +273,41 @@ export class Enemy extends Character implements IEnemy {
 
     protected getDeltaPosition(player: Player, offsetX: number, offsetY: number) {
         return new Vector(player.middlePosition.x - offsetX - this.position.x, player.middlePosition.y - offsetY - this.position.y);
+    }
+
+    protected getPathBlocks(deltaPos: Vector) {
+
+        let blocksize = 20;
+        let magnitude = deltaPos.magnitude();
+        let direction = deltaPos.copy(deltaPos);
+        let bowPosition = new Vector(this.position.x, this.position.y + 10);
+
+        direction.normalize();
+
+        let blocks: Rectangle[] = [];
+
+        for (let i = 0; i < Math.floor(magnitude / blocksize); i++) {
+
+            let newMagnitude = magnitude - (i * blocksize);
+
+            blocks.push(new Rectangle(bowPosition.x + direction.x * newMagnitude, bowPosition.y + direction.y * newMagnitude, blocksize, 17));
+        }
+
+        return blocks;
+    }
+
+    protected clearShoot(deltaPos: Vector, tiles: Tile[]) {
+        let clear = true;
+        let pathBlocks = this.getPathBlocks(deltaPos);
+
+        for (let block of pathBlocks) {
+            if (!this.collisionDetection.fastCheckEnviroment(block, tiles)) {
+                clear = false;
+                break;
+            }
+        }
+
+        return clear;
     }
 
     private updateBurnDamage() {

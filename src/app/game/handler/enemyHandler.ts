@@ -72,8 +72,10 @@ export class EnemyHandler {
         if (enemy.dead) {
             if (enemy.deathType == DeathType.freezeDeath) {
                 if (enemy instanceof Swordman) {
+                    this.animationHandler.audioHandler.playSound("swordmandeath.wav", 2, 0, 0.3);
                     this.projectileHandler.createFrozenSwordManDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
                 } else if (enemy instanceof Archer) {
+                    this.animationHandler.audioHandler.playSound("swordmandeath.wav", 2, 0, 0.3);
                     this.projectileHandler.createFrozenArcherDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse, enemy.color);
                 } else if (enemy instanceof Shadow) {
                     this.projectileHandler.createShadow_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
@@ -88,8 +90,10 @@ export class EnemyHandler {
                 this.remove(enemy);
             } else if (enemy.deathType == DeathType.fireDeath) {
                 if (enemy instanceof Swordman) {
+                    this.animationHandler.audioHandler.playSound("swordmandeath.wav", 2, 0, 0.3);
                     this.animationHandler.fireDeathSwordman(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if (enemy instanceof Archer) {
+                    this.animationHandler.audioHandler.playSound("swordmandeath.wav", 2, 0, 0.3);
                     this.animationHandler.fireDeathArcher(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if (enemy instanceof Shadow) {
                     this.projectileHandler.createShadow_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
@@ -104,6 +108,7 @@ export class EnemyHandler {
                 this.remove(enemy);
             } else if (enemy.deathType == DeathType.swordDeath) {
                 if (enemy instanceof Archer) {
+                    this.animationHandler.audioHandler.playSound("swordmandeath.wav", 2, 0, 0.3);
                     this.animationHandler.createArcherDeath(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);
                 } else if (enemy instanceof Shadow) {
                     this.projectileHandler.createShadow_death(new Rectangle(enemy.position.x, enemy.position.y, enemy.width, enemy.height), enemy.inverse);

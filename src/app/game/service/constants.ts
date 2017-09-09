@@ -64,7 +64,13 @@ export class Constants {
         "jump.ogg",
         "bow.wav",
         "arrowhit.wav",
-        "playerhit.wav"
+        "playerhit.wav",
+        "swordmanhit.wav",
+        "swing3.wav",
+        "shade9.wav",
+        "shade15.wav",
+        "shade2.wav",
+        "swordmandeath.wav"
     ];
 
     public tileSize: [number, number] = [32, 32];

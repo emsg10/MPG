@@ -1,7 +1,7 @@
 import { Enemy } from './enemy';
 import { Player } from './player';
 import { Context } from '../context';
-import { Vector, Rectangle, Tile, Meele, Animation, SpellType, DebugElement } from '../model';
+import { Vector, Rectangle, Tile, Meele, Animation, SpellType, DebugElement, ContinuousAudio } from '../model';
 import { TextureMapper } from '../render/textureMapper';
 import { AnimationHandler } from '../handler/animationHandler';
 import { ProjectileHandler } from '../handler/projectileHandler';
@@ -20,7 +20,8 @@ export class Shadow extends Enemy {
     protected trackingSpeed = 0.2;
     protected idleSpeed = 0;
     protected minDistance = 30;
-    public debugHandler = DebugHandler.getInstance();
+
+    private spotted = false;
 
     constructor(position: Vector, width: number, height: number, projectileHandler: ProjectileHandler, animationHandler: AnimationHandler) {
         super(position, width, height);
@@ -66,8 +67,15 @@ export class Shadow extends Enemy {
             collisionArea = new Rectangle(this.position.x, this.position.y - 5, this.width, this.height);
         }
 
-
         return collisionArea;
+    }
+
+    public takeDamage(damage: number, type: SpellType) {
+        super.takeDamage(damage, type);
+        if(this.damageAudioTimer <= 0) {
+            this.animationHandler.audioHandler.playSound("shade15.wav", 2, 0, 0.1);
+            this.damageAudioTimer = this.damageAudioTimerValue;
+        }
     }
 
     protected hit(delta: number, player: Player, tiles: Tile[]) {
@@ -81,7 +89,7 @@ export class Shadow extends Enemy {
             } else {
                 pos = new Vector(this.position.x - 50, this.position.y + 20);
             }
-
+            this.animationHandler.audioHandler.playSound("shade2.wav", 1, 0, 0.1);
             let projectile = this.projectileHandler.createCollisionProjectile(pos, this.width, this.inverse, 60, new Vector(1, 0.8));
         }
 
@@ -99,6 +107,11 @@ export class Shadow extends Enemy {
     protected idleToTrackingTransition(delta: number) {
         this.currentAnimation = this.idleToTrackingAnimation;
         this.stop();
+
+        if(!this.spotted) {
+            this.animationHandler.audioHandler.playSound("shade9.wav", 3, 0, 0.5);
+            this.spotted = true;
+        }
 
         if (this.idleToTrackingAnimation.repetitions == 0) {
             this.trackingTime = this.trackingMaxTime;
@@ -131,7 +144,13 @@ export class Shadow extends Enemy {
 
     protected inRange(player: Player, offset: number, tiles: Tile[]) {
 
-        let deltaPos = this.getDeltaPosition(player, 10, 0);
+        let deltaPos: Vector;
+        if(this.inverse) {
+            deltaPos = this.getDeltaPosition(player, 0, 0);
+        } else {
+            deltaPos = this.getDeltaPosition(player, 50, 0);
+        }
+
         let magnitude = deltaPos.magnitude();
 
         if (magnitude < offset) {
@@ -143,40 +162,5 @@ export class Shadow extends Enemy {
         } else {
             return false;
         }
-    }
-
-    private clearShoot(deltaPos: Vector, tiles: Tile[]) {
-        let clear = true;
-        let pathBlocks = this.getPathBlocks(deltaPos);
-
-        for (let block of pathBlocks) {
-            if (!this.collisionDetection.fastCheckEnviroment(block, tiles)) {
-                clear = false;
-                break;
-            }
-        }
-
-        return clear;
-    }
-
-    private getPathBlocks(deltaPos: Vector) {
-
-        let blocksize = 20;
-        let magnitude = deltaPos.magnitude();
-        let direction = deltaPos.copy(deltaPos);
-        let bowPosition = new Vector(this.position.x, this.position.y + 10);
-
-        direction.normalize();
-
-        let blocks: Rectangle[] = [];
-
-        for (let i = 0; i < Math.floor(magnitude / blocksize); i++) {
-
-            let newMagnitude = magnitude - (i * blocksize);
-
-            blocks.push(new Rectangle(bowPosition.x + direction.x * newMagnitude, bowPosition.y + direction.y * newMagnitude, blocksize, 17));
-        }
-
-        return blocks;
     }
 }

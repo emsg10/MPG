@@ -66,6 +66,14 @@ export class Apprentice extends Enemy {
         return collisionArea;
     }
 
+    public takeDamage(damage: number, type: SpellType) {
+        super.takeDamage(damage, type);
+        if(this.damageAudioTimer <= 0) {
+            this.animationHandler.audioHandler.playSound("ogre2.wav", 1, 0, 0.1);
+            this.damageAudioTimer = this.damageAudioTimerValue;
+        }
+    }
+
     protected hit(delta: number, player: Player, tiles: Tile[]) {
         super.hit(delta, player, tiles);
         if (this.hitAnimation.frameIndex == 3) {

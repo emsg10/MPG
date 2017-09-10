@@ -84,6 +84,8 @@ export class ProjectileHandler {
         necroBall.damage = damage;
         necroBall.distance = 1000;
 
+        this.animationHandler.audioHandler.playSound("foom.wav", 1, 0, 0.03);
+
         this.enemyProjectiles.push(necroBall);
     }
 
@@ -195,7 +197,7 @@ export class ProjectileHandler {
         let velocity = new Vector(0, 0);
         let x = area.x;
 
-
+        this.animationHandler.audioHandler.playSound("shade13.wav", 2, 0, 0.3);
 
         projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.shadow_Death(area, inverse), 0.8)
 
@@ -218,7 +220,7 @@ export class ProjectileHandler {
         let projectileCorpse: Projectile;
         let velocity = new Vector(0, 0);
         let x = area.x;
-
+        
         projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.screamer_Death(area, inverse), 0.8)
 
         this.projectiles.push(projectile);
@@ -547,6 +549,7 @@ export class ProjectileHandler {
                 this.animationHandler.blue_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
             } else if (projectile.projectileType == ProjectileType.NecroBall) {
                 this.animationHandler.necroball_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
+
             } else {
                 this.animationHandler.fireball_explosion(new Vector(projectile.area.x, projectile.area.y), projectile.area.width);
             }

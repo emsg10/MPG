@@ -325,6 +325,7 @@ export class AnimationHandler {
     }
 
     public necroball_explosion(position: Vector, size: number) {
+        this.audioHandler.playSound("explode4.ogg", 1, 0, 0.05);
         this.particleHandler.createNecroballExplosion(position, size);
     }
 

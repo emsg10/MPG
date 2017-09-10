@@ -100,10 +100,12 @@ export class Screamer extends Enemy {
 
     protected idleToTrackingTransition(delta: number) {
         this.currentAnimation = this.trackingAnimation;
+
         if (this.chargeTimer > 0) {
             this.chargeTimer -= delta;
         } else {
             this.currentState = State.Tracking;
+            this.animationHandler.audioHandler.playSound("soundseffects.ogg", 2, 0.5, 0.8);
         }
     }
 

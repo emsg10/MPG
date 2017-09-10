@@ -14,7 +14,7 @@ import { DebugHandler } from '../handler/debugHandler';
 
 export class Player extends Character {
 
-	public defaultJumpSpeed: number = -0.7;
+	public defaultJumpSpeed: number = -0.8;
 	public jumpSpeed: number = this.defaultJumpSpeed;
 	public damageAnimations: StickyAnimation[] = [];
 	public hp: number;

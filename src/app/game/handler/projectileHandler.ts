@@ -210,6 +210,8 @@ export class ProjectileHandler {
         let velocity = new Vector(0, 0);
         let x = area.x;
 
+        this.animationHandler.audioHandler.playSound("mnstr5.wav", 2, 0, 0.3);        
+
         projectile = new PhysicalProjectile(velocity, new Rectangle(x, area.y - 10, area.width, area.height), this.animationHandler.masterSorcerer_death(area, inverse), 0.8)
 
         this.projectiles.push(projectile);

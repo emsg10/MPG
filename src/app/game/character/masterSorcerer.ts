@@ -72,6 +72,14 @@ export class MasterSorcerer extends Enemy {
         this.npcAction(delta, player, tiles);
     }
 
+    public takeDamage(damage: number, type: SpellType) {
+        super.takeDamage(damage, type);
+        if(this.damageAudioTimer <= 0) {
+            this.animationHandler.audioHandler.playSound("mnstr3.wav", 2, 0, 0.1);
+            this.damageAudioTimer = this.damageAudioTimerValue;
+        }
+    }
+
     public getCollisionArea() {
         let collisionArea: Rectangle;
 

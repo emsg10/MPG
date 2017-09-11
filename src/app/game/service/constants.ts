@@ -77,7 +77,10 @@ export class Constants {
         "shot2.ogg",
         "forcepush.ogg",
         "explode4.ogg",
-        "ogre2.wav"
+        "ogre2.wav",
+        "mnstr3.wav",
+        "mnstr5.wav",
+        "magic1.wav"
     ];
 
     public tileSize: [number, number] = [32, 32];

@@ -64,6 +64,8 @@ export class Player extends Character {
 	private shieldTextureCoords = this.renderHelper.getTextureCoordinates([], 199);
 
 	private stepAudio: ContinuousAudio;
+	protected damageAudioTimerValue = 500;
+    protected damageAudioTimer = 0;
 
 	private debugHandler = DebugHandler.getInstance();
 
@@ -107,12 +109,16 @@ export class Player extends Character {
 
 	public takeDamage(damage: number) {
 		this.hp -= damage;
-		this.animationHandler.audioHandler.playSound("playerhit.wav", 1, 0, 0.1);
-
+		
 		if (this.hp <= 0) {
 			this.hp = 0;
 			this.deathType = DeathType.swordDeath;
 		}
+
+		if(this.damageAudioTimer <= 0) {
+            this.animationHandler.audioHandler.playSound("playerhit.wav", 1, 0, 0.1);
+            this.damageAudioTimer = this.damageAudioTimerValue;
+        }
 	}
 
 	public hardHit(inverse: boolean, x: number) {
@@ -181,6 +187,7 @@ export class Player extends Character {
 	}
 
 	public shieldExplosion(inverse: boolean) {
+		this.animationHandler.audioHandler.playSound("magic1.wav", 2, 0, 0.1);
 		this.particleHandler.createShieldExplosionEffect(this.getCalculatedPos(this.position, 0), this.inverse);
 		this.hardHit(inverse, 0.7);
 	}
@@ -357,6 +364,10 @@ export class Player extends Character {
 		this.updateDamageAnimations();
 
 		this.onGroundTimer -= delta;
+
+		if(this.damageAudioTimer > 0) {
+            this.damageAudioTimer -= delta;
+        }
 	}
 
 	public moveRight(delta: number) {

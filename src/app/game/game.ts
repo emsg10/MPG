@@ -32,6 +32,7 @@ export class Game {
 	public canvasWidth = 1200;
 	public canvasHeight = 800;
 	public context: Context;
+	public levelCompleted = false;
 
 	private fps = 60;
 	private tileMap: TileMap;
@@ -66,8 +67,8 @@ export class Game {
 	private particleHandler: ParticleHandler;
 	private debugHandler = DebugHandler.getInstance();
 	private camera: Camera;
-	private levelCompleted = false;
 	private deathTimer = 0;
+	private levelCompletedTimer = 3000;
 	private renderCalls: Map<number, RenderCall> = new Map<number, RenderCall>();
 	private sceneHandler: SceneHandler;
 	private collisionAreaEnd: Rectangle;
@@ -126,6 +127,16 @@ export class Game {
 						this.UI.update(this.player.hp, this.player.mana);
 						this.camera.update(this.player.position);
 						this.particleHandler.update(delta, this.enemyHandler.enemies);
+					} else if(this.levelCompleted) {
+						this.levelCompletedTimer -= delta;
+						this.enemyHandler.update(delta, this.level.tiles, this.player);
+						this.animationHandler.update(delta);
+						this.projectileHandler.update(delta, this.level.tiles, this.player, this.dynamicTileHandler.dynamicTiles);
+						this.particleHandler.update(delta, this.enemyHandler.enemies);
+						if (this.levelCompletedTimer < 0) {
+							this.audioHandler.reset();
+							this.sceneHandler.levelCompleted(this.level.name);
+						}
 					} else if (this.deathTimer < 3000) {
 						this.deathTimer += delta;
 						this.player.position.x = -1000;
@@ -147,9 +158,6 @@ export class Game {
 					this.sceneHandler.render();
 				}
 
-
-
-
 				nextGameTick += skipTicks;
 			}
 		};
@@ -164,8 +172,6 @@ export class Game {
 		let colorRenderCalls: ColorRenderCall[] = [];
 
 		let simpleRenderCalls: SimpleParticleRenderCall[] = [];
-
-		// this.debugHandler.debugRects = this.player.getShieldCollidables();
 
 		//GAME
 		this.enemyHandler.createRenderCall(colorRenderCall);
@@ -207,9 +213,6 @@ export class Game {
 
 	private checkGoal() {
 		this.levelCompleted = this.collision.aabbCheck(this.player.getCollisionArea(), this.collisionAreaEnd);
-		if (this.levelCompleted) {
-			this.sceneHandler.levelCompleted(this.level.name);
-		}
 	}
 
 	private checkKeys(delta: number) {
@@ -366,7 +369,7 @@ export class Game {
 		this.projectileHandler = new ProjectileHandler(this.animationHandler, this.getSpellLevel(progress.defence));
 		this.dynamicTileHandler = new DynamicTileHandler();
 
-		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler, this.particleHandler);
+		this.level = this.loadHelper.levelDataToLevel(levelData, this.projectileHandler, this.animationHandler, this.particleHandler, this);
 		this.collisionAreaEnd = new Rectangle(this.level.end.x + (this.level.end.width / 2), this.level.end.y + (this.level.end.height / 2), 1, 1);
 		this.particleHandler.tiles = this.level.tiles;
 
@@ -383,6 +386,7 @@ export class Game {
 
 
 		this.deathTimer = 0;
+		this.levelCompletedTimer = 3000;
 
 		this.dynamicTileHandler.dynamicTiles = this.level.dynamicTiles;
 		this.tileMap = new TileMap(this.level.tiles, this.level.decorativeTiles);

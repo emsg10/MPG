@@ -155,7 +155,7 @@ export class Player extends Character {
 	}
 
 	public isMoving() {
-		return this.velocity.x == 0;
+		return this.velocity.x == 0 && this.velocity.y == 0;
 	}
 
 	public createRenderCall(renderCall: RenderCall) {

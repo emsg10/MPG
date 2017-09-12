@@ -80,7 +80,11 @@ export class Constants {
         "ogre2.wav",
         "mnstr3.wav",
         "mnstr5.wav",
-        "magic1.wav"
+        "magic1.wav",
+        "spellend.wav",
+        "fireplace.wav",
+        "shade11.wav",
+        "shade12.wav"
     ];
 
     public tileSize: [number, number] = [32, 32];

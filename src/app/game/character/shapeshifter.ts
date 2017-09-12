@@ -8,6 +8,7 @@ import { ParticleHandler } from "../handler/particleHandler";
 import { DebugHandler } from "../handler/debugHandler";
 import { CollisionData } from "../collision";
 import { CollisionDetection } from '../collision/collisionDetection';
+import { Game } from "../game";
 
 export class ShapeShifter extends Character implements IEnemy {
     public toMove: Vector;
@@ -20,6 +21,8 @@ export class ShapeShifter extends Character implements IEnemy {
     public collisionData: CollisionData;
     protected velocity: Vector;
     protected gravityStrength: number = 0;
+    protected damageAudioTimerValue = 500;
+    protected damageAudioTimer = 0;
     private currentState = ShapeShifterState.Idle;
     private collisionArea: Rectangle;
     private hp: number = 1500;
@@ -53,6 +56,7 @@ export class ShapeShifter extends Character implements IEnemy {
     private cinderValue = 0;
     private burnDurationFactor = 1;
     private flameDamage: number = 0.12;
+    private magicChannelAudio = this.animationHandler.audioHandler.createContinuos("fireloop.ogg", 1, 0, 0.01);
 
     private renderHalper = RenderHelper.getInstance();
     private collisionDetection = CollisionDetection.getInstance();
@@ -65,7 +69,7 @@ export class ShapeShifter extends Character implements IEnemy {
         this.particleHandler.createNecroFireBall(new Vector(area.x, area.y), area.width, inverse, offsetX);
     };
 
-    constructor(public position: Vector, public width: number, public height: number, private projectileHandler: ProjectileHandler, private animationHandler: AnimationHandler, private particleHandler: ParticleHandler) {
+    constructor(public position: Vector, public width: number, public height: number, private projectileHandler: ProjectileHandler, private animationHandler: AnimationHandler, private particleHandler: ParticleHandler, private game: Game) {
         super(position, width, height);
         this.sorcererAnimation = new Animation([600, 601, 602, 603, 604, 605, 606, 607]);
         this.sorcererAnimationP2 = new Animation([608, 609, 610, 611, 612, 613, 614, 615]);
@@ -92,12 +96,20 @@ export class ShapeShifter extends Character implements IEnemy {
             }
 
             this.dead = true;
+            this.game.levelCompleted = true;
         }
 
         if (this.hp < 1000 && this.currentState == ShapeShifterState.Phase1) {
+            this.animationHandler.audioHandler.playSound("shade12.wav", 2, 0, 0.1);
             this.currentState = ShapeShifterState.Phase1To2;
         } else if (this.hp < 500 && this.currentState == ShapeShifterState.Phase2) {
+            this.animationHandler.audioHandler.playSound("shade12.wav", 2, 0, 0.1);
             this.currentState = ShapeShifterState.Phase2To3;
+        }
+
+        if(this.damageAudioTimer <= 0) {
+            this.animationHandler.audioHandler.playSound("shade11.wav", 2, 0, 0.1);
+            this.damageAudioTimer = this.damageAudioTimerValue;
         }
     }
 
@@ -145,6 +157,10 @@ export class ShapeShifter extends Character implements IEnemy {
         }
 
         this.updateBurnDamage();
+
+        if(this.damageAudioTimer > 0) {
+            this.damageAudioTimer -= delta;
+        }
     }
 
     public createRenderCall(rendercall: RenderCall) {
@@ -192,6 +208,7 @@ export class ShapeShifter extends Character implements IEnemy {
                 this.p1Fire(player);
                 this.fireCdTimer = 0;
             } else {
+                this.magicChannelAudio.play();
                 this.particleHandler.createBlueChannelMagic(this.position, this.inverse, 105, 75, 20, 75);
             }
         }

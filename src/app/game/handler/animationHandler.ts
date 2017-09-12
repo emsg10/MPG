@@ -330,6 +330,7 @@ export class AnimationHandler {
     }
 
     public blue_explosion(position: Vector, size: number) {
+        this.audioHandler.playSound("spellend.wav", 1, 0, 0.03);
         this.particleHandler.createBlueExplosion(position, size);
     }
 

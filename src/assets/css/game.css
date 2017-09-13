@@ -21,3 +21,14 @@ html *
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
+
+#container {
+    background-size: 100% auto;
+    background-size: cover;
+    width: 1200px;
+    height: 800px;
+    margin:auto;
+    position: relative;
+    border: 1px solid #333;
+    background-color: white;
+}

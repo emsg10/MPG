@@ -51,6 +51,7 @@ export class Constants {
         new TextureResource("119ui.png", [256, 256]),
         new TextureResource("120ui.png", [256, 256]),
         new TextureResource("121ui.png", [256, 256]),
+        new TextureResource("122ui.png", [1024, 1024])
     ];
 
     public audioResources: string[] = [

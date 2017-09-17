@@ -15,6 +15,7 @@ import { AssetsLoader } from '../service/assetsLoader';
 import { PowerSelectionMenu } from './powerSelectionMenu';
 import { NewGameMenu } from "./newGameMenu";
 import { RestartMenu } from "./restartMenu";
+import { CreditMenu } from "./creditMenu";
 
 export class SceneHandler {
 
@@ -46,7 +47,8 @@ export class SceneHandler {
             [
                 this.createNewGameButton(),
                 this.createContinueButton(),
-                this.createLoadButton()
+                this.createLoadButton(),
+                this.createCreditsButton()
             ],
             [],
             this,
@@ -82,6 +84,7 @@ export class SceneHandler {
         this.loadLevelFinishedScreen();
         this.loadNewGameMenu();
         this.loadRestartMenu();
+        this.loadCreditMenu();
 
         this.createEventListerners();
     }
@@ -173,6 +176,25 @@ export class SceneHandler {
         );
 
         this.scenes.set(SceneIndex.RestartMenu, restartMenu);
+    }
+
+    private loadCreditMenu() {
+        let creditMenu = new CreditMenu(
+            [
+                this.createToStartMenuBackFromLevelMenu()
+            ],
+            [],
+            this,
+            this.textArea,
+            this.renderer,
+            this.canvasSize,
+            100,
+            [512, 512],
+            false,
+            this.game
+        );
+
+        this.scenes.set(SceneIndex.CreditsMenu, creditMenu);
     }
 
     private loadNewGameMenu() {
@@ -299,6 +321,14 @@ export class SceneHandler {
         }
 
         return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 295, 300, 50), 179, 181, 183, onClick);
+    }
+
+    private createCreditsButton() {
+        let onClick = () => {
+            this.currentScene = SceneIndex.CreditsMenu;
+        }
+
+        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 355, 300, 50), 179, 181, 624, onClick);
     }
 
     private createNextLevelButton(disabled: boolean) {

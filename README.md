@@ -1,19 +1,9 @@
-# MPG
+# Hellwalker
 
-A webgl 2d game
+Use destructive magic to destroy your enemies!
 
-The goal is to clear as many levels as possible.
+Clear the base levels or create your own.
 
-Use destructive magic you destroy everything that stand in your way.
-
-If you want to try it out:
-
--Clone this repository  
--run "npm install" in root  
--run "npm start" in root  
-
-Make sure you have nodejs installed.
-
-Have fun!
+Original assets [here](https://github.com/inspirsea/Hellwalker/blob/master/src/assets/credits.txt).
 
 

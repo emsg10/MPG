@@ -104,7 +104,7 @@ export class Player extends Character {
 		this.lowerAnimation = this.lowerIdleAnimation;
 		this.upperAnimation = this.upperIdleAnimation;
 
-		this.stepAudio = this.animationHandler.audioHandler.createContinuos("step.wav", 2, 0, 0.05);
+		this.stepAudio = this.animationHandler.audioHandler.createContinuos("step.flac", 2, 0, 0.05);
 	}
 
 	public takeDamage(damage: number) {

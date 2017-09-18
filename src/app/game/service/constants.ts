@@ -61,7 +61,6 @@ export class Constants {
         "freeze.ogg",
         "shield.ogg",
         "foom.wav",
-        "step.wav",
         "fireloop.ogg",
         "jump.ogg",
         "bow.wav",
@@ -85,7 +84,8 @@ export class Constants {
         "spellend.wav",
         "fireplace.wav",
         "shade11.wav",
-        "shade12.wav"
+        "shade12.wav",
+        "step.flac"
     ];
 
     public tileSize: [number, number] = [32, 32];

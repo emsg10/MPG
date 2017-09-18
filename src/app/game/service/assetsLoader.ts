@@ -4,9 +4,9 @@ import { Constants } from './constants';
 import { TextureResource, TileAsset } from '../map/model/';
 
 export class AssetsLoader {
-  private shaderUrl = 'src/assets/shader/';
+  private shaderUrl = 'src/shader/';
   private textureUrl = "src/assets/texture/";
-  private levelUrl = "src/assets/maps/";
+  private levelUrl = "src/maps/";
   private audioUrl = "src/assets/audio/"
   private constants = Constants.getInstance();
 

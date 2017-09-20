@@ -128,6 +128,7 @@ export class Game {
 						this.camera.update(this.player.position);
 						this.particleHandler.update(delta, this.enemyHandler.enemies);
 					} else if(this.levelCompleted) {
+						this.audioHandler.reset();
 						this.levelCompletedTimer -= delta;
 						this.enemyHandler.update(delta, this.level.tiles, this.player);
 						this.animationHandler.update(delta);

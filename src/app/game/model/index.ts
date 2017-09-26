@@ -1,4 +1,3 @@
-import { ShaderType } from './shaderType';
 import { Tile } from './tile'
 import { Vector } from './vector';
 import { Rectangle } from './rectangle';
@@ -30,6 +29,7 @@ import { RenderableData } from './renderable-data';
 import { Progress } from './progress';
 import { AudioAsset } from "./audioAsset";
 import { ContinuousAudio } from "./audio/continousAudio";
+import { ShaderType } from './enum/shaderType';
 
 export {
     ShaderType,

@@ -135,8 +135,12 @@ export class AssetsLoader {
 
     try {
       let valid = loadHelper.validateLevelData(body)
+      if(!valid) {
+        throw new Error("Validation error")
+      }
     } catch (e) {
       console.log("Invalid level: " + e);
+      return  {};
     }
 
     return body;

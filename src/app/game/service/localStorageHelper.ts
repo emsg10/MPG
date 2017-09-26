@@ -76,7 +76,7 @@ export class LocalStorageHelper {
             progression = [this.defaultProgress()] as Progress[];
         }
 
-        return progression.find(it => it.active == true);
+        return progression.find(it => it.active === true);
     }
 
     public saveProgress(progress: Progress) {

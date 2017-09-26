@@ -162,7 +162,6 @@ export class CollisionDetection {
 	}
 
 	public getClosestX(rect: Rectangle, tiles: Rectangle[], inverse: boolean) {
-		let coliidables: Rectangle[] = []
 		let closestX: number = inverse ? 0 : this.gameSize.x;
 
 		let possibleColls = this.grid.get(rect);
@@ -291,7 +290,7 @@ export class CollisionDetection {
 				collisionData.velocityY = velocity.y;
 			}
 
-			if (velocity.y > 20) {
+			if (velocity.y > 28) {
 				collisionData.fallDeath = true;
 			}
 

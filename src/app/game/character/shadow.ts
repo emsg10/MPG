@@ -90,7 +90,7 @@ export class Shadow extends Enemy {
                 pos = new Vector(this.position.x - 50, this.position.y + 20);
             }
             this.animationHandler.audioHandler.playSound("shade2.wav", 1, 0, 0.1);
-            let projectile = this.projectileHandler.createCollisionProjectile(pos, this.width, this.inverse, 60, new Vector(1, 0.8));
+            this.projectileHandler.createCollisionProjectile(pos, this.width, this.inverse, 60, new Vector(1, 0.8));
         }
 
         if (this.hitAnimation.frameIndex == 0) {

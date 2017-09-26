@@ -445,7 +445,6 @@ export class ParticleHandler {
         for (let particle of particleCollection) {
             this.updateParticle(particle, delta);
             let collisionSize = particle.area.width / 2;
-            let collisionRectangle = new Rectangle(particle.area.x, particle.area.y, collisionSize, collisionSize);
 
             if (particle.lifeTime <= 0 || particle.area.width < 0 || particle.dead) {
                 removeCollection.push(particle);

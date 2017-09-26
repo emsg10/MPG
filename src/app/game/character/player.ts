@@ -207,7 +207,6 @@ export class Player extends Character {
 		let x: number = this.position.x;
 		let x1: number;
 		let x2: number;
-		let textureNumber: number;
 
 		if (this.inverse) {
 			x2 = x;

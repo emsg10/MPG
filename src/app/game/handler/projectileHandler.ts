@@ -193,7 +193,6 @@ export class ProjectileHandler {
     public createShadow_death(area: Rectangle, inverse: boolean) {
 
         let projectile: PhysicalProjectile;
-        let projectileCorpse: Projectile;
         let velocity = new Vector(0, 0);
         let x = area.x;
 
@@ -206,7 +205,6 @@ export class ProjectileHandler {
 
     public createMasterSorcerer_death(area: Rectangle, inverse: boolean) {
         let projectile: PhysicalProjectile;
-        let projectileCorpse: Projectile;
         let velocity = new Vector(0, 0);
         let x = area.x;
 
@@ -219,7 +217,6 @@ export class ProjectileHandler {
 
     public createScreamer_death(area: Rectangle, inverse: boolean) {
         let projectile: PhysicalProjectile;
-        let projectileCorpse: Projectile;
         let velocity = new Vector(0, 0);
         let x = area.x;
         
@@ -231,7 +228,6 @@ export class ProjectileHandler {
     public createApprentice_death(area: Rectangle, inverse: boolean) {
 
         let projectile: PhysicalProjectile;
-        let projectileCorpse: Projectile;
         let velocity = new Vector(0, 0);
         let x = area.x;
 
@@ -504,7 +500,6 @@ export class ProjectileHandler {
     }
 
     private updateFriendslyProjectiles(delta: number, collidables: Rectangle[], dynamicTiles: DynamicTile[]) {
-        let collisionData: CollisionData;
         let removeProjectiles: Projectile[] = [];
 
         for (let projectile of this.projectiles) {

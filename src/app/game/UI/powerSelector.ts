@@ -11,7 +11,7 @@ export class PowerSelector {
 
     public render(renderCalls: Map<number, RenderCall>) {
         for (let active of this.actives) {
-            let tempRenderCalls = active.createRenderCall(renderCalls);
+            active.createRenderCall(renderCalls);
         }
 
         return renderCalls;

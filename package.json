@@ -1,7 +1,7 @@
 {
-  "name": "MPG",
+  "name": "Hellwalker",
   "version": "1.0.0",
-  "description": "Version 1 of MPG",
+  "description": "Version 1 of Hellwalker",
   "scripts": {
     "start": "webpack-dev-server --inline --progress --port 8080",
     "test": "karma start",

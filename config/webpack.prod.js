@@ -26,7 +26,10 @@ module.exports = webpackMerge(commonConfig, {
       }
     }),
     new copyWebpackPlugin([
-      { from: 'src/assets', to: 'src/assets' }
+      { from: 'src/assets', to: 'src/assets' },
+      { from: 'src/shader', to: 'src/shader' },
+      { from: 'src/css', to: 'src/css' },
+      { from: 'src/maps', to: 'src/maps' }
     ])
   ]
 });

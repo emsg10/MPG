@@ -95,7 +95,6 @@ export class Apprentice extends Enemy {
     protected idle(delta: number, player: Player, tiles: Tile[]) {
         super.idle(delta, player, tiles);
         this.actualSpeed = this.maxSpeed;
-        this.patrol(delta);
     }
 
     protected idleToTrackingTransition(delta: number) {

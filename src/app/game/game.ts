@@ -194,7 +194,7 @@ export class Game {
 		this.animationHandler.createDynamicRenderCall(dynamicRenderCall, this.camera.position);
 		this.animationHandler.createRenderCall(colorRenderCall)
 		this.animationHandler.createStaticRenderCall(renderCall);
-		this.UI.createRenderCall(renderCall, this.camera.position);
+		
 		simpleRenderCalls = this.particleHandler.createRenderCalls(simpleRenderCalls);
 
 		this.debugHandler.createRenderCall(renderCall);
@@ -210,6 +210,16 @@ export class Game {
 		this.colorRenderer.render(colorRenderCalls, this.camera.position);
 		this.simpleParticleRenderer.render(simpleRenderCalls, this.camera.position);
 		this.dynamicRenderer.render([dynamicRenderCall]);
+
+		this.generateUi();
+	}
+
+	private generateUi() {
+		let renderCall = new RenderCall();
+		this.renderCalls.clear();
+		this.UI.createRenderCall(renderCall, this.camera.position);
+		this.renderCalls.set(-1, renderCall);
+		this.renderer.render(this.renderCalls, this.camera.position);
 	}
 
 	private checkGoal() {

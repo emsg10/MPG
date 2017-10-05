@@ -48,7 +48,7 @@ export class ShapeShifter extends Character implements IEnemy {
     private burstTimer2 = 0;
     private fireCdTimer = 0;
     private patrolTimer = 0;
-    private patrolMax = 5000;
+    private patrolMax = 10000;
     private direction = true;
     private currentSpell = 0;
     private freezeDamage: number = 0.08;
@@ -107,7 +107,7 @@ export class ShapeShifter extends Character implements IEnemy {
             this.currentState = ShapeShifterState.Phase2To3;
         }
 
-        if(this.damageAudioTimer <= 0) {
+        if (this.damageAudioTimer <= 0) {
             this.animationHandler.audioHandler.playSound("shade11.wav", 2, 0, 0.1);
             this.damageAudioTimer = this.damageAudioTimerValue;
         }
@@ -158,7 +158,7 @@ export class ShapeShifter extends Character implements IEnemy {
 
         this.updateBurnDamage();
 
-        if(this.damageAudioTimer > 0) {
+        if (this.damageAudioTimer > 0) {
             this.damageAudioTimer -= delta;
         }
     }
@@ -180,7 +180,7 @@ export class ShapeShifter extends Character implements IEnemy {
     private idle(delta: number, player: Player) {
         this.move(delta, 500, 0.0005, 0.01);
 
-        if (Math.abs(this.position.x - player.position.x) < 400) {
+        if (this.inRange(player, 450)) {
             this.currentState = ShapeShifterState.Phase1;
         }
     }
@@ -455,6 +455,18 @@ export class ShapeShifter extends Character implements IEnemy {
             return new Vector(player.middlePosition.x - offsetX - (this.position.x + this.width), player.middlePosition.y - offsetY - this.position.y);
         }
 
+    }
+
+    protected inRange(player: Player, offset: number) {
+
+        let deltaPos = this.getDeltaPosition(player, 10, 0);
+        let magnitude = deltaPos.magnitude();
+
+        if (magnitude < offset) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

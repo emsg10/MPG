@@ -16,10 +16,26 @@ import { PowerSelectionMenu } from './powerSelectionMenu';
 import { NewGameMenu } from "./newGameMenu";
 import { RestartMenu } from "./restartMenu";
 import { CreditMenu } from "./creditMenu";
+import { AboutMenu } from './aboutMenu';
+import { AudioHandler } from '../handler/audioHandler';
 
 export class SceneHandler {
 
-    public started = false;
+    public set started(value: boolean) {
+        this._started = value;
+
+        if(this._started) {
+            this.audioHandler.endLoops();
+            this.audioHandler.playSound("gamebackground.ogg", 0, 0, 0.03, true);
+        } else {
+            this.audioHandler.endLoops();
+            this.audioHandler.playSound("menubackground.mp3", 0, 0, 0.1, true);
+        }
+    };
+    public get started() {
+        return this._started;
+    }
+    private _started: boolean;
     public currentScene = SceneIndex.StartMenu;
     public lastCurrentScene = SceneIndex.StartMenu;
     private scenes: Map<number, Scene> = new Map<number, Scene>();
@@ -41,14 +57,17 @@ export class SceneHandler {
     private localStorageHelper = LocalStorageHelper.getInstance();
     private assetLoader = new AssetsLoader();
 
-    constructor(private renderer: Renderer, private canvasSize: [number, number], private canvas: HTMLElement, private game: Game) {
+    constructor(private renderer: Renderer, private canvasSize: [number, number], private canvas: HTMLElement, private game: Game, private audioHandler: AudioHandler) {
+
+        this.started = false;
 
         let startMenu = new Menu(
             [
                 this.createNewGameButton(),
                 this.createContinueButton(),
                 this.createLoadButton(),
-                this.createCreditsButton()
+                this.createCreditsButton(),
+                this.createAboutButton()
             ],
             [],
             this,
@@ -66,7 +85,8 @@ export class SceneHandler {
 
         let loadMenu = new Menu(
             [
-                this.createToStartMenuBack(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50))
+                this.createToStartMenuBack(new Rectangle((this.canvasSize[0] / 2) - 150, 295, 300, 50)),
+                this.createLevelEditor()
             ],
             [],
             this,
@@ -85,6 +105,7 @@ export class SceneHandler {
         this.loadNewGameMenu();
         this.loadRestartMenu();
         this.loadCreditMenu();
+        this.loadAboutMenu();
 
         this.createEventListerners();
     }
@@ -195,6 +216,25 @@ export class SceneHandler {
         );
 
         this.scenes.set(SceneIndex.CreditsMenu, creditMenu);
+    }
+
+    private loadAboutMenu() {
+        let aboutMenu = new AboutMenu(
+            [
+                this.createToStartMenuBackFromLevelMenu()
+            ],
+            [],
+            this,
+            this.textArea,
+            this.renderer,
+            this.canvasSize,
+            100,
+            [512, 512],
+            false,
+            this.game
+        );
+
+        this.scenes.set(SceneIndex.AboutMenu, aboutMenu);
     }
 
     private loadNewGameMenu() {
@@ -331,6 +371,14 @@ export class SceneHandler {
         return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 355, 300, 50), 179, 181, 624, onClick);
     }
 
+    private createAboutButton() {
+        let onClick = () => {
+            this.currentScene = SceneIndex.AboutMenu;
+        }
+
+        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 415, 300, 50), 179, 181, 625, onClick);
+    }
+
     private createNextLevelButton(disabled: boolean) {
 
         let onClick = () => {
@@ -407,6 +455,14 @@ export class SceneHandler {
         }
 
         return new Clickable(area, 179, 181, 186, onClick);
+    }
+
+    private createLevelEditor() {
+        let onClick = () => {
+            window.location.href = "http://editor.hellwalker-games.com/";
+        }
+
+        return new Clickable(new Rectangle((this.canvasSize[0] / 2) - 150, 235, 300, 50), 179, 181, 626, onClick);
     }
 
     private createToStartMenuBackFromLevelMenu() {

@@ -378,6 +378,8 @@ export class TextureMapper {
 	private texture622 = new Rectangle(32, 768, 128, 128);
 	private texture623 = new Rectangle(160, 768, 128, 128);
 	private texture624 = new Rectangle(1440, 288, 164, 27);
+	private texture625 = new Rectangle(1440, 320, 164, 27);
+	private texture626 = new Rectangle(1440, 350, 164, 27);
 
 	constrcuctor() {
 		if (TextureMapper.instance) {
@@ -760,6 +762,8 @@ export class TextureMapper {
 			case 622: return this.texture622;
 			case 623: return this.texture623;
 			case 624: return this.texture624;
+			case 625: return this.texture625;
+			case 626: return this.texture626;
 		}
 	}
 

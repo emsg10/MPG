@@ -79,11 +79,11 @@ export class Game {
 
 		this.context = new Context(asset, this.canvasWidth, this.canvasHeight, canvas);
 		this.renderer = new Renderer(this.context);
-		this.sceneHandler = new SceneHandler(this.renderer, [this.canvasWidth, this.canvasHeight], canvas, this);
 		this.colorRenderer = new ColorRenderer(this.context);
 		this.simpleParticleRenderer = new SimpleParticleRenderer(this.context);
 		this.dynamicRenderer = new DynamicRenderer(this.context);
 		this.audioHandler = new AudioHandler(audioAsset);
+		this.sceneHandler = new SceneHandler(this.renderer, [this.canvasWidth, this.canvasHeight], canvas, this, this.audioHandler);
 		this.levelData = level;
 
 		this.initKeyBindings();

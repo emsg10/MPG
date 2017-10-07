@@ -46,7 +46,7 @@ export class SpellHandler {
 
         this.flameThrowerAudio = this.animationHandler.audioHandler.createContinuos("flamethrower.ogg", 3.5, 0, 0.1);
         this.freezeAudio = this.animationHandler.audioHandler.createContinuos("freeze.ogg", 6, 0, 0.1);
-        this.shieldAudio = this.animationHandler.audioHandler.createContinuos("shield.ogg", 2.4, 0, 0.03);
+        this.shieldAudio = this.animationHandler.audioHandler.createContinuos("shield.ogg", 2.4, 0, 0.1);
         this.magicChannelAudio = this.animationHandler.audioHandler.createContinuos("fireloop.ogg", 1, 0, 0.02);
         this.maxMagicAudio = this.animationHandler.audioHandler.createContinuos("fireloop.ogg", 2.5, 1, 0.01);   
     }

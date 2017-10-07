@@ -51,7 +51,8 @@ export class Constants {
         new TextureResource("119ui.png", [256, 256]),
         new TextureResource("120ui.png", [256, 256]),
         new TextureResource("121ui.png", [256, 256]),
-        new TextureResource("122ui.png", [1024, 1024])
+        new TextureResource("122ui.png", [1024, 1024]),
+        new TextureResource("123ui.png", [1024, 1024])
     ];
 
     public audioResources: string[] = [
@@ -85,7 +86,9 @@ export class Constants {
         "fireplace.wav",
         "shade11.wav",
         "shade12.wav",
-        "step.flac"
+        "step.flac",
+        "menubackground.mp3",
+        "gamebackground.ogg"
     ];
 
     public tileSize: [number, number] = [32, 32];
